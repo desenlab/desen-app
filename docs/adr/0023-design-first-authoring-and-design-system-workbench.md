@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 through M10A-T08 `DONE` with exact-head hosted and fresh-`main` closure
+- Status: Accepted; task completion is owned by the canonical task board and task proof documents
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,9 +17,9 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T08
-are `DONE` with exact-head hosted and fresh-`main` evidence while the other 19 tasks remain `NOT_STARTED`. T06's hosted
-closure is task-owned. Neither acceptance is a release or production-readiness claim. The canonical sequence is in
+This decision creates the M10A prerequisite milestone and its G10A gate. Task-owned proofs record
+each exact-head and fresh-main closure; this ADR does not duplicate changing progress counters.
+Acceptance is not a release or production-readiness claim. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -94,6 +94,14 @@ recovery never guesses, merges, or silently repairs data.
 The project record is the durable editable-workspace authority. Within it, canonical Source is
 still the sole authority for DESEN production composition and behavior. Recipe and draft metadata
 cannot acquire runtime meaning merely because it is durable.
+
+The T15 candidate implements this boundary as V2 with an explicit recipe graph. V1 migration
+adds an empty graph without reinterpreting legacy inert recipes. One whole-project controller
+owns Source, graph, history, dirty state and CAS persistence. A visual master draft uses the
+existing editing surface but remains isolated from save, navigation and Run/Publish; Apply
+admits the eventual complete project as one live transaction. This is an authoring-schema
+evolution, not a new protocol or Runtime document. [T15's proof](../proof/M10A-T15.md) owns
+fresh evidence and its still-required hosted closure.
 
 ### Release, bind, and recover design tokens explicitly
 

@@ -77,3 +77,25 @@ preparation, child failures and cancellation, workspace/output guards, and hosti
 Hosted completion requires the exact final PR head and a fresh successful main run. Historical
 timeouts remain failures. The [CI-04 evidence](../proof/CI-FRESH-PROOF-PERFORMANCE.md) separates
 focused local measurements and fixed-duration scheduling estimates from actual hosted results.
+
+## T15 extension — rebalance the unchanged exhaustive inventory
+
+T15's hosted candidate exhausted shard C's unchanged 27-minute runner deadline, reaching its
+fresh T15 verifier only after roughly 24 minutes. The failure cancelled that verifier and never
+ran its root test. It is not evidence of a failed product assertion or of successful T15 execution.
+The task-owned [correction record](../proof/M10A-T15.md#shard-deadline-correction) owns the exact
+run and timing observations.
+
+Redistribute the same 123 ordered proof pairs as contiguous ranges of 81/30/12 instead of
+53/32/38. A ends at Editor Core terminal integration; B owns the ordinary App/M10 region through
+T01; C begins at T02 and retains T07/T08/T09/T15's four exclusive barriers. The original eleven
+barriers remain on A. No executable command, dependency, canonical pair order, browser requirement,
+worker count, replicated prerequisite or closing workload changes. T01's ordinary root tests
+inject browser observations; its historical verifier does not execute Chromium. The real browser
+barriers remain on C, which already installs Chromium.
+
+The new code-owned partition digest and tests must prove exact once-only coverage of all 260
+logical workloads, all 123 verifier/root pairs, unchanged 285 physical workloads, and rejection
+of the superseded partition's join summaries. Deadlines, cancellation and process-close authority
+remain unchanged. Scheduling estimates guide the fixed boundaries but grant no PASS authority;
+exact-head hosted and fresh-main execution still decide closure.

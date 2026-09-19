@@ -13,7 +13,7 @@ function clone<Value>(value: Value): Value {
 function fixture(): MutableRecord {
   return {
     kind: "desen.editable-project",
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: "project.sign-in",
     source: clone(validSource),
     designSystem: {
@@ -54,6 +54,7 @@ function fixture(): MutableRecord {
           extensions: { "run.desen.asset": { retained: true } },
         },
       ],
+      recipeGraph: { definitions: [], instances: [] },
       extensions: { "run.desen.system": { retained: true } },
     },
     connectionIntents: [
@@ -91,7 +92,8 @@ describe("admitEditableProjectRecord", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new TypeError("Expected a valid editable project.");
     expect(result.record.kind).toBe("desen.editable-project");
-    expect(result.record.schemaVersion).toBe(1);
+    expect(result.record.schemaVersion).toBe(2);
+    expect(result.record.designSystem.recipeGraph).toEqual({ definitions: [], instances: [] });
     expect(result.record.source).toEqual(validSource);
     expect(result.record.source).not.toBe(input.source);
     expect(result.record.designSystem.tokenSources[0]?.document.$extensions).toEqual({
@@ -104,6 +106,38 @@ describe("admitEditableProjectRecord", () => {
     input.id = "caller-mutated";
     expect(result.record.id).toBe("project.sign-in");
     expect(Object.isFrozen(input)).toBe(false);
+  });
+
+  it("requires an explicit current graph and rejects malformed graph data atomically", () => {
+    const missing = fixture();
+    delete (missing.designSystem as MutableRecord).recipeGraph;
+    const missingResult = admitEditableProjectRecord(missing);
+    expect(missingResult).toEqual({
+      ok: false,
+      diagnostics: [expect.objectContaining({ code: "INVALID_PROJECT", pointer: "/designSystem" })],
+    });
+
+    for (const graph of [null, [], {}, { definitions: [], instances: [], extra: true }]) {
+      const input = fixture();
+      (input.designSystem as MutableRecord).recipeGraph = graph;
+      const before = clone(input);
+      const result = admitEditableProjectRecord(input);
+      expect(result.ok).toBe(false);
+      expect(Object.hasOwn(result, "record")).toBe(false);
+      expect(input).toEqual(before);
+    }
+  });
+
+  it("requires explicit migration for the historical version even when its Source is valid", () => {
+    const input = fixture();
+    input.schemaVersion = 1;
+    delete (input.designSystem as MutableRecord).recipeGraph;
+    expect(admitEditableProjectRecord(input)).toEqual({
+      ok: false,
+      diagnostics: [
+        expect.objectContaining({ code: "UNSUPPORTED_PROJECT_VERSION", pointer: "/schemaVersion" }),
+      ],
+    });
   });
 
   it("rejects invalid Source and exposes no partial record", () => {
@@ -240,7 +274,7 @@ describe("admitEditableProjectRecord", () => {
     );
 
     const future = fixture();
-    future.schemaVersion = 2;
+    future.schemaVersion = 3;
     const futureResult = admitEditableProjectRecord(future);
     expect(futureResult.ok).toBe(false);
     if (futureResult.ok) throw new TypeError("Expected version rejection.");

@@ -2,16 +2,18 @@ import { createDesenEditorDocument } from "@desen/editor-core";
 
 import { createEditableProjectDiagnostic } from "./diagnostics.js";
 import { captureDesignSystemJson, InertJsonCaptureError } from "./inert-json.js";
+import { admitEditableProjectRecipeGraph } from "./recipe-graph.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
 import type { EditableProjectDiagnostic } from "./diagnostics.js";
 import type { DesignSystemJsonObject, DesignSystemJsonValue } from "./inert-json.js";
+import type { EditableProjectRecipeGraph } from "./master-instance-types.js";
 
 /** Exact kind discriminator for the App-owned editable-project envelope. */
 export const EDITABLE_PROJECT_KIND = "desen.editable-project" as const;
 
 /** Current and only admitted editable-project schema version. */
-export const EDITABLE_PROJECT_SCHEMA_VERSION = 1 as const;
+export const EDITABLE_PROJECT_SCHEMA_VERSION = 2 as const;
 
 /** Finite collection and identifier limits for the editable-project schema. */
 export const EDITABLE_PROJECT_LIMITS = Object.freeze({
@@ -35,7 +37,7 @@ export interface EditableProjectTokenSource {
   readonly extensions?: DesignSystemJsonObject;
 }
 
-/** Metadata placeholder for a later recipe/master authority. */
+/** Legacy inert recipe metadata, independent of the explicit master/instance graph. */
 export interface EditableProjectRecipeMetadata {
   /** Stable project-local recipe identity. */
   readonly id: string;
@@ -79,11 +81,11 @@ export interface EditableProjectConnectionIntent {
   readonly extensions?: DesignSystemJsonObject;
 }
 
-/** Design-system data embedded in the editable-project envelope. */
-export interface EditableProjectDesignSystem {
+/** Exact design-system data retained by the historical version-1 envelope. */
+export interface EditableProjectDesignSystemV1 {
   /** Ordered project token sources available to explicit resolver selections. */
   readonly tokenSources: readonly EditableProjectTokenSource[];
-  /** Inert recipe metadata; recipe graphs remain a later task. */
+  /** Inert recipe metadata with no graph or materialization semantics. */
   readonly recipes: readonly EditableProjectRecipeMetadata[];
   /** Inert asset metadata; asset bytes and imports remain a later task. */
   readonly assets: readonly EditableProjectAssetMetadata[];
@@ -91,26 +93,43 @@ export interface EditableProjectDesignSystem {
   readonly extensions?: DesignSystemJsonObject;
 }
 
-/** Current version of the App-owned editable project; this is not a DESEN protocol document. */
+/** Current design-system data with explicit authoring relationships beside ordinary Source. */
+export interface EditableProjectDesignSystem extends EditableProjectDesignSystemV1 {
+  /** Admitted definitions and linked instances whose materializations equal stored Source. */
+  readonly recipeGraph: EditableProjectRecipeGraph;
+}
+
+/** Historical version-1 App-owned project accepted only through explicit migration. */
 export interface EditableProjectRecordV1 {
   /** App-owned envelope discriminator. */
   readonly kind: typeof EDITABLE_PROJECT_KIND;
   /** Exact finite envelope schema version. */
-  readonly schemaVersion: typeof EDITABLE_PROJECT_SCHEMA_VERSION;
+  readonly schemaVersion: 1;
   /** Stable project identity. */
   readonly id: string;
   /** Exact structurally admitted canonical DESEN Source. */
   readonly source: DesenEditorDocument;
   /** Editable design-system documents and inert metadata. */
-  readonly designSystem: EditableProjectDesignSystem;
+  readonly designSystem: EditableProjectDesignSystemV1;
   /** Durable incomplete connection notes with no runtime authority. */
   readonly connectionIntents: readonly EditableProjectConnectionIntent[];
   /** Namespaced inert project metadata preserved losslessly. */
   readonly extensions?: DesignSystemJsonObject;
 }
 
-/** Every editable-project schema currently admitted by this package. */
-export type EditableProjectRecord = EditableProjectRecordV1;
+/** Current App-owned project with explicit authoring graph semantics outside DESEN Source. */
+export interface EditableProjectRecordV2 extends Omit<
+  EditableProjectRecordV1,
+  "schemaVersion" | "designSystem"
+> {
+  /** Exact current envelope schema version. */
+  readonly schemaVersion: 2;
+  /** Editable design-system data and verified master/instance relationships. */
+  readonly designSystem: EditableProjectDesignSystem;
+}
+
+/** Current editable-project schema admitted by this package. */
+export type EditableProjectRecord = EditableProjectRecordV2;
 
 /** Successful editable-project admission. */
 export interface EditableProjectAdmissionSuccess {
@@ -133,6 +152,14 @@ export interface EditableProjectAdmissionFailure {
 /** Result of admitting an unknown value as a current editable project. */
 export type EditableProjectAdmissionResult =
   EditableProjectAdmissionFailure | EditableProjectAdmissionSuccess;
+
+type KnownProjectAdmissionResult =
+  | EditableProjectAdmissionFailure
+  | {
+      readonly ok: true;
+      readonly record: EditableProjectRecordV1 | EditableProjectRecordV2;
+      readonly diagnostics: readonly [];
+    };
 
 type MutableJsonObject = Record<string, DesignSystemJsonValue>;
 
@@ -295,14 +322,10 @@ function mapCaptureFailure(error: InertJsonCaptureError): EditableProjectAdmissi
   return failure(code, error.pointer, error.message);
 }
 
-/**
- * Admits an unknown value as the current finite editable-project envelope.
- *
- * @remarks The returned Source is the exact structurally admitted DESEN 0.1.0 Source snapshot.
- * Token documents and metadata remain inert data; this function grants no persistence, release,
- * asset-loading, recipe-materialization, connection or runtime authority.
- */
-export function admitEditableProjectRecord(input: unknown): EditableProjectAdmissionResult {
+function admitKnownProjectRecord(
+  input: unknown,
+  allowLegacy: boolean,
+): KnownProjectAdmissionResult {
   let captured: DesignSystemJsonValue;
   try {
     captured = captureDesignSystemJson(input);
@@ -325,7 +348,10 @@ export function admitEditableProjectRecord(input: unknown): EditableProjectAdmis
       "Editable project schema version is missing.",
     );
   }
-  if (captured.schemaVersion !== EDITABLE_PROJECT_SCHEMA_VERSION) {
+  if (
+    captured.schemaVersion !== EDITABLE_PROJECT_SCHEMA_VERSION &&
+    !(allowLegacy && captured.schemaVersion === 1)
+  ) {
     return failure(
       "UNSUPPORTED_PROJECT_VERSION",
       "/schemaVersion",
@@ -360,7 +386,13 @@ export function admitEditableProjectRecord(input: unknown): EditableProjectAdmis
 
   if (
     !isObject(captured.designSystem) ||
-    !exactKeys(captured.designSystem, ["tokenSources", "recipes", "assets"], ["extensions"]) ||
+    !exactKeys(
+      captured.designSystem,
+      captured.schemaVersion === 1
+        ? ["tokenSources", "recipes", "assets"]
+        : ["tokenSources", "recipes", "assets", "recipeGraph"],
+      ["extensions"],
+    ) ||
     !optionalExtensions(captured.designSystem.extensions)
   ) {
     return failure("INVALID_PROJECT", "/designSystem", "Design-system fields are invalid.");
@@ -382,10 +414,45 @@ export function admitEditableProjectRecord(input: unknown): EditableProjectAdmis
     return failure("INVALID_PROJECT", "/connectionIntents", "Connection intents are invalid.");
   }
 
+  let designSystem = captured.designSystem;
+  if (captured.schemaVersion === EDITABLE_PROJECT_SCHEMA_VERSION) {
+    const graph = admitEditableProjectRecipeGraph(designSystem.recipeGraph, source.document);
+    if (!graph.ok) return Object.freeze({ ok: false, diagnostics: graph.diagnostics });
+    designSystem = {
+      ...designSystem,
+      recipeGraph: graph.graph as unknown as DesignSystemJsonValue,
+    };
+  }
+
   const record: MutableJsonObject = {
     ...captured,
     source: source.document as unknown as DesignSystemJsonValue,
+    designSystem,
   };
-  const admitted = captureDesignSystemJson(record) as unknown as EditableProjectRecord;
+  const admitted = captureDesignSystemJson(record) as unknown as
+    EditableProjectRecordV1 | EditableProjectRecordV2;
   return Object.freeze({ ok: true, record: admitted, diagnostics: EMPTY_DIAGNOSTICS });
+}
+
+/** Internal exact-version admission used only by the closed migration registry. */
+export function admitEditableProjectRecordForMigration(
+  input: unknown,
+): KnownProjectAdmissionResult {
+  return admitKnownProjectRecord(input, true);
+}
+
+/**
+ * Admits an unknown value as the current finite editable-project envelope.
+ *
+ * @remarks Source remains structurally admitted DESEN 0.1.0 data. Graph admission verifies its
+ * authoring relationships against that Source; inert token documents, legacy recipe metadata,
+ * assets and draft intents acquire no runtime authority. Version 1 requires explicit migration.
+ */
+export function admitEditableProjectRecord(input: unknown): EditableProjectAdmissionResult {
+  const result = admitKnownProjectRecord(input, false);
+  if (!result.ok) return result;
+  if (result.record.schemaVersion !== EDITABLE_PROJECT_SCHEMA_VERSION) {
+    return failure("UNSUPPORTED_PROJECT_VERSION", "/schemaVersion", "Current schema is required.");
+  }
+  return Object.freeze({ ok: true, record: result.record, diagnostics: EMPTY_DIAGNOSTICS });
 }

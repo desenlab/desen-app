@@ -35,13 +35,13 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 244,
+  PROOF_UNIT: 246,
   CI_POLICY: 50,
   DEPENDENCY_POLICY: 39,
-  FROZEN_INPUT: 171,
-  PACKAGE_OR_APPLICATION: 765,
-  SHARED_PROOF_INFRASTRUCTURE: 413,
-  PROJECT_DOCUMENTATION: 174,
+  FROZEN_INPUT: 172,
+  PACKAGE_OR_APPLICATION: 801,
+  SHARED_PROOF_INFRASTRUCTURE: 418,
+  PROJECT_DOCUMENTATION: 175,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -515,6 +515,53 @@ const LOCAL_PREFLIGHT_SUCCESSOR_PATHS = Object.freeze([
   "scripts/ci/local-preflight.mjs",
   "scripts/ci/test/local-preflight.test.mjs",
 ]);
+const M10A_T15_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/t15-masters-instances.pw.ts",
+  "apps/desen-app-browser-e2e/t15-playwright.config.ts",
+  "apps/desen-app/src/authoring-persistence-types.ts",
+  "apps/desen-app/src/master-draft-banner.module.css",
+  "apps/desen-app/src/master-draft-banner.tsx",
+  "apps/desen-app/src/master-instance-panel.module.css",
+  "apps/desen-app/src/master-instance-panel.tsx",
+  "apps/desen-app/src/project-authoring-context.tsx",
+  "apps/desen-app/src/project-authoring-controller.ts",
+  "apps/desen-app/src/project-authoring-session.ts",
+  "apps/desen-app/src/project-authoring-source-controller.ts",
+  "apps/desen-app/src/project-master-draft-controller.ts",
+  "apps/desen-app/test/project-authoring-application.test.tsx",
+  "apps/desen-app/test/project-authoring-controller.test.ts",
+  "apps/desen-app/test/project-authoring-fixture.ts",
+  "apps/desen-app/test/project-authoring-source-controller.test.ts",
+  "apps/desen-app/test/project-lifecycle-admission.test.ts",
+  "apps/desen-app/test/project-master-draft-application.test.tsx",
+  "apps/desen-app/test/project-master-draft-controller.test.ts",
+  "docs/proof/M10A-T15.md",
+  "docs/proof/artifacts/m10a-t15.json",
+  "packages/design-system-core/src/master-edit-types.ts",
+  "packages/design-system-core/src/master-edit.ts",
+  "packages/design-system-core/src/master-instance-materialization.ts",
+  "packages/design-system-core/src/master-instance-types.ts",
+  "packages/design-system-core/src/project-history.ts",
+  "packages/design-system-core/src/recipe-capture.ts",
+  "packages/design-system-core/src/recipe-graph.ts",
+  "packages/design-system-core/src/recipe-source-edits.ts",
+  "packages/design-system-core/src/recipe-source.ts",
+  "packages/design-system-core/src/recipe-transaction-types.ts",
+  "packages/design-system-core/src/recipe-transactions.ts",
+  "packages/design-system-core/test/master-edit.test.ts",
+  "packages/design-system-core/test/master-instance-materialization.test.ts",
+  "packages/design-system-core/test/project-history.test.ts",
+  "packages/design-system-core/test/recipe-graph.test.ts",
+  "packages/design-system-core/test/recipe-source-edits.test.ts",
+  "packages/design-system-core/test/recipe-transactions.test.ts",
+  "scripts/generate-m10a-t15-proof.mjs",
+  "scripts/lib/m10a-t15-execution.mjs",
+  "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
+  "scripts/lib/m10a-t15-proof.mjs",
+  "scripts/lib/m10a-t15-workloads.mjs",
+  "scripts/verify-m10a-t15.mjs",
+  "tests/m10a-t15.test.mjs",
+]);
 
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE(
@@ -535,13 +582,13 @@ async function currentTrackedPaths() {
 }
 
 function calculateAffectedWorkloadOwnershipReview(rawPaths) {
+  const withoutT15 = rawPaths.filter((candidate) => !M10A_T15_SUCCESSOR_PATHS.includes(candidate));
   const paths =
     rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
       ? rawPaths
-      : rawPaths.length ===
-          EXPECTED_AFFECTED_TRACKED_PATH_COUNT - LOCAL_PREFLIGHT_SUCCESSOR_PATHS.length
-        ? rawPaths
-        : rawPaths.filter(
+      : withoutT15.length === 1867 || withoutT15.length === 1865
+        ? withoutT15
+        : withoutT15.filter(
             (candidate) =>
               !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
               !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
@@ -585,7 +632,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1867 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1912 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -618,6 +665,46 @@ test("freezes exact-one ownership for all 1867 reviewed tracked paths", async ()
   assertDeepFrozen(authority);
 });
 
+test("T15 adds only its 45 reviewed paths and reconstructs the exact pre-T15 ownership", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  assert.equal(M10A_T15_SUCCESSOR_PATHS.length, 45);
+  assert.equal(new Set(M10A_T15_SUCCESSOR_PATHS).size, 45);
+  for (const relativePath of M10A_T15_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-m10a-t15.mjs" || relativePath === "tests/m10a-t15.test.mjs";
+    assert.equal(owner.proofUnitId, proofInput ? "m10a-t15" : null);
+    assert.equal(owner.disposition, proofInput ? "SELECT_PROOF_UNIT" : "FORCE_EXHAUSTIVE");
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReviewBase(
+      paths.filter((candidate) => !M10A_T15_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1867,
+      trackedPathSetSha256: "96e708713b3e175b162a651f3b78223f50ada76426c7718834211b9014ce73bc",
+      proofOwnedPathCount: 244,
+      categoryCounts: {
+        PROOF_UNIT: 244,
+        CI_POLICY: 50,
+        DEPENDENCY_POLICY: 39,
+        FROZEN_INPUT: 171,
+        PACKAGE_OR_APPLICATION: 765,
+        SHARED_PROOF_INFRASTRUCTURE: 413,
+        PROJECT_DOCUMENTATION: 174,
+        REPOSITORY_POLICY: 11,
+      },
+      ownershipSha256: "229cf86ef50580fb35b87ed07e540bec3a9727a55cee768c29d6285ec6ec8c31",
+    },
+  );
+});
+
 test("the local-preflight successor preserves T14 and adds exactly two exhaustive CI-policy paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
@@ -640,7 +727,11 @@ test("the local-preflight successor preserves T14 and adds exactly two exhaustiv
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReviewBase(
-      paths.filter((candidate) => !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T15_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1865,
@@ -1505,7 +1596,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 244);
+  assert.equal(proofEntries.length, 246);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "m10a-t12")

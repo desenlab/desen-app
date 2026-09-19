@@ -482,6 +482,11 @@ test(NAMES[5], async () => {
       "",
     ),
     packageJson.scripts["test:e2e"] + " && true",
+    packageJson.scripts["test:e2e"].replace(
+      " && playwright test --config t15-playwright.config.ts",
+      "",
+    ),
+    packageJson.scripts["test:e2e"] + " && playwright test --config t15-playwright.config.ts",
   ]) {
     await assert.rejects(
       build({

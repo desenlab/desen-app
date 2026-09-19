@@ -181,6 +181,7 @@ export const PROOF_IDS = Object.freeze([
   "m10a-t12",
   "m10a-t13",
   "m10a-t14",
+  "m10a-t15",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -196,8 +197,11 @@ export const READ_ONLY_ROOT_PROOF_IDS = Object.freeze([
   "runtime-core-resource-lifecycle",
   "runtime-core-state-navigation-actions",
   "desen-app-published-host-update",
+  "m10a-t02",
+  "m10a-t03",
   "m10a-t05",
   "m10a-t06",
+  "m10a-t12",
   "m10a-t13",
   "m10a-t14",
 ]);
@@ -225,7 +229,6 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
   "m10-gate",
-  "m10a-t14",
 ]);
 
 /** Exact verifiers allowed to execute their task-owned fixed-port browser toolchains. */
@@ -233,10 +236,9 @@ export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze([
   "verify-m10a-t07",
   "verify-m10a-t08",
   "verify-m10a-t09",
-  "verify-m10a-t03",
-  "verify-m10a-t12",
+  "verify-m10a-t15",
 ]);
-if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 5) {
+if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 4) {
   throw new Error("The reviewed browser-exclusive verifier set drifted.");
 }
 
@@ -253,13 +255,9 @@ const BROWSER_AUTHORITY_BY_STEP_ID = Object.freeze({
     port: 4_192,
     tempEnvironmentKey: "DESEN_M10A_T09_PROOF_TEMP",
   }),
-  "verify-m10a-t03": Object.freeze({
-    port: 4_188,
-    tempEnvironmentKey: "DESEN_M10A_T03_PROOF_TEMP",
-  }),
-  "verify-m10a-t12": Object.freeze({
-    port: 4_175,
-    tempEnvironmentKey: "DESEN_M10A_T12_PROOF_TEMP",
+  "verify-m10a-t15": Object.freeze({
+    ports: Object.freeze([4_175, 4_188]),
+    tempEnvironmentKey: "DESEN_M10A_T15_PROOF_TEMP",
   }),
 });
 
@@ -301,7 +299,6 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
   "m10-gate",
-  "m10a-t14",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -356,7 +353,15 @@ const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
 // Frozen receipt readers do not gain writable temporary authority merely because successor
 // Catalog capabilities are introduced. Other read-only roots retain their existing runner-temp
 // authority until their own proof contracts are separately narrowed.
-const STRICT_READ_ONLY_ROOT_PROOF_ID_SET = new Set(["m10a-t05", "m10a-t06"]);
+const STRICT_READ_ONLY_ROOT_PROOF_ID_SET = new Set([
+  "m10a-t02",
+  "m10a-t03",
+  "m10a-t05",
+  "m10a-t06",
+  "m10a-t12",
+  "m10a-t13",
+  "m10a-t14",
+]);
 if (
   [...STRICT_READ_ONLY_ROOT_PROOF_ID_SET].some(
     (proofId) => !READ_ONLY_ROOT_PROOF_ID_SET.has(proofId),
@@ -479,7 +484,6 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE: "DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE",
   DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE: "DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE",
   DESEN_APP_M10_GATE_VITE: "DESEN_APP_M10_GATE_VITE",
-  DESEN_APP_M10A_T14_VITEST: "DESEN_APP_M10A_T14_VITEST",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -504,7 +508,6 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE,
   "desen-app-repeatable-demo": NATIVE_ADDON_POLICIES.DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE,
   "m10-gate": NATIVE_ADDON_POLICIES.DESEN_APP_M10_GATE_VITE,
-  "m10a-t14": NATIVE_ADDON_POLICIES.DESEN_APP_M10A_T14_VITEST,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -649,7 +652,7 @@ for (const proofId of PROOF_IDS) {
           ? TEMP_POLICIES.RUNNER_SCOPED_OS
           : TEMP_POLICIES.NONE,
       tempKey: browserExclusive || verifierUsesOsTemp ? verifierStepId : null,
-      ports: browserExclusive ? [browserAuthority.port] : [],
+      ports: browserExclusive ? (browserAuthority.ports ?? [browserAuthority.port]) : [],
       childProcessPolicy: browserExclusive
         ? CHILD_PROCESS_POLICIES.TOOLCHAIN_EXCLUSIVE
         : verifierUsesRuntimeProbe
@@ -716,8 +719,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 258) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 258 steps.", {
+if (METADATA_BY_STEP_ID.size !== 260) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 260 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
@@ -1269,7 +1272,7 @@ export async function createProofStepIsolationContext({
       metadata.tempPolicy !== TEMP_POLICIES.RUNNER_SCOPED_OS ||
       metadata.tempKey !== metadata.stepId ||
       metadata.childProcessPolicy !== CHILD_PROCESS_POLICIES.TOOLCHAIN_EXCLUSIVE ||
-      !isDeepStrictEqual(metadata.ports, [browserAuthority.port]) ||
+      !isDeepStrictEqual(metadata.ports, browserAuthority.ports ?? [browserAuthority.port]) ||
       metadata.barrier !== true
     ) {
       fail(
@@ -1289,6 +1292,7 @@ export async function createProofStepIsolationContext({
     delete environment.DESEN_M10A_T08_PROOF_TEMP;
     delete environment.DESEN_M10A_T09_PROOF_TEMP;
     delete environment.DESEN_M10A_T12_PROOF_TEMP;
+    delete environment.DESEN_M10A_T15_PROOF_TEMP;
     environment[browserAuthority.tempEnvironmentKey] = temp.path;
   } else {
     delete environment.DESEN_M10A_T01_PROOF_TEMP;
@@ -1299,6 +1303,7 @@ export async function createProofStepIsolationContext({
     delete environment.DESEN_M10A_T08_PROOF_TEMP;
     delete environment.DESEN_M10A_T09_PROOF_TEMP;
     delete environment.DESEN_M10A_T12_PROOF_TEMP;
+    delete environment.DESEN_M10A_T15_PROOF_TEMP;
     const nodeOptions = [
       "--permission",
       ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),

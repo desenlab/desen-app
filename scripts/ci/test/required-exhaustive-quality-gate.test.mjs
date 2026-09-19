@@ -96,7 +96,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 258-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 260-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -111,13 +111,13 @@ test("the dependency-derived plan owns the exact 258-node exhaustive inventory",
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
   assert.equal(DEFAULT_GATE_TIMEOUT_MS, 27 * 60 * 1_000);
-  assert.equal(plan.stepCount, 258);
-  assert.equal(plan.proofPairCount, 122);
+  assert.equal(plan.stepCount, 260);
+  assert.equal(plan.proofPairCount, 123);
   assert.equal(plan.prefix.length, 12);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "0b783ea5a4a674bdc72f3a2c585372aee3e6e91535cf850079acc4af00951023");
-  assert.equal(ownedIds.length, 258);
-  assert.equal(new Set(ownedIds).size, 258);
+  assert.equal(plan.planSha256, "6bf51ad33339d1e3cef850c80a40d9796b65fb5570cfec58088e74ac64d58569");
+  assert.equal(ownedIds.length, 260);
+  assert.equal(new Set(ownedIds).size, 260);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   const exactTailProofIds = [
     "desen-app-user-created-blank-project",
@@ -145,6 +145,7 @@ test("the dependency-derived plan owns the exact 258-node exhaustive inventory",
     "m10a-t12",
     "m10a-t13",
     "m10a-t14",
+    "m10a-t15",
   ];
   assert.deepEqual(
     plan.proofPairs.slice(-exactTailProofIds.length).map(({ id }) => id),
@@ -181,7 +182,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "4140fd5933b19e71d4f7f70bb8c6731d11b11fd098810ef644159aabee3c473c",
+    "9df91f7ed62c0ee3520ba336dacee1a716e30d8bf787841d54eccca65a451d54",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -271,7 +272,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 258 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 260 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -282,8 +283,8 @@ test("all 258 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 258);
-  assert.equal(new Set(calls).size, 258);
+  assert.equal(calls.length, 260);
+  assert.equal(new Set(calls).size, 260);
   assert.equal(calls.filter((id) => id === "editor-core-public-package-contract").length, 1);
   assert.equal(calls.filter((id) => id === "design-system-core-public-package-contract").length, 1);
   assert.equal(
@@ -334,7 +335,7 @@ test("all 258 successful closes produce stable inventory-ordered receipts", asyn
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 258);
+  assert.equal(receipt.observedClosedCount, 260);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -378,19 +379,28 @@ test("only the exact digest and published-host pairs move within their ordinary 
   const segmentBarrierIndex = plan.proofPairs.findIndex(
     ({ id }) => id === "reference-host-web-source-audit",
   );
-  const successorBarrierIndex = plan.proofPairs.findIndex(({ id }) => id === "m10a-t03");
+  const successorBarrierIndex = plan.proofPairs.findIndex(({ id }) => id === "m10a-t07");
   const segmentBarrier = plan.proofPairs[segmentBarrierIndex];
   const finalSegment = plan.proofPairs.slice(segmentBarrierIndex + 1, successorBarrierIndex);
   assert.equal(classifyProofPairState(segmentBarrier.id).barrier, true);
   assert.equal(classifyProofPairState(plan.proofPairs[successorBarrierIndex].id).barrier, true);
-  assert.equal(finalSegment.at(-8).id, "desen-app-published-host-update");
-  assert.equal(finalSegment.at(-7).id, "desen-app-invalid-publication");
-  assert.equal(finalSegment.at(-6).id, "desen-app-last-known-good-recovery");
-  assert.equal(finalSegment.at(-5).id, "desen-app-repeatable-demo");
-  assert.equal(finalSegment.at(-4).id, "runtime-core-baseline");
-  assert.equal(finalSegment.at(-3).id, "m10-gate");
-  assert.equal(finalSegment.at(-2).id, "m10a-t01");
-  assert.equal(finalSegment.at(-1).id, "m10a-t02");
+  assert.deepEqual(
+    finalSegment.slice(-12).map(({ id }) => id),
+    [
+      "desen-app-published-host-update",
+      "desen-app-invalid-publication",
+      "desen-app-last-known-good-recovery",
+      "desen-app-repeatable-demo",
+      "runtime-core-baseline",
+      "m10-gate",
+      "m10a-t01",
+      "m10a-t02",
+      "m10a-t03",
+      "m10a-t04",
+      "m10a-t05",
+      "m10a-t06",
+    ],
+  );
   const finalSegmentStart = ids.indexOf(segmentBarrier.rootTest.id) + 1;
   assert.deepEqual(ids.slice(finalSegmentStart, finalSegmentStart + 2), [
     "verify-desen-app-published-host-update",
@@ -403,7 +413,7 @@ test("only the exact digest and published-host pairs move within their ordinary 
   assert.deepEqual(
     ids.filter((id) => finalSegment.some(({ verifier }) => verifier.id === id)),
     [
-      finalSegment.at(-8),
+      finalSegment.find(({ id }) => id === "desen-app-published-host-update"),
       ...finalSegment.filter(({ id }) => id !== "desen-app-published-host-update"),
     ].map(({ verifier }) => verifier.id),
   );
@@ -437,9 +447,9 @@ test("a held early published-host root overlaps its own segment and blocks the s
   const segmentBarrierIndex = plan.proofPairs.findIndex(
     ({ id }) => id === "reference-host-web-source-audit",
   );
-  const successorBarrierIndex = plan.proofPairs.findIndex(({ id }) => id === "m10a-t03");
+  const successorBarrierIndex = plan.proofPairs.findIndex(({ id }) => id === "m10a-t07");
   const segment = plan.proofPairs.slice(segmentBarrierIndex + 1, successorBarrierIndex);
-  const publishedPair = segment.at(-8);
+  const publishedPair = segment.find(({ id }) => id === "desen-app-published-host-update");
   assert.equal(publishedPair.id, "desen-app-published-host-update");
   const otherRootIds = new Set(
     segment.filter(({ id }) => id !== publishedPair.id).map(({ rootTest }) => rootTest.id),
@@ -468,7 +478,7 @@ test("a held early published-host root overlaps its own segment and blocks the s
       () => [...otherRootIds].every((id) => completed.has(id)),
       "the final ordinary segment stalled behind the published-host root",
     );
-    assert.equal(segment.length, 63);
+    assert.equal(segment.length, 67);
     assert.equal(started.includes(publishedPair.rootTest.id), true);
     assert.equal(completed.has(publishedPair.rootTest.id), false);
     assert.equal(completed.has(plan.proofPairs[segmentBarrierIndex].rootTest.id), true);
@@ -488,7 +498,7 @@ test("a held early published-host root overlaps its own segment and blocks the s
   }
   const receipt = await running;
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 258);
+  assert.equal(receipt.observedClosedCount, 260);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -500,9 +510,9 @@ test("cancelling the early published-host root drains its sibling without launch
   const segmentBarrierIndex = plan.proofPairs.findIndex(
     ({ id }) => id === "reference-host-web-source-audit",
   );
-  const successorBarrierIndex = plan.proofPairs.findIndex(({ id }) => id === "m10a-t03");
+  const successorBarrierIndex = plan.proofPairs.findIndex(({ id }) => id === "m10a-t07");
   const segment = plan.proofPairs.slice(segmentBarrierIndex + 1, successorBarrierIndex);
-  const publishedPair = segment.at(-8);
+  const publishedPair = segment.find(({ id }) => id === "desen-app-published-host-update");
   const sibling = segment[0];
   const heldIds = new Set([publishedPair.rootTest.id, sibling.verifier.id]);
   const started = [];
@@ -672,7 +682,7 @@ test("a held early digest lets its original segment progress but cannot cross th
   }
   const receipt = await running;
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 258);
+  assert.equal(receipt.observedClosedCount, 260);
   assert.equal(
     started.indexOf(digestPair.rootTest.id) <
       started.indexOf(plan.proofPairs[firstBarrierIndex].verifier.id),
@@ -763,9 +773,9 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
   assert.equal(receipt.status, "PASS");
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
-  assert.equal(barrierPairs.length, 16);
-  assert.equal(plan.proofPairs.length - barrierPairs.length, 106);
-  assert.equal(exclusiveBarrierSteps.size, 32);
+  assert.equal(barrierPairs.length, 15);
+  assert.equal(plan.proofPairs.length - barrierPairs.length, 108);
+  assert.equal(exclusiveBarrierSteps.size, 30);
 });
 
 test("the first proof failure permanently aborts and awaits its active sibling", async () => {
@@ -1496,7 +1506,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 258 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 260 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1511,7 +1521,7 @@ test("untracked drift fails the gate even after all 258 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 258);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 260);
       return true;
     },
   );
@@ -1540,7 +1550,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 258);
+  assert.equal(receipt.execution.observedClosedCount, 260);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 

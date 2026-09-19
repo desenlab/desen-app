@@ -320,6 +320,8 @@ test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[9], async () => {
 });
 
 test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[10], async () => {
+  // A broken historical baseline must not make unrelated negative mutations appear covered.
+  assert.doesNotThrow(() => verifyDesenAppSourcePersistenceSourcePolicy(sourcePolicyInput));
   const sourceMutations = [
     [
       "persistence",

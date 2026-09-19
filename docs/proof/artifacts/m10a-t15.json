@@ -1,0 +1,2150 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T15",
+  "proofId": "m10a-t15",
+  "profile": "desen.m10a-t15.masters-instances.v1",
+  "result": "PASS",
+  "source": {
+    "files": [
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 2075,
+        "sha256": "b4ea1a4b7bd0c160108df7d779587d13a599247cb47f751bf8516386d52ea548"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 4606,
+        "sha256": "9a3afaf578152b3abeb94eccf02ae1e5a7cdcec85adac1ec6d37d89a112d77ca"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/t12-playwright.config.ts",
+        "bytes": 1500,
+        "sha256": "0dbd8fd484720ef5841c1ea7723961a80c00ca7b3d4aaff23adb329e6af7caeb"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/t12-rich-styling.pw.ts",
+        "bytes": 12992,
+        "sha256": "326784048504064fc5715d5324eb8e7bfddf529eca8a676d995ffe288c7deaf1"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/t15-masters-instances.pw.ts",
+        "bytes": 16397,
+        "sha256": "7c1e18aec18038163ed8fc39c06f6b2c083e1a95e9b3d5670cf80fe6605dd19d"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/t15-playwright.config.ts",
+        "bytes": 1320,
+        "sha256": "6085c72e4b3f6798a7fb8200eb9b30a3b160bd76f6bce24798b9ead47ef9a8ba"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 5226,
+        "sha256": "06d2ae3491c70c8efe4c6d3cd2e8084dbef1894abb9334859269c2597b46f8ac"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 133589,
+        "sha256": "00d8dd17c6737795a968d89f092589af637ce597850c43fe9228a65f9607098c"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 196864,
+        "sha256": "f27bc881bde7e8fb2e5d841355f8b4b5299552ae44d0385df3d364d488161ef4"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 33278,
+        "sha256": "b759d8b68e118e36dffdd8ac637251c048c6dfb75bcd7afcad173cd84d8a8b61"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-design-tokens.ts",
+        "bytes": 5150,
+        "sha256": "66f48f4f4f8ab89a18b6ea24a7b42c3dab171345ff1eecba6bf14c634bfe3833"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 39061,
+        "sha256": "abbc6fb9d844c067f2fb9c8acea9617ca1e8e0a04354dd8d2fc47d61a6b87145"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-persistence-types.ts",
+        "bytes": 4707,
+        "sha256": "9380b9cd0fea2f14fbbc786a7b9f59dc018bdadc77fc61cecf8c26684b51729c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-persistence.ts",
+        "bytes": 32034,
+        "sha256": "716c9b95fcdfa4dbb1696f803ceabfe9c4f946ecefddd6424fd278f82c8ff517"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-style-preview-runtime.ts",
+        "bytes": 5449,
+        "sha256": "7ab842b881d4ccfcc5f769dc80bd06f79d23b6e419848ce17ec179c3c142c8a5"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-styles.ts",
+        "bytes": 50494,
+        "sha256": "766adea2e706dd03fe443788bf0b76c070b90c8dfca358b0aad6537cf1a9d03e"
+      },
+      {
+        "path": "apps/desen-app/src/design-system-asset-storage.ts",
+        "bytes": 6129,
+        "sha256": "3d7a7e405d6a9aa45d03e530d6269d22b3d30fdecb25099a6094622a8838066a"
+      },
+      {
+        "path": "apps/desen-app/src/local-project-workspace-persistence.ts",
+        "bytes": 13501,
+        "sha256": "7803a72208e6693440aecaea535faf5474a46fc1fc878b624eb16a9c45cb31c9"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 7728,
+        "sha256": "2a714ea98366f4f210b9972214c828275ff6a2bce993d57ff9754181a0c5028b"
+      },
+      {
+        "path": "apps/desen-app/src/master-draft-banner.module.css",
+        "bytes": 734,
+        "sha256": "fd72d6623fa37f3df2cc1c08d55463647fb0024bc4cffcd34a8fcba2180d03ed"
+      },
+      {
+        "path": "apps/desen-app/src/master-draft-banner.tsx",
+        "bytes": 1637,
+        "sha256": "10ba75b6f35173ed6652a906652673142e7e8e708330a3fe91c1ffc1a4ba1c3f"
+      },
+      {
+        "path": "apps/desen-app/src/master-instance-panel.module.css",
+        "bytes": 1147,
+        "sha256": "bc9fbe1f3c36f741ef0fc61de025dac1f01b5a3d9fd277896bd21e0076e9ed14"
+      },
+      {
+        "path": "apps/desen-app/src/master-instance-panel.tsx",
+        "bytes": 14054,
+        "sha256": "d5fc12181e65454fe3b5440239d2c98d2b329aebca8533ce1cd90890ef16102a"
+      },
+      {
+        "path": "apps/desen-app/src/persistence-controls.tsx",
+        "bytes": 9958,
+        "sha256": "38e14c0c2ca259951aa3795d361a3f23f369fb52299702cea467b26c0b9c1397"
+      },
+      {
+        "path": "apps/desen-app/src/preview-fidelity.ts",
+        "bytes": 7961,
+        "sha256": "a5015bf788238e0534da6129e92efe4a425e5580e8229f51f40805d8ffafccc4"
+      },
+      {
+        "path": "apps/desen-app/src/product-bootstrap.tsx",
+        "bytes": 16434,
+        "sha256": "94842fcf3837bd110013856850ab072bf45b33c734a10ab2a014f35a85ab51c6"
+      },
+      {
+        "path": "apps/desen-app/src/project-authoring-context.tsx",
+        "bytes": 1027,
+        "sha256": "1e47c5a86ef1a33aaa17792985f0535561a3738345dc0261ada7c9530a13cf98"
+      },
+      {
+        "path": "apps/desen-app/src/project-authoring-controller.ts",
+        "bytes": 16636,
+        "sha256": "20e89bb2b46a05fd37cffb14db2f6f5d3267952f178884b27792a64188acc417"
+      },
+      {
+        "path": "apps/desen-app/src/project-authoring-session.ts",
+        "bytes": 4400,
+        "sha256": "e82f6caf985c63c95c69d4eaf9db50f2e9af51f8e9ace534c4e6342c6d2f8e40"
+      },
+      {
+        "path": "apps/desen-app/src/project-authoring-source-controller.ts",
+        "bytes": 8885,
+        "sha256": "a4312f1807c226538c15653c632adf08ea0de14fa7eab924c4e9bd674b657bef"
+      },
+      {
+        "path": "apps/desen-app/src/project-lifecycle.ts",
+        "bytes": 43184,
+        "sha256": "9b35cae46001f0fe7bb4c688983640c76317d91416315e6e9fa4e9d69e2cebfb"
+      },
+      {
+        "path": "apps/desen-app/src/project-master-draft-controller.ts",
+        "bytes": 11707,
+        "sha256": "a5b91d48955637d8c1449a3ff6fc17a6f1126cc43e3e710f10758712f173f07b"
+      },
+      {
+        "path": "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+        "bytes": 12890,
+        "sha256": "988efd9ecc26bc1769398639c28c5427e107b88fdcd9691499a6b435546e0f68"
+      },
+      {
+        "path": "apps/desen-app/src/starter-neutral-workspace-profile.ts",
+        "bytes": 3634,
+        "sha256": "5273a112ba2b39dcb01737c9786f6a2cb10f8f167b2abadcd353958a60e214fb"
+      },
+      {
+        "path": "apps/desen-app/src/starter-project.ts",
+        "bytes": 4160,
+        "sha256": "f5d79aeaee47ac25f675b7113fd270bb36426c1d9f00e2fc41a8d79e358f14d7"
+      },
+      {
+        "path": "apps/desen-app/src/starter-workspace-product.tsx",
+        "bytes": 2527,
+        "sha256": "7e8da51344b4558b6fdcb0c3e52c776359ad651429b422c0f0fe833bbabdfa0f"
+      },
+      {
+        "path": "apps/desen-app/src/style-panel.tsx",
+        "bytes": 65544,
+        "sha256": "424abb192f510104aca344d6cdef48b466df4aae15bb9bdb9943638b5bc9f191"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 133879,
+        "sha256": "9b8b412488b2eb5b0c1dd385e21ffa5c1857be5d32bfd94b3d9da1971d22392a"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-data.test.ts",
+        "bytes": 18628,
+        "sha256": "a8ae04664ca651ad7efec5ecde4116c1fc00d3f69b262d47459de6326aae7aca"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-design-tokens.test.ts",
+        "bytes": 2842,
+        "sha256": "41783d71896976a1b1ce53493f7cc21cb54f486befe9271e002b6f06762778d0"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 54451,
+        "sha256": "1adae75aefd721e8375afba744e0b0d37fc6ef2ce260054c981794f217e1c0f3"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-persistence.test.ts",
+        "bytes": 41315,
+        "sha256": "69f3d40d633997ee7a7c2171fe945b7c44d60d901a6b0ec2860fc93660940713"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-style-preview-runtime.test.ts",
+        "bytes": 2800,
+        "sha256": "b8062587ed5793618aa787f93582764a9d28bda21b851032a838fc194e7cf1b6"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-styles.test.ts",
+        "bytes": 22206,
+        "sha256": "0aea845ed9ecf4aa3cb58187e5bca74ab74c6600292c1868af16f83aa388b3c3"
+      },
+      {
+        "path": "apps/desen-app/test/local-project-workspace-persistence.test.ts",
+        "bytes": 6357,
+        "sha256": "bd7f8a31a769bd28b26ada13427b107ba7f0dd7929302d7bc7b7d046275e078b"
+      },
+      {
+        "path": "apps/desen-app/test/main-lifecycle.test.tsx",
+        "bytes": 11323,
+        "sha256": "f6a2064bcf140e6531e2b708e5b3db31eaeb7df66b234412560825feae68c3f2"
+      },
+      {
+        "path": "apps/desen-app/test/persistence-application.test.tsx",
+        "bytes": 38471,
+        "sha256": "eb356637088ea0a92cf67ef3397f2c9eeb74622386125f66f6584636fed609ce"
+      },
+      {
+        "path": "apps/desen-app/test/preview-fidelity.test.ts",
+        "bytes": 9254,
+        "sha256": "535a836e655858d60d603898080bf0397b3785b9d2a8b378ac900a0a57398858"
+      },
+      {
+        "path": "apps/desen-app/test/product-bootstrap.test.tsx",
+        "bytes": 20485,
+        "sha256": "2849d59897d6018a38c6ffce509824c4dc066a525dc40ad0898331a88506b91d"
+      },
+      {
+        "path": "apps/desen-app/test/project-authoring-application.test.tsx",
+        "bytes": 14116,
+        "sha256": "9208ce6d16a2e9e07c6d5ef29f9710b44d42329ff600e59ae4a6a0532dd29e70"
+      },
+      {
+        "path": "apps/desen-app/test/project-authoring-controller.test.ts",
+        "bytes": 27327,
+        "sha256": "63e63d55b8e4a6dae66522c5b0c31eaca2c0c71b7d62b53ed40896a13fafbfc3"
+      },
+      {
+        "path": "apps/desen-app/test/project-authoring-fixture.ts",
+        "bytes": 5735,
+        "sha256": "63d048267444b86a0e23690e8b001f754b5cb71a912807e44e0aa479923e8ba1"
+      },
+      {
+        "path": "apps/desen-app/test/project-authoring-source-controller.test.ts",
+        "bytes": 6067,
+        "sha256": "529810f9b758c5420a0e7ec7ffa2f23f1f588787a0324bb1f025efd91bb886bc"
+      },
+      {
+        "path": "apps/desen-app/test/project-lifecycle-admission.test.ts",
+        "bytes": 10394,
+        "sha256": "7c6c2df7f9a1e8a86cf63f51e297dae72b02531e0ebeb3f24e9ca4294d4a0e76"
+      },
+      {
+        "path": "apps/desen-app/test/project-lifecycle.test.ts",
+        "bytes": 16392,
+        "sha256": "1f2f5bfecfe13de41e1b15f827a8d2d031817c2affac20d541525e46045eacfa"
+      },
+      {
+        "path": "apps/desen-app/test/project-master-draft-application.test.tsx",
+        "bytes": 4081,
+        "sha256": "e7b778eeb3cbad39fe3e59a855168facbd533408bddfb3e9094c87de9938d94b"
+      },
+      {
+        "path": "apps/desen-app/test/project-master-draft-controller.test.ts",
+        "bytes": 10051,
+        "sha256": "78644bf55d78e8e3e912c15470661cf28e0746f2543cee10c7be9b4bb8c0047a"
+      },
+      {
+        "path": "apps/desen-app/test/project-workspace-authoring-persistence.test.ts",
+        "bytes": 8125,
+        "sha256": "9e11cde5a701ca934bea54b8da60420314159266c1c2647f709f70a59397248d"
+      },
+      {
+        "path": "apps/desen-app/test/publication-application.test.tsx",
+        "bytes": 29648,
+        "sha256": "0bab1b4dcfa046e3596e22b16ebd3446c82c4a1ca7cdd1296c62c67153b4b523"
+      },
+      {
+        "path": "apps/desen-app/test/starter-neutral-workspace-profile.test.ts",
+        "bytes": 1304,
+        "sha256": "a27817cb7f7e879c933ae0c15e55c224edfcb5a6cdfa2ba7cb07826fa92388d9"
+      },
+      {
+        "path": "apps/desen-app/test/starter-project.test.ts",
+        "bytes": 1777,
+        "sha256": "882e8fd300ab9ad53f40a37621fcbfa6dc14b8218a0d721af7256bbedd91034e"
+      },
+      {
+        "path": "apps/desen-app/test/style-panel.test.tsx",
+        "bytes": 10820,
+        "sha256": "39ee7593005429cbaadf89b7b2b8ebd955feb1fbb06227a32be20fdb8c5bd29c"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/design-system-workbench.pw.ts",
+        "bytes": 12561,
+        "sha256": "ff787ab13ed1496e2e621f3a3347f96cab4afb03541bcc57a80a7bb3e15c5bd4"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/package.json",
+        "bytes": 884,
+        "sha256": "d67e41db944b4d4fa065411d84b7675719dfd673c92075be329eeeaca197beb4"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/playwright.config.ts",
+        "bytes": 1739,
+        "sha256": "7c0e50f2a62c04412a2b37451bdd7fdd575582fbc126cf5b75564023b786f866"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/proof-contract.ts",
+        "bytes": 1982,
+        "sha256": "c0a55a6da3577809440be38beb4d0d2aa2e1e1dd0901045f392b51c57fc3a047"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/proof-reporter.ts",
+        "bytes": 2934,
+        "sha256": "ad8d4ded7f3d77d637bf7210ef01134b7835cc910e597cfd1415dd648dc4aa08"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/src/main.tsx",
+        "bytes": 422,
+        "sha256": "35bd37cc068b95ab325711591ea01413dd5766e536c6e17492935e902cfbdbbb"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/src/workbench-application.tsx",
+        "bytes": 48401,
+        "sha256": "8a59dd1d759e72216e6debb016c6828f856e320de81bd251a7498bf02b771645"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/src/workbench.css",
+        "bytes": 12789,
+        "sha256": "15be1543338a51233dd3c21c76c7f82bb471350f0c8ab693defafac7e6312c78"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/vite.config.ts",
+        "bytes": 2819,
+        "sha256": "b8cf381915284f5ce62509c1152ec35bb1dfccb4e8d78271f650da1094fbadde"
+      },
+      {
+        "path": "package.json",
+        "bytes": 106459,
+        "sha256": "3f73278d063a6cb8f56973965a9dfbc9d2d097b1626fb8c2e74c8243b3179fa7"
+      },
+      {
+        "path": "packages/design-system-assets/README.md",
+        "bytes": 1161,
+        "sha256": "6584c9d059cbe8a0d068689b661d6b51215d5ccfa51ca5cb4fd1bb79d19f29ba"
+      },
+      {
+        "path": "packages/design-system-assets/package.json",
+        "bytes": 671,
+        "sha256": "21a1e4e3a36d214a0c910b5fa0cfc3dab53608faff4ec6cf28f732446c594e01"
+      },
+      {
+        "path": "packages/design-system-assets/src/asset-admission.ts",
+        "bytes": 16866,
+        "sha256": "739fe7d808088253084a3ba46cd5103a4bb1abda3dbb7ab6db22a76bb1c99d22"
+      },
+      {
+        "path": "packages/design-system-assets/src/asset-store.ts",
+        "bytes": 5113,
+        "sha256": "374c676e88f81fcfcd4e26bbacad76f00952f7eefd7355c105f3276b12643431"
+      },
+      {
+        "path": "packages/design-system-assets/src/image-presentation.ts",
+        "bytes": 2864,
+        "sha256": "eb125d2cbc86cd99b62580f50e71ad6b964c04179fdd497ed5415125ab18235c"
+      },
+      {
+        "path": "packages/design-system-assets/src/index.ts",
+        "bytes": 1351,
+        "sha256": "a74c47f9a411af924e6814c6a81e73615730edd09040cbf2d5d12c6dfb894e75"
+      },
+      {
+        "path": "packages/design-system-assets/test/asset-admission.test.ts",
+        "bytes": 6860,
+        "sha256": "d499aae389438e9626e472adafc2d4b2a5b8f0b4ad6aaaae1b8fbac1bc359a97"
+      },
+      {
+        "path": "packages/design-system-assets/tsconfig.build.json",
+        "bytes": 277,
+        "sha256": "3d39769f9789283f9d25088104a34c3c1cd1473e1f98b09b31655245d229d685"
+      },
+      {
+        "path": "packages/design-system-assets/tsconfig.json",
+        "bytes": 134,
+        "sha256": "a7967241666f36269ac166dfd698809c982381c0a42f0b9825041f1340517d65"
+      },
+      {
+        "path": "packages/design-system-authoring/package.json",
+        "bytes": 876,
+        "sha256": "4051ff794bdd74833aa972626de173d049678c144e530437ec0d5c515365311f"
+      },
+      {
+        "path": "packages/design-system-authoring/src/index.ts",
+        "bytes": 1862,
+        "sha256": "65baa3fd3cc459d72c393cedb5baae4dd80862a101067f1c0d89a7a7bf394641"
+      },
+      {
+        "path": "packages/design-system-authoring/src/inert-json.ts",
+        "bytes": 15017,
+        "sha256": "cd84c687217963e9598aa59476865eeff328c1fa9d346044cf08b3b0c24433bd"
+      },
+      {
+        "path": "packages/design-system-authoring/src/neutral-theme.ts",
+        "bytes": 11431,
+        "sha256": "f6b57ddb059cf62d2be051e20e4007f5c34acb138a5596a4f838ef8eb0522295"
+      },
+      {
+        "path": "packages/design-system-authoring/src/reviewed-dtcg-compatibility.ts",
+        "bytes": 60316,
+        "sha256": "c18cda491f5eb9a400595240fde23b058fceb40801257800674611a246e87f5e"
+      },
+      {
+        "path": "packages/design-system-authoring/src/theme-authoring.ts",
+        "bytes": 85941,
+        "sha256": "c5368b525be36ce1779c47e857dfd91f7c25a24b529e4aef6d2633023d4df65b"
+      },
+      {
+        "path": "packages/design-system-authoring/test/public-package.mjs",
+        "bytes": 6599,
+        "sha256": "78099aa42a437c14fd06fdc049f4d828c0b7f9f4a18ceecb2b911335a61da55a"
+      },
+      {
+        "path": "packages/design-system-authoring/test/public-package.types.mts",
+        "bytes": 1408,
+        "sha256": "406fe963f2eceb1e7b23b9e89cad560317a35a6ac228c7b919923a02205bbebf"
+      },
+      {
+        "path": "packages/design-system-authoring/test/theme-authoring.test.ts",
+        "bytes": 103166,
+        "sha256": "3a18b73edb36358c47c150ffd47d343e9fbe939dad0b05928800e98d70bd2ff6"
+      },
+      {
+        "path": "packages/design-system-authoring/tsconfig.build.json",
+        "bytes": 277,
+        "sha256": "3d39769f9789283f9d25088104a34c3c1cd1473e1f98b09b31655245d229d685"
+      },
+      {
+        "path": "packages/design-system-authoring/tsconfig.json",
+        "bytes": 151,
+        "sha256": "86b4d7bb6eec2189ba90d151dc60b25d886d85c04da5bcc79e61e387d58418f4"
+      },
+      {
+        "path": "packages/design-system-authoring/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      },
+      {
+        "path": "packages/design-system-core/package.json",
+        "bytes": 1072,
+        "sha256": "dcda60f86096ba59c5d56d2c44abd088acdabca4526e40184ccd51ace0e24db9"
+      },
+      {
+        "path": "packages/design-system-core/src/diagnostics.ts",
+        "bytes": 908,
+        "sha256": "8e191679ab29f682b4c55591922c040d11e5587ed1fc02771eaf3acf6e97186f"
+      },
+      {
+        "path": "packages/design-system-core/src/index.ts",
+        "bytes": 4462,
+        "sha256": "8ff5dfcd86f6c3e0ef0f27362000c48b665f18b7a3702f46b1812e85c78120ca"
+      },
+      {
+        "path": "packages/design-system-core/src/inert-json.ts",
+        "bytes": 9086,
+        "sha256": "ac6169a5b222f5a4b8cd7dd74b6f601daedc855e674578fb2ddd508de92b1477"
+      },
+      {
+        "path": "packages/design-system-core/src/master-edit-types.ts",
+        "bytes": 1487,
+        "sha256": "46e50c8bd1a31fca1468487f269c7195a4cefa1ef0e7d7153c9dfea6fde09765"
+      },
+      {
+        "path": "packages/design-system-core/src/master-edit.ts",
+        "bytes": 11770,
+        "sha256": "e4f5c988e179515dfb6eda61158e618725b67e6aa29cca4e82a524dd642dd89c"
+      },
+      {
+        "path": "packages/design-system-core/src/master-instance-materialization.ts",
+        "bytes": 23245,
+        "sha256": "a5d2865663e1920a1ba6d5223ec0037f5a453602ab9e0fce97237ce5f15de825"
+      },
+      {
+        "path": "packages/design-system-core/src/master-instance-types.ts",
+        "bytes": 6314,
+        "sha256": "6227ed0ab54512764d9ac900002be2c8562b00a34e0b7a67c2f7e1f367e88daf"
+      },
+      {
+        "path": "packages/design-system-core/src/project-history.ts",
+        "bytes": 9604,
+        "sha256": "86ccd57d2b3c937e252043c1c70f482f0ef3c7906de6e5754a96fac8b8cbceab"
+      },
+      {
+        "path": "packages/design-system-core/src/project-migrations.ts",
+        "bytes": 5421,
+        "sha256": "9a66f6ef06c18253301c75df1deace992bc12957c168ab57c0215a3c45e41bb9"
+      },
+      {
+        "path": "packages/design-system-core/src/project-record.ts",
+        "bytes": 17859,
+        "sha256": "8fe7da43c53878dad643f3aea3ed53aa08721e2093cd8ac859257867b88e799f"
+      },
+      {
+        "path": "packages/design-system-core/src/recipe-capture.ts",
+        "bytes": 7908,
+        "sha256": "24d61c37f80b78655397cbd9e31aa89aa06c9ba602bfa256bb10ab142b535ca6"
+      },
+      {
+        "path": "packages/design-system-core/src/recipe-graph.ts",
+        "bytes": 16206,
+        "sha256": "a2514e62bc9eff1bc6d941d2de499df53f58cdceff049dc420af7f41eb20663b"
+      },
+      {
+        "path": "packages/design-system-core/src/recipe-source-edits.ts",
+        "bytes": 8438,
+        "sha256": "df71f6dffaa1b9516d0d7b39a387e26e35a9af0e596203ceca89dec400de8c28"
+      },
+      {
+        "path": "packages/design-system-core/src/recipe-source.ts",
+        "bytes": 8789,
+        "sha256": "5a95b5a4dce777188e3d336d899453fef8d4a0618067ffe747351f655fa03baf"
+      },
+      {
+        "path": "packages/design-system-core/src/recipe-transaction-types.ts",
+        "bytes": 7805,
+        "sha256": "0b515915df0d546304d2f27adc734c8872b0a2f994740391444a93a5cc0e3d14"
+      },
+      {
+        "path": "packages/design-system-core/src/recipe-transactions.ts",
+        "bytes": 27904,
+        "sha256": "12911b194c50777ea485fa3be345e5cdd7e99c0a79a38ccbee884b1051acfee6"
+      },
+      {
+        "path": "packages/design-system-core/src/token-document.ts",
+        "bytes": 46377,
+        "sha256": "9ad722dd314d85d0a8283b2d120de740ac54b072be1f033accf19fa9a84dabdb"
+      },
+      {
+        "path": "packages/design-system-core/src/token-resolver.ts",
+        "bytes": 26077,
+        "sha256": "7d8666e7581a8fa1675012bc49e289f371ed2c6251c9ad8bf86b717369f2cdac"
+      },
+      {
+        "path": "packages/design-system-core/src/token-types.ts",
+        "bytes": 9220,
+        "sha256": "99519daaf832ea141c3b141191f8e47b2fab130296ed6e1a43f4b8bbaf60a78f"
+      },
+      {
+        "path": "packages/design-system-core/test/master-edit.test.ts",
+        "bytes": 20593,
+        "sha256": "757e86b5181154b100621f7c9e3c14dc0e5932930baac4eae3c9f6941c09b699"
+      },
+      {
+        "path": "packages/design-system-core/test/master-instance-materialization.test.ts",
+        "bytes": 23609,
+        "sha256": "7c21538143b53079063615b99c969edebcffa99575da7c6aff19f859ccfe2a42"
+      },
+      {
+        "path": "packages/design-system-core/test/project-history.test.ts",
+        "bytes": 13444,
+        "sha256": "36cedbd2b1f934d593726f586dba80ea827057ee3621ce3d7fce17ee9bb308e3"
+      },
+      {
+        "path": "packages/design-system-core/test/project-migrations.test.ts",
+        "bytes": 8597,
+        "sha256": "4c44d9510235d4d9f34020e858ef7c1c59f9f3dde2a2fb3423ac67967209e23c"
+      },
+      {
+        "path": "packages/design-system-core/test/project-migrations.types.ts",
+        "bytes": 1010,
+        "sha256": "a831411f19145c76cdeb2e84e6e7da6fc73bfaa72b1e72e906d006abca557246"
+      },
+      {
+        "path": "packages/design-system-core/test/project-record.test.ts",
+        "bytes": 10251,
+        "sha256": "10a8b5b04a86b8b36df1c73765ca2656642bfd505f918fc8c732f645d9e0cd8d"
+      },
+      {
+        "path": "packages/design-system-core/test/project-record.types.ts",
+        "bytes": 1794,
+        "sha256": "3d7a65057f1e79b58f3498bd7d5c2e350b567c669ebc98b57d66b0be99139992"
+      },
+      {
+        "path": "packages/design-system-core/test/public-package.mjs",
+        "bytes": 12842,
+        "sha256": "a22173a8d8fe14e57a629ad66ac3a1b81d6f93f8475cf3768d0b1d7c282df54e"
+      },
+      {
+        "path": "packages/design-system-core/test/public-package.types.mts",
+        "bytes": 6264,
+        "sha256": "1fbb79e80c485bd2bd2498627fc80185aa5981abec583d5d6938c5d6366b2d14"
+      },
+      {
+        "path": "packages/design-system-core/test/recipe-graph.test.ts",
+        "bytes": 23357,
+        "sha256": "18ccba87a011d8a368b95814b56d6db71bcd557472fbbf9ed8a64c2f644a31ef"
+      },
+      {
+        "path": "packages/design-system-core/test/recipe-source-edits.test.ts",
+        "bytes": 14869,
+        "sha256": "ab49efa487f198422d09b112b6ad42fe412424b53a658d6bfa17416695aef604"
+      },
+      {
+        "path": "packages/design-system-core/test/recipe-transactions.test.ts",
+        "bytes": 28832,
+        "sha256": "f72c3c564c7724bdb66b760cdc96f88f26e923341dbf098e9ecc1723afdffda9"
+      },
+      {
+        "path": "packages/design-system-core/test/token-document.test.ts",
+        "bytes": 12537,
+        "sha256": "62b971b4acccfe12c5ac3a1b263fb48898e320bd7c98ee2cc37305fa4ca00161"
+      },
+      {
+        "path": "packages/design-system-core/test/token-document.types.ts",
+        "bytes": 1829,
+        "sha256": "561161745aee0773abc3ea55d3f49d7c3fc1558bc7327fdb763dba1ce5af2366"
+      },
+      {
+        "path": "packages/design-system-core/test/token-resolver.test.ts",
+        "bytes": 14389,
+        "sha256": "6808856d00b2273bd17b311230a802cf9d360b52b73c4c67b16121fd8830fdaf"
+      },
+      {
+        "path": "packages/design-system-core/test/token-resolver.types.ts",
+        "bytes": 1894,
+        "sha256": "a43bd63b0fb750d2416feb39e3ae968c248eb8877be7062e0eaf3fc126889793"
+      },
+      {
+        "path": "packages/design-system-core/tsconfig.build.json",
+        "bytes": 277,
+        "sha256": "3d39769f9789283f9d25088104a34c3c1cd1473e1f98b09b31655245d229d685"
+      },
+      {
+        "path": "packages/design-system-core/tsconfig.json",
+        "bytes": 134,
+        "sha256": "a7967241666f36269ac166dfd698809c982381c0a42f0b9825041f1340517d65"
+      },
+      {
+        "path": "packages/design-system-core/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      },
+      {
+        "path": "packages/editor-core/src/history.ts",
+        "bytes": 50994,
+        "sha256": "d4ff1b465765d25c9b3765b482af0baefea7bc5690d9b61bf3941befc747eedf"
+      },
+      {
+        "path": "packages/editor-core/src/index.ts",
+        "bytes": 5906,
+        "sha256": "36df2da75ee72253416511cbe8b4b71d66af5f6fb8836b7a4d9611ea37487d04"
+      },
+      {
+        "path": "packages/editor-core/test/history.test.ts",
+        "bytes": 41060,
+        "sha256": "375c35683c5e63c8b8378559b48471927abefb2f7cd2a4a535870d3c22383395"
+      },
+      {
+        "path": "packages/starter-catalog-web/catalog.json",
+        "bytes": 4120610,
+        "sha256": "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6"
+      },
+      {
+        "path": "packages/starter-catalog-web/package.json",
+        "bytes": 1561,
+        "sha256": "ada34ec4727fd14d890a8d4f0e9c2ba360f36d5c35259154710f439ffeb66522"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/contracts.ts",
+        "bytes": 15903,
+        "sha256": "c43294456adccafa4263bedb4ab7dbf8721470d4ebf942a715cb672f462e4f25"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/data-display-feedback-contracts.ts",
+        "bytes": 18253,
+        "sha256": "3c4722623e12c11cbfb7c084cbb7ff3120ef220dbd71ec1ed6e427f33ba290d5"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/form-control-contracts.ts",
+        "bytes": 19580,
+        "sha256": "9e51cd39a309964da8ae33431483f5aed74c613a44c1b128bcb1ec73b00a5832"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/index.ts",
+        "bytes": 4451,
+        "sha256": "b12c4aed42c2894cf8604ef2ce7b95e2b9044dc843b19979e799cfa5d5c5b6c4"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/layout-content-contracts.ts",
+        "bytes": 14221,
+        "sha256": "60c455b60442f1e2d0b25ed456ef54f0845926e9a6117beeb7fb49faf2b763b4"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/neutral.module.css",
+        "bytes": 16249,
+        "sha256": "42a865b7d760708f9d983002c90f840930659af5057882b6ca8ddb6caf0e4931"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/overlay-disclosure-contracts.ts",
+        "bytes": 11444,
+        "sha256": "54a8e900566ad05579a9b46a4176192d01fdb699820664909f2ea47d53038edc"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/react-adapters.tsx",
+        "bytes": 122548,
+        "sha256": "2265e1283518bab08bce9a00209992431f315ff8d2235ba082d16190cb9b69f9"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/selection-numeric-contracts.ts",
+        "bytes": 20817,
+        "sha256": "3d096d0ead060c3e06f17100ab0e9f23a3d6616bf97880cd3b087926308ae2e0"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/styles.d.ts",
+        "bytes": 111,
+        "sha256": "00a558ca41e878c67239d4026b1d53eca70a77ab92c0cc5c5240b4fea185e4d4"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/templates.ts",
+        "bytes": 25750,
+        "sha256": "96935d13f9894affa3643ab2e787466f6f205f6b9065263c89eeb82f7993dabc"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/visual-style-profile.ts",
+        "bytes": 45117,
+        "sha256": "4e8fd510d26f9f7abbfea581df659a02cd1703cf54036c2d6ecfd0f7e5a2e117"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/contracts.test.ts",
+        "bytes": 38944,
+        "sha256": "e28056d522085eba26663039a9f1d98822918467193be027d8363ce8055b4e20"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/contracts.types.ts",
+        "bytes": 2557,
+        "sha256": "6fb37c2bff3cd86c72da748dc88ba4f36fffe151045f1b2697914c8a2b22b695"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/data-display-feedback-adapters.test.tsx",
+        "bytes": 7170,
+        "sha256": "44894be8820100d9dba3bc3449c86795b33b6bc2dfd777b11bf564917f5a1423"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/form-control-adapters.test.tsx",
+        "bytes": 14823,
+        "sha256": "7fe5bda2cf7f215362372aae5f7e7c4e07327955af5efb7252a63fd2c272bb49"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/layout-content-adapters.test.tsx",
+        "bytes": 16708,
+        "sha256": "5261cac62297a0f05f3920fd118d0e65acbabaf56697bcb8de23c5e29dbf58c3"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/overlay-disclosure-adapters.test.tsx",
+        "bytes": 5299,
+        "sha256": "ff4c7d617d93f29265aec98c6c10099b56469392f339619bad61c219de2e1e1f"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/public-api.types.ts",
+        "bytes": 4860,
+        "sha256": "6c25f225a6e4b5116fade71320156cd346c8bda9c9cec64efe71d2e827efb65a"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/public-package.mjs",
+        "bytes": 3768,
+        "sha256": "475d1ebdcec1b9648a869f9720b9b2d9a5fc2f7b8be3197537195292c7877c86"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/public-package.types.mts",
+        "bytes": 5508,
+        "sha256": "6160b447626e97002232674a22f28f84d34e073942373779df822d6146cbc034"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/react-adapters.test.tsx",
+        "bytes": 11990,
+        "sha256": "4a842964b69003f3d2f737fb8072dbdd19c43cfd43c6d257fd7b0c91d15e222b"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/selection-numeric-adapters.test.tsx",
+        "bytes": 7298,
+        "sha256": "4fdf357f1d70ddca5b0432d12d644d109b3aaf171d4b0dca337f54a59d6c5a90"
+      },
+      {
+        "path": "packages/starter-catalog-web/tsconfig.build.json",
+        "bytes": 277,
+        "sha256": "2700584c8ac1384826efda3cd78eda2a56d2c4dba2ce063e4a88e250d4886330"
+      },
+      {
+        "path": "packages/starter-catalog-web/tsconfig.json",
+        "bytes": 166,
+        "sha256": "c73844d5baa0b4496849dfe4ea69486fad545d01952cd0e38c3885284f961233"
+      },
+      {
+        "path": "packages/starter-catalog-web/tsconfig.public-package.json",
+        "bytes": 150,
+        "sha256": "453c3071e6a46729fad001ec96306563dd60b4a8f957293926411a11a2efd1c4"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 141822,
+        "sha256": "2973a4c7af7283756095e12ed8b4c39c456027987b7a8e3352d0b6680162feb8"
+      },
+      {
+        "path": "prettier.config.mjs",
+        "bytes": 199,
+        "sha256": "df2dd03305969423901a25a6c18efa8d2c4c6bc62d9088321fb5c8eed1648941"
+      },
+      {
+        "path": "scripts/generate-m10a-t15-proof.mjs",
+        "bytes": 450,
+        "sha256": "c829c278f5a930944d8fc8fe50b3c8569f78e4574cbf8794371c5c79b671e93e"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/m10a-t02-proof.mjs",
+        "bytes": 13595,
+        "sha256": "4ffb520ea8a700fe1bc95335c5bb629cdca440d6cdd8b9d8e997b141baf64e59"
+      },
+      {
+        "path": "scripts/lib/m10a-t03-proof.mjs",
+        "bytes": 22492,
+        "sha256": "91f491a3dc167a422f8b3827955551490033489897a2464467d56a968ee24b45"
+      },
+      {
+        "path": "scripts/lib/m10a-t09-proof.mjs",
+        "bytes": 17859,
+        "sha256": "272a75ce4aa793dbe25b4a0bdb9a9d4f33c1fe5c708f51d3488d052728bdb7bd"
+      },
+      {
+        "path": "scripts/lib/m10a-t12-proof.mjs",
+        "bytes": 3507,
+        "sha256": "658909dc44c5f4453697ebcf794972963869a9628407aab93a0b1b4661ecfeda"
+      },
+      {
+        "path": "scripts/lib/m10a-t13-proof.mjs",
+        "bytes": 3502,
+        "sha256": "48c878a2726d91ff4cb68faf0d3b9e88ad6a16e40f7d1b610cf1083f3489b182"
+      },
+      {
+        "path": "scripts/lib/m10a-t14-proof.mjs",
+        "bytes": 3512,
+        "sha256": "34b56622d1837311efeedb1d9c7f32fed136aeb7b518bb5afaa08648dc866e69"
+      },
+      {
+        "path": "scripts/lib/m10a-t15-execution.mjs",
+        "bytes": 17383,
+        "sha256": "eb95a79f59bfb97b5cc1def4f3a275f55771afaf3b0a90dc364ab880f9bc7c49"
+      },
+      {
+        "path": "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
+        "bytes": 35381,
+        "sha256": "ee2e9fc4610ab5f7d3ce75de377b0eeccc4da767ea8429bc85544eedcc6515c7"
+      },
+      {
+        "path": "scripts/lib/m10a-t15-proof.mjs",
+        "bytes": 12250,
+        "sha256": "cc323d418ddd435a5a3eb2b6b015ac7838ea5fbc825e5c323b468c4d2a743a56"
+      },
+      {
+        "path": "scripts/lib/m10a-t15-workloads.mjs",
+        "bytes": 6753,
+        "sha256": "66810e32347e4dc63d1c7fc9c1073079f72fb1bdbf54c68a66f73b5cf34e478c"
+      },
+      {
+        "path": "scripts/verify-m10a-t15.mjs",
+        "bytes": 462,
+        "sha256": "1357a919623d4cd26d4944dcdb7982749b67cbcc194f7e8d07be9ebb518c5982"
+      },
+      {
+        "path": "tests/m10a-t02.test.mjs",
+        "bytes": 5059,
+        "sha256": "797414dbb527520c550e81e2d47044862be0717ecd35a434202871cab34e1ca7"
+      },
+      {
+        "path": "tests/m10a-t03.test.mjs",
+        "bytes": 6996,
+        "sha256": "186eae63105205611ad9b68649a705fb901da14e1cf09c4d4f0bbfa1c6116ea2"
+      },
+      {
+        "path": "tests/m10a-t09.test.mjs",
+        "bytes": 5219,
+        "sha256": "efde6073cef6941ece3951085ce5b0dc9d48b951dd90a0a1f3abe139184318ca"
+      },
+      {
+        "path": "tests/m10a-t12.test.mjs",
+        "bytes": 3452,
+        "sha256": "cbe9572107162be7a664e6999804f53d6efa721d9c0fa5de03f7b4b1a4f8e74c"
+      },
+      {
+        "path": "tests/m10a-t13.test.mjs",
+        "bytes": 3430,
+        "sha256": "5a0a847a6cbe5a1a55edfd9cbf94728ba79598ddc45c72deb0b70a3d3f56df00"
+      },
+      {
+        "path": "tests/m10a-t14.test.mjs",
+        "bytes": 3405,
+        "sha256": "ed3a36dd9de5ee0cb8e3063b497c2143f90af6a3888ffb0b394708d7228344de"
+      },
+      {
+        "path": "tests/m10a-t15.test.mjs",
+        "bytes": 15816,
+        "sha256": "3b33fedc39b837cb3ce2607ecf71652b8d1c816cd46b5e2480218be108f09ea4"
+      }
+    ],
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.7.0",
+      "target": "web-react",
+      "componentCount": 32,
+      "path": "packages/starter-catalog-web/catalog.json",
+      "bytes": 4120610,
+      "sha256": "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6"
+    },
+    "predecessors": [
+      {
+        "task": "M10A-T02",
+        "path": "docs/proof/artifacts/m10a-t02.json",
+        "bytes": 11513,
+        "sha256": "135dffbab6bc2c0d73e93caf2da6edbbeb7cec2653555fc5c128e1de0f5936c2"
+      },
+      {
+        "task": "M10A-T03",
+        "path": "docs/proof/artifacts/m10a-t03.json",
+        "bytes": 80054,
+        "sha256": "530efe5d80d78a722c1832ad5b95086c2fd97bc2f1a4bd275b9a1924394b1e2b"
+      },
+      {
+        "task": "M10A-T12",
+        "path": "docs/proof/artifacts/m10a-t12.json",
+        "bytes": 11804,
+        "sha256": "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b"
+      },
+      {
+        "task": "M10A-T13",
+        "path": "docs/proof/artifacts/m10a-t13.json",
+        "bytes": 3992,
+        "sha256": "e76f00a135a6625f2c65175d07aafd83e467c4bf193de070444ece99fd0df6f3"
+      },
+      {
+        "task": "M10A-T14",
+        "path": "docs/proof/artifacts/m10a-t14.json",
+        "bytes": 3670,
+        "sha256": "fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54"
+      }
+    ]
+  },
+  "workloads": [
+    {
+      "id": "build-app-closure",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/app-web...", "build"]
+    },
+    {
+      "id": "build-control-plane",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/control-plane-api", "build"]
+    },
+    {
+      "id": "protocol-snapshot",
+      "command": "node",
+      "args": ["scripts/verify-protocol-snapshot.mjs"]
+    },
+    {
+      "id": "runtime-baseline",
+      "command": "node",
+      "args": ["scripts/verify-runtime-core-baseline.mjs"]
+    },
+    {
+      "id": "core-public-contract",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/design-system-core", "test:public-package"]
+    },
+    {
+      "id": "theme-public-contract",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/design-system-authoring", "test:public-package"]
+    },
+    {
+      "id": "starter-public-contract",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/starter-catalog-web", "test:public-package"]
+    },
+    {
+      "id": "core-behavior",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@desen/design-system-core",
+        "exec",
+        "vitest",
+        "run",
+        "test/master-edit.test.ts",
+        "test/master-instance-materialization.test.ts",
+        "test/project-history.test.ts",
+        "test/project-migrations.test.ts",
+        "test/project-record.test.ts",
+        "test/recipe-graph.test.ts",
+        "test/recipe-source-edits.test.ts",
+        "test/recipe-transactions.test.ts",
+        "test/token-document.test.ts",
+        "test/token-resolver.test.ts"
+      ]
+    },
+    {
+      "id": "theme-behavior",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/design-system-authoring", "exec", "vitest", "run"]
+    },
+    {
+      "id": "starter-behavior",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/starter-catalog-web", "exec", "vitest", "run"]
+    },
+    {
+      "id": "asset-behavior",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/design-system-assets", "exec", "vitest", "run"]
+    },
+    {
+      "id": "source-history",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/editor-core", "exec", "vitest", "run", "test/history.test.ts"]
+    },
+    {
+      "id": "app-behavior",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@desen/app-web",
+        "exec",
+        "vitest",
+        "run",
+        "test/application.test.tsx",
+        "test/authoring-data.test.ts",
+        "test/authoring-design-tokens.test.ts",
+        "test/authoring-inspector.test.ts",
+        "test/authoring-persistence.test.ts",
+        "test/authoring-style-preview-runtime.test.ts",
+        "test/authoring-styles.test.ts",
+        "test/local-project-workspace-persistence.test.ts",
+        "test/main-lifecycle.test.tsx",
+        "test/persistence-application.test.tsx",
+        "test/preview-fidelity.test.ts",
+        "test/product-bootstrap.test.tsx",
+        "test/project-authoring-application.test.tsx",
+        "test/project-authoring-controller.test.ts",
+        "test/project-authoring-source-controller.test.ts",
+        "test/project-lifecycle-admission.test.ts",
+        "test/project-lifecycle.test.ts",
+        "test/project-master-draft-application.test.tsx",
+        "test/project-master-draft-controller.test.ts",
+        "test/project-workspace-authoring-persistence.test.ts",
+        "test/publication-application.test.tsx",
+        "test/starter-neutral-workspace-profile.test.ts",
+        "test/starter-project.test.ts",
+        "test/style-panel.test.tsx",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "id": "browser-types",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/app-browser-e2e", "typecheck"]
+    },
+    {
+      "id": "theme-browser",
+      "command": "pnpm",
+      "args": ["--filter", "@desen/design-system-workbench-proof", "test:e2e"]
+    },
+    {
+      "id": "style-browser",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@desen/app-browser-e2e",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "t12-playwright.config.ts"
+      ]
+    },
+    {
+      "id": "master-browser",
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@desen/app-browser-e2e",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "t15-playwright.config.ts"
+      ]
+    }
+  ],
+  "execution": [
+    {
+      "id": "build-app-closure",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "build-control-plane",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "protocol-snapshot",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "runtime-baseline",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "core-public-contract",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "theme-public-contract",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "starter-public-contract",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "core-behavior",
+      "result": "PASS",
+      "observation": {
+        "owner": "core-behavior",
+        "passedTests": 158,
+        "files": [
+          {
+            "path": "packages/design-system-core/test/master-edit.test.ts",
+            "tests": [
+              "isolated visual master editing keeps nested edits as occurrence overrides and explicit detach as ordinary parent-owned content",
+              "isolated visual master editing opens unused master defaults and round-trips canonically without changing the live Source",
+              "isolated visual master editing preserves local state, actions, navigation and unused declarations through an ordinary visual edit",
+              "isolated visual master editing preserves namespace-equal state/resource aliases, unused resources and opaque extensions",
+              "isolated visual master editing rejects a structural update that would destroy an existing instance override",
+              "isolated visual master editing rejects changed Catalog authority and malformed draft-open requests",
+              "isolated visual master editing rejects out-of-scope definition edits",
+              "isolated visual master editing rejects out-of-scope metadata edits",
+              "isolated visual master editing rejects out-of-scope other-surface edits",
+              "isolated visual master editing rejects out-of-scope surface-metadata edits",
+              "isolated visual master editing rejects recursive nested insertion without losing the isolated draft or live project",
+              "isolated visual master editing rejects stale or forged handles without evaluating caller-owned getters",
+              "isolated visual master editing retains nested occurrence identities, defaults and repeat occurrences through reordering",
+              "isolated visual master editing retains parent commands to nested roots and behavior-owned occurrence slots",
+              "isolated visual master editing round-trips masters whose root is a chain of linked occurrences",
+              "isolated visual master editing updates two linked instances, preserves local overrides and leaves a detached third untouched"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/master-instance-materialization.test.ts",
+            "tests": [
+              "internal recipe materialization applies nested defaults before an explicit local override and reset restores the updated master",
+              "internal recipe materialization deterministically isolates two instances of a complete existing Source composition",
+              "internal recipe materialization keeps boundary-length state.set and state.toggle paths within 128 code units",
+              "internal recipe materialization materializes attached behavior slot nodes and rewrites behavior-owned actions",
+              "internal recipe materialization qualifies repeated nested masters by occurrence path and keeps those IDs on reorder",
+              "internal recipe materialization rejects external command targets and conflicting local operation aliases",
+              "internal recipe materialization rejects recursive and missing definition closures without changing the input",
+              "internal recipe materialization rejects unresolved operation bindings",
+              "internal recipe materialization rejects unresolved resource bindings",
+              "internal recipe materialization rejects unresolved state bindings",
+              "internal recipe materialization resolves parent commands to nested occurrence roots through chained root occurrences",
+              "internal recipe materialization rewrites all admitted binding locations while preserving strings, tokens and opaque extensions"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/project-history.test.ts",
+            "tests": [
+              "complete editable-project history accepts both finite history-limit endpoints",
+              "complete editable-project history bounds retained past entries and preserves the limit through undo and redo",
+              "complete editable-project history captures a detached immutable aggregate and its complete canonical byte count",
+              "complete editable-project history clears redo only after a valid new edit and preserves earlier immutable branches",
+              "complete editable-project history evicts oldest snapshots when retained canonical bytes exceed the aggregate budget",
+              "complete editable-project history keeps the exact history and redo branch for a canonical whole-project no-op",
+              "complete editable-project history rejects a throwing record proxy with a controlled unchanged-history result",
+              "complete editable-project history rejects active input without invoking its getter or changing the current history",
+              "complete editable-project history rejects forged, serialized, active and revoked histories before reading their members",
+              "complete editable-project history rejects invalid history limit -1 before inspecting the candidate",
+              "complete editable-project history rejects invalid history limit 0 before inspecting the candidate",
+              "complete editable-project history rejects invalid history limit 1.5 before inspecting the candidate",
+              "complete editable-project history rejects invalid history limit 513 before inspecting the candidate",
+              "complete editable-project history rejects invalid history limit Infinity before inspecting the candidate",
+              "complete editable-project history rejects invalid history limit NaN before inspecting the candidate",
+              "complete editable-project history rejects invalid records and project-identity replacement without losing redo",
+              "complete editable-project history restores Source and authoring metadata together in one transition",
+              "complete editable-project history returns the unchanged history for empty undo and redo",
+              "complete editable-project history undoes and redoes metadata-only changes even while Source stays byte-identical"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/project-migrations.test.ts",
+            "tests": [
+              "migrateEditableProjectRecord captures inert input before dispatch without invoking schema-version accessors",
+              "migrateEditableProjectRecord converts exact v1 by only changing its version and adding an empty graph",
+              "migrateEditableProjectRecord dispatches an unknown future root by version before applying a known field shape",
+              "migrateEditableProjectRecord keeps the current v2 path byte-equivalent and reports no transformations",
+              "migrateEditableProjectRecord never reinterprets graph data smuggled into v1 or repairs malformed known envelopes",
+              "migrateEditableProjectRecord rejects unsupported versions without claiming a fictional migration"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/project-record.test.ts",
+            "tests": [
+              "admitEditableProjectRecord admits one detached, immutable App-owned envelope without changing Source bytes",
+              "admitEditableProjectRecord bounds aggregate canonical bytes before producing a detached project",
+              "admitEditableProjectRecord enforces finite collection limits and rejects unknown schema versions",
+              "admitEditableProjectRecord rejects active, exotic, cyclic, sparse and non-finite input safely",
+              "admitEditableProjectRecord rejects invalid Source and exposes no partial record",
+              "admitEditableProjectRecord rejects unknown fields, duplicate identities and executable connection states",
+              "admitEditableProjectRecord requires an explicit current graph and rejects malformed graph data atomically",
+              "admitEditableProjectRecord requires explicit migration for the historical version even when its Source is valid",
+              "admitEditableProjectRecord turns throwing and revoked Proxy containers into controlled failures"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/recipe-graph.test.ts",
+            "tests": [
+              "recipe graph admission through the complete project admits an ordinary declaration of the same operation alias on another surface",
+              "recipe graph admission through the complete project admits an unused structurally valid definition without changing canonical Source",
+              "recipe graph admission through the complete project admits external read-only observation of an instance-owned operation lifecycle",
+              "recipe graph admission through the complete project admits repeated same-operation declarations owned by one instance across handlers and settlements",
+              "recipe graph admission through the complete project bounds nested composition depth and repeated expansion before returning a project",
+              "recipe graph admission through the complete project rejects a same-capability operation declaration outside its instance in a behavior failure settlement",
+              "recipe graph admission through the complete project rejects a same-capability operation declaration outside its instance in a behavior handler",
+              "recipe graph admission through the complete project rejects a same-capability operation declaration outside its instance in a behavior success settlement",
+              "recipe graph admission through the complete project rejects a same-capability operation declaration outside its instance in a component failure settlement",
+              "recipe graph admission through the complete project rejects a same-capability operation declaration outside its instance in a component handler",
+              "recipe graph admission through the complete project rejects a same-capability operation declaration outside its instance in a component success settlement",
+              "recipe graph admission through the complete project rejects an invalid unused-definition operation identity before allocation can sanitize it",
+              "recipe graph admission through the complete project rejects an invalid unused-definition resource identity before allocation can sanitize it",
+              "recipe graph admission through the complete project rejects an invalid unused-definition state identity before allocation can sanitize it",
+              "recipe graph admission through the complete project rejects an ordinary same-surface node reusing a managed node identity",
+              "recipe graph admission through the complete project rejects an outside declaration of a managed operation alias with a different capability",
+              "recipe graph admission through the complete project rejects hostile graph descriptors and proxies without invoking getters",
+              "recipe graph admission through the complete project rejects malformed graph collections, unknown members and invalid template data",
+              "recipe graph admission through the complete project rejects master changes and forged provenance digests until Source is updated atomically",
+              "recipe graph admission through the complete project rejects missing, stale, duplicate and out-of-order durable mappings without repairing them",
+              "recipe graph admission through the complete project rejects state/resource drift and orphaned surface/root identities",
+              "recipe graph admission through the complete project rejects two same-surface instances claiming the same ordinary identities",
+              "recipe graph admission through the complete project rejects unused recursive or unresolved nested definitions",
+              "recipe graph admission through the complete project replays a materialized aggregate exactly after export and returns detached immutable graph data"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/recipe-source-edits.test.ts",
+            "tests": [
+              "ordinary Source edits over managed instances addresses nested occurrences by stable path and rejects cross-occurrence binding scope",
+              "ordinary Source edits over managed instances allows intact instance movement and detached duplication without inventing a new relationship",
+              "ordinary Source edits over managed instances deletes a whole instance and its owned declarations, but never a still-referenced target",
+              "ordinary Source edits over managed instances does not silently overwrite managed declarations or reuse a deleted instance's owned state",
+              "ordinary Source edits over managed instances inverts a Source state alias into the instance's local override scope without aliasing another instance",
+              "ordinary Source edits over managed instances inverts nested fallback and format bindings while preserving format templates",
+              "ordinary Source edits over managed instances keeps a canonical Source no-op unchanged",
+              "ordinary Source edits over managed instances never turns a cross-surface move into an implicit detach",
+              "ordinary Source edits over managed instances records prop and style overrides while preserving the exact requested Source and all mappings",
+              "ordinary Source edits over managed instances rejects a managed structural or handler edit without exposing a preceding valid override",
+              "ordinary Source edits over managed instances removes a genuinely added override without replacing inherited fields or empty container authority"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/recipe-transactions.test.ts",
+            "tests": [
+              "atomic recipe transaction preparation allocates around an existing unmanaged identity deterministically instead of overwriting it",
+              "atomic recipe transaction preparation captures nested managed compositions as occurrences instead of flattening relationships",
+              "atomic recipe transaction preparation creates, captures and deletes definitions without changing unrelated Source or inert metadata",
+              "atomic recipe transaction preparation deletes an unreferenced instance and then its unused master atomically",
+              "atomic recipe transaction preparation does not mistake opaque reference-shaped extensions for surviving wiring",
+              "atomic recipe transaction preparation preserves valid equal-spelling identities across distinct Source namespaces during capture",
+              "atomic recipe transaction preparation rejects a structural master edit that removes an override target without changing either instance",
+              "atomic recipe transaction preparation rejects deleting a managed node identity still referenced by an ordinary outside owner",
+              "atomic recipe transaction preparation rejects deleting a managed operation identity still referenced by an ordinary outside owner",
+              "atomic recipe transaction preparation rejects deleting a managed resource identity still referenced by an ordinary outside owner",
+              "atomic recipe transaction preparation rejects deleting an instance with surviving external state wiring but permits detached deletion",
+              "atomic recipe transaction preparation rejects hostile command values without invoking accessors and exposes no partial candidate",
+              "atomic recipe transaction preparation rejects managed insertion, internal capture, missing destinations and direct surface-root deletion",
+              "atomic recipe transaction preparation rejects recursive masters, unknown capabilities and invalid overrides even when structurally valid",
+              "atomic recipe transaction preparation rejects stale projects and definitions, unknown commands and duplicate identities",
+              "atomic recipe transaction preparation retains mapping identities across safe structural additions, removals and reorder",
+              "atomic recipe transaction preparation treats repeated same-value overrides and reset-without-override as complete canonical no-ops",
+              "atomic recipe transaction preparation updates transitive nested definitions on multiple surfaces and keeps unaffected nested overrides",
+              "atomic recipe transaction preparation updates two linked instances, preserves an override, detaches a third, and restores whole history/reopen"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/token-document.test.ts",
+            "tests": [
+              "admitDtcgTokenDocument admits every bounded value family and preserves DTCG metadata",
+              "admitDtcgTokenDocument classifies group extension syntax as an explicit unsupported feature",
+              "admitDtcgTokenDocument classifies property alias as an explicit unsupported feature",
+              "admitDtcgTokenDocument classifies unknown token type as an explicit unsupported feature",
+              "admitDtcgTokenDocument contains throwing and revoked proxy inputs as controlled failures",
+              "admitDtcgTokenDocument infers an untyped alias from its target before considering a parent group type",
+              "admitDtcgTokenDocument inherits group deprecation metadata and honors a token override",
+              "admitDtcgTokenDocument keeps standalone admission closed when an untyped alias target is external",
+              "admitDtcgTokenDocument rejects a non-string source id without inspecting or retaining it",
+              "admitDtcgTokenDocument rejects accessors without invoking them and exposes no unsafe snapshot",
+              "admitDtcgTokenDocument rejects cyclic and over-depth JSON before semantic traversal",
+              "admitDtcgTokenDocument rejects empty group as invalid DTCG",
+              "admitDtcgTokenDocument rejects invalid name as invalid DTCG",
+              "admitDtcgTokenDocument rejects malformed composite as invalid DTCG",
+              "admitDtcgTokenDocument rejects missing type as invalid DTCG",
+              "admitDtcgTokenDocument rejects mixed token and group as invalid DTCG",
+              "admitDtcgTokenDocument rejects non-finite value as invalid DTCG",
+              "admitDtcgTokenDocument rejects numeric overflow as invalid DTCG",
+              "admitDtcgTokenDocument returns a detached, key-deterministic snapshot without freezing caller data",
+              "admitDtcgTokenDocument returns safely captured unsupported documents without stripping their feature"
+            ]
+          },
+          {
+            "path": "packages/design-system-core/test/token-resolver.test.ts",
+            "tests": [
+              "resolveDesignTokens applies a literal override to every path admitted by the DTCG name grammar",
+              "resolveDesignTokens applies literal overrides last and lets aliases observe them",
+              "resolveDesignTokens contains throwing and revoked request proxies as controlled failures",
+              "resolveDesignTokens does not let deferred alias closure hide unsupported data later in a source",
+              "resolveDesignTokens infers an untyped base alias from a typed target introduced by a later source",
+              "resolveDesignTokens is deterministic across input object key order",
+              "resolveDesignTokens overlays ordered sources before resolving aliases",
+              "resolveDesignTokens propagates an unsupported source snapshot",
+              "resolveDesignTokens rejects a alias literal override",
+              "resolveDesignTokens rejects a completed cross-source alias graph with a cycle",
+              "resolveDesignTokens rejects a completed cross-source alias graph with a missing target",
+              "resolveDesignTokens rejects a completed cross-source alias graph with a type mismatch",
+              "resolveDesignTokens rejects a duplicate path override",
+              "resolveDesignTokens rejects a missing path override",
+              "resolveDesignTokens rejects a source overlay that changes an existing token type",
+              "resolveDesignTokens rejects a type change override",
+              "resolveDesignTokens rejects alias cycles with no partial token map",
+              "resolveDesignTokens rejects an alias with a missing target",
+              "resolveDesignTokens rejects an alias with a type mismatch",
+              "resolveDesignTokens rejects empty and duplicate source selections",
+              "resolveDesignTokens rejects unsafe source descriptors without invoking accessors",
+              "resolveDesignTokens resolves an untyped alias from its target before a parent group type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "theme-behavior",
+      "result": "PASS",
+      "observation": {
+        "owner": "theme-behavior",
+        "passedTests": 32,
+        "files": [
+          {
+            "path": "packages/design-system-authoring/test/theme-authoring.test.ts",
+            "tests": [
+              "theme authoring allocates bounded deterministic source identities for maximum-length duplicate ids",
+              "theme authoring atomically rejects deleting the final theme or mode",
+              "theme authoring authors named themes, modes, literal tokens, and aliases without raw JSON",
+              "theme authoring bounds unsupported-feature preservation work per overlay",
+              "theme authoring caps successful document history without constraining custom literal values",
+              "theme authoring covers the frozen SC-01 valid-but-unsupported fixture authority losslessly",
+              "theme authoring defers alias-cycle authority until ordered source overrides are composed",
+              "theme authoring does not confuse ordinary token names with a Resolver document",
+              "theme authoring edits arbitrary supported colors and composite typography with bounded undo/redo",
+              "theme authoring edits whole-token aliases and rejects broken all-mode graphs atomically",
+              "theme authoring keeps $root projection paths bounded through adversarial name collisions",
+              "theme authoring keeps both Neutral defaults legible and gives focus a separate two-pixel signal",
+              "theme authoring keeps opaque validated features unchanged through supported edits and self-roundtrip",
+              "theme authoring leaves over-depth alias-chain rejection to the frozen T02 resolver",
+              "theme authoring never lets an unsupported feature mask a later invalid declaration",
+              "theme authoring preserves $root tokens at both frozen T02 token-path limits",
+              "theme authoring preserves a valid __proto__ token through group inheritance, edits, history, and export",
+              "theme authoring preserves and discloses validated shadow inset literals and property references",
+              "theme authoring preserves the closed T02-recognized unsupported type and composite-reference matrix",
+              "theme authoring projects array-composite references as one value without flattening",
+              "theme authoring prunes empty token ancestors but never erases a required source root",
+              "theme authoring rejects every frozen SC-01 invalid fixture atomically",
+              "theme authoring rejects malformed reviewed Resolver bounds, member types, and source references atomically",
+              "theme authoring rejects whitespace labels and reused document-local source identities",
+              "theme authoring restores structural selections through undo and redo",
+              "theme authoring retains the exact working session for malformed, duplicate, invalid, and unsafe imports",
+              "theme authoring round-trips deterministically and preserves disclosed unsupported standard data",
+              "theme authoring ships an editable Neutral light/dark foundation with live alias-aware controls",
+              "theme authoring undoes and redoes an imported document together with its exact selection",
+              "theme authoring uses one zero-based depth limit for direct admission and canonical reimport",
+              "theme authoring uses the exact T02 token-name grammar for ordinary edits",
+              "theme authoring validates group inheritance through curly, JSON Pointer, and group $ref deep merges"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "starter-behavior",
+      "result": "PASS",
+      "observation": {
+        "owner": "starter-behavior",
+        "passedTests": 84,
+        "files": [
+          {
+            "path": "packages/starter-catalog-web/test/contracts.test.ts",
+            "tests": [
+              "starter component contracts adds the finite T12 visual profile to Button and Dialog controls",
+              "starter component contracts admits finite logical layout, typography, and closed content contracts",
+              "starter component contracts keeps Button props and press payload closed and inert",
+              "starter component contracts keeps T09 data-display and feedback contracts finite, text-only, and identity-safe",
+              "starter component contracts keeps every published capability on one exact adapter visual profile",
+              "starter component contracts keeps the T06 form controls finite, labelled, styleable, and event-closed",
+              "starter component contracts keeps the T07 selection, tab, and numeric controls closed, bounded, and data-only",
+              "starter component contracts registers the exact ordered capability inventory without fabricating a package digest",
+              "starter component contracts requires bounded Dialog content from only the exact starter inventory",
+              "starter component contracts upgrades Select in place with stable data-only identities and a legacy migration spelling",
+              "starter node templates creates a complete Dialog subtree with one required managed child",
+              "starter node templates creates complete T09 data-display and feedback templates without a connection or operation",
+              "starter node templates creates complete nested layout templates and inert content leaves",
+              "starter node templates creates deterministic complete T07 selection, tabs, and numeric templates",
+              "starter node templates creates deterministic frozen Button and Select leaves",
+              "starter node templates creates deterministic frozen leaves for every T06 form control",
+              "starter node templates rejects extra or executable wrapper data before constructing a node",
+              "starter node templates rejects unknown capabilities, invalid prefixes, excess inventory, and all collisions"
+            ]
+          },
+          {
+            "path": "packages/starter-catalog-web/test/data-display-feedback-adapters.test.tsx",
+            "tests": [
+              "M10A-T09 data-display and feedback Web adapters rejects missing explicit slots, duplicate identities, incomplete rows, and unbounded data",
+              "M10A-T09 data-display and feedback Web adapters renders basic native Table semantics, captions, complete cells, and stable row identities",
+              "M10A-T09 data-display and feedback Web adapters renders explicit Card and List managed slots with stable list identities",
+              "M10A-T09 data-display and feedback Web adapters renders visible and accessible feedback across ready, error, and loading examples"
+            ]
+          },
+          {
+            "path": "packages/starter-catalog-web/test/form-control-adapters.test.tsx",
+            "tests": [
+              "M10A-T06 form control Web adapters keeps keyboard focus visible, allows declared style states, and never lets styling replace semantics",
+              "M10A-T06 form control Web adapters projects every admitted RadioGroup state through its public parts without silently dropping a style",
+              "M10A-T06 form control Web adapters projects only declared controlled JSON payloads from native interaction",
+              "M10A-T06 form control Web adapters renders real labelled form semantics with immutable help and error relationships",
+              "M10A-T06 form control Web adapters server-renders the five form controls without native event or application-state authority",
+              "M10A-T06 form control Web adapters suppresses events for disabled controls and rejects invalid values, payload inputs, and duplicate radio values"
+            ]
+          },
+          {
+            "path": "packages/starter-catalog-web/test/layout-content-adapters.test.tsx",
+            "tests": [
+              "M10A-T05 layout and content Web adapters maps the bounded T12 visual profile and resolved DTCG composite literals explicitly",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects invalid dimensions, executable content, and closed prop or ineffective-style violations",
+              "M10A-T05 layout and content Web adapters rejects missing required layout slots before a semantic container can render",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters rejects unknown style authority, private selectors, and invalid dimensions",
+              "M10A-T05 layout and content Web adapters renders finite grid flow and all leaf semantic content without document-controlled markup",
+              "M10A-T05 layout and content Web adapters renders nested logical layout slots with RTL-safe inline alignment",
+              "M10A-T05 layout and content Web adapters server-renders only inert text nodes, trusted local media, and semantic elements"
+            ]
+          },
+          {
+            "path": "packages/starter-catalog-web/test/overlay-disclosure-adapters.test.tsx",
+            "tests": [
+              "M10A-T08 overlay and disclosure adapters does not require a document body fallback for overlay portals",
+              "M10A-T08 overlay and disclosure adapters keeps Menu item selection data-only and disabled items inert",
+              "M10A-T08 overlay and disclosure adapters opens and closes a Popover in the owned portal and returns open events",
+              "M10A-T08 overlay and disclosure adapters projects Accordion panel slots in order and dispatches stable expanded values",
+              "M10A-T08 overlay and disclosure adapters renders Tooltip closed on the server and rejects forged portal authority or missing slots"
+            ]
+          },
+          {
+            "path": "packages/starter-catalog-web/test/react-adapters.test.tsx",
+            "tests": [
+              "M10A-T01 static starter adapter boundary applies declared Dialog text defaults without relying on JSON Schema mutation",
+              "M10A-T01 static starter adapter boundary keeps a loading Button focused but suppresses both loading and disabled activation",
+              "M10A-T01 static starter adapter boundary projects Button activation to a fresh frozen empty JSON object",
+              "M10A-T01 static starter adapter boundary projects only declared finite style properties and preserves the visible focus outline",
+              "M10A-T01 static starter adapter boundary refuses a missing approved portal boundary instead of falling back to document.body",
+              "M10A-T01 static starter adapter boundary registers exactly the Catalog inventory once, with immutable remount policy",
+              "M10A-T01 static starter adapter boundary rejects a capability mismatch and an unsatisfied required slot",
+              "M10A-T01 static starter adapter boundary rejects a portal target moved outside its owned surface on the next adapter render",
+              "M10A-T01 static starter adapter boundary rejects duplicate option identities and a nonexistent initial selection",
+              "M10A-T01 static starter adapter boundary rejects executable/React-node/unknown prop injection before rendering",
+              "M10A-T01 static starter adapter boundary rejects executable/React-node/unknown prop injection before rendering",
+              "M10A-T01 static starter adapter boundary rejects executable/React-node/unknown prop injection before rendering",
+              "M10A-T01 static starter adapter boundary rejects executable/React-node/unknown prop injection before rendering",
+              "M10A-T01 static starter adapter boundary rejects executable/React-node/unknown prop injection before rendering",
+              "M10A-T01 static starter adapter boundary rejects unknown style authority and unsafe values",
+              "M10A-T01 static starter adapter boundary rejects unknown style authority and unsafe values",
+              "M10A-T01 static starter adapter boundary rejects unknown style authority and unsafe values",
+              "M10A-T01 static starter adapter boundary rejects unknown style authority and unsafe values",
+              "M10A-T01 static starter adapter boundary rejects unknown style authority and unsafe values",
+              "M10A-T01 static starter adapter boundary server-renders and hydrates the three bounded closed controls without mismatches or render-time events",
+              "M10A-T01 static starter adapter boundary survives StrictMode replay, compatible re-render, unmount and fresh mount without duplicate events"
+            ]
+          },
+          {
+            "path": "packages/starter-catalog-web/test/selection-numeric-adapters.test.tsx",
+            "tests": [
+              "M10A-T07 selection and numeric Web adapters admits only finite, in-range, step-aligned numeric data and never a renderer",
+              "M10A-T07 selection and numeric Web adapters keeps Combobox filtering finite and adapter-owned instead of admitting a filter or renderer",
+              "M10A-T07 selection and numeric Web adapters keeps Select's pre-T07 uniform padding surface without widening form controls",
+              "M10A-T07 selection and numeric Web adapters preserves Select's legacy value/default behavior while admitting stable id data",
+              "M10A-T07 selection and numeric Web adapters requires Tabs to pair stable tab data with exactly one ordered public panel per tab"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "asset-behavior",
+      "result": "PASS",
+      "observation": {
+        "owner": "asset-behavior",
+        "passedTests": 11,
+        "files": [
+          {
+            "path": "packages/design-system-assets/test/asset-admission.test.ts",
+            "tests": [
+              "local content-addressed store and image presentation is immutable and returns a visible missing-handle diagnostic",
+              "local content-addressed store and image presentation validates bounded crop/fit data without accepting CSS",
+              "safe design-system asset admission admits restricted SVG icons and WOFF2 fonts",
+              "safe design-system asset admission content-addresses a bounded PNG and exposes only an opaque handle",
+              "safe design-system asset admission records only an inert namespaced project reference",
+              "safe design-system asset admission rejects active SVG without a partial asset",
+              "safe design-system asset admission rejects decoded image dimensions beyond the fixed limit",
+              "safe design-system asset admission rejects digest mismatch without a partial asset",
+              "safe design-system asset admission rejects external SVG reference without a partial asset",
+              "safe design-system asset admission rejects path traversal without a partial asset",
+              "safe design-system asset admission rejects wrong magic without a partial asset"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-history",
+      "result": "PASS",
+      "observation": {
+        "owner": "source-history",
+        "passedTests": 19,
+        "files": [
+          {
+            "path": "packages/editor-core/test/history.test.ts",
+            "tests": [
+              "editor history and identity-safe clipboard allocates all selected roots before remapping cross-root component references",
+              "editor history and identity-safe clipboard allocates bounded deterministic copy identities for maximum-length IDs and collisions",
+              "editor history and identity-safe clipboard captures transitive resource-to-resource-to-state dependencies",
+              "editor history and identity-safe clipboard copies surface bindings and rewrites multi-root nested actions without touching extensions",
+              "editor history and identity-safe clipboard duplicates a nested node with fresh identities and rejects a foreign payload",
+              "editor history and identity-safe clipboard fails closed on hostile selection and paste-command wrappers",
+              "editor history and identity-safe clipboard keeps bounded immutable undo/redo snapshots and clears redo after a new edit",
+              "editor history and identity-safe clipboard keeps remapped state action paths inside the protocol length boundary",
+              "editor history and identity-safe clipboard never reuses maximum-length source identities that already end in a copy suffix",
+              "editor history and identity-safe clipboard preserves opaque extension data while remapping schema-owned references",
+              "editor history and identity-safe clipboard rejects component command targets outside the captured identity closure",
+              "editor history and identity-safe clipboard rejects exhausted single-character state identity space without inventing an invalid root",
+              "editor history and identity-safe clipboard rejects forged mutable history authorities before any transition",
+              "editor history and identity-safe clipboard rejects partial or conflicting operation alias remapping atomically",
+              "editor history and identity-safe clipboard rejects structurally admitted documents with ambiguous identities",
+              "editor history and identity-safe clipboard rejects unresolved state and resource dependencies before producing a payload",
+              "editor history and identity-safe clipboard remaps bindings inside predicate literal objects that only resemble nested predicates",
+              "editor history and identity-safe clipboard rewrites style, variant, repeat, and behavior ValueSpecs",
+              "editor history and identity-safe clipboard snapshots mutable history inputs and rejects invalid records without changing authority"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "app-behavior",
+      "result": "PASS",
+      "observation": {
+        "owner": "app-behavior",
+        "passedTests": 266,
+        "files": [
+          {
+            "path": "apps/desen-app/test/application.test.tsx",
+            "tests": [
+              "Desen App application shell admits an explicit empty-project bootstrap without substituting completed sign-in content",
+              "Desen App application shell chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+              "Desen App application shell clears the project clipboard when opaque workspace authority changes",
+              "Desen App application shell commits sign-in event handlers and complete actions through the live authoring session",
+              "Desen App application shell deletes a newly inserted selected layer with Backspace outside editable controls",
+              "Desen App application shell deletes a newly inserted selected layer with Delete outside editable controls",
+              "Desen App application shell disables deletion for the surface root and a slot-minimum preflight without changing preview",
+              "Desen App application shell does not reuse an older clipboard when the current duplicate selection is rejected",
+              "Desen App application shell drops from a visible row with the last admitted projection when drop coordinates are absent",
+              "Desen App application shell duplicates a reverse-clicked multi-selection in Source order as one contiguous group",
+              "Desen App application shell edits schema-derived string and enum props and refreshes the exact adapter preview",
+              "Desen App application shell extends selection with a modifier while keeping canvas controls outside managed capability DOM",
+              "Desen App application shell fails closed for '/#workspace'",
+              "Desen App application shell fails closed for '/projects/account-app/surfaces/missin…'",
+              "Desen App application shell fails closed for '/projects/missing-project'",
+              "Desen App application shell fails closed for '/projects?mode=design'",
+              "Desen App application shell filters only the fixed project inventory and provides a clear recovery action",
+              "Desen App application shell forgets an admitted gap after the pointer reaches the dragged layer's no-op position",
+              "Desen App application shell guides a catalog-less project without inventing a surface or enabled action",
+              "Desen App application shell ignores deletion shortcuts from editable controls while retaining the selected layer",
+              "Desen App application shell keeps Catalog scenarios transient across Design and Run without changing Source values",
+              "Desen App application shell keeps Components and Layers visible while filtering the exact local Catalog view",
+              "Desen App application shell keeps Source unchanged when a pasted candidate fails the current admission preflight",
+              "Desen App application shell keeps bound props explicit while boolean and numeric edits fail or apply atomically",
+              "Desen App application shell keeps canvas viewport and preview-frame chrome scoped to the surfaced Run destination",
+              "Desen App application shell keeps duplicate and undo/redo operations atomic in the authored Source",
+              "Desen App application shell keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+              "Desen App application shell keeps inert fixture routes outside every Source and editor authority",
+              "Desen App application shell keeps inert inventories separate from Source authority and rejects forged handles",
+              "Desen App application shell keeps the admitted gap stable while the pointer jitters around a row midpoint",
+              "Desen App application shell keeps the prior event projection and canvas when action preview preflight fails",
+              "Desen App application shell moves nodes across nested slots with keyboard and App-owned native drag intent",
+              "Desen App application shell moves selected layers together into a nested slot through the keyboard Place control",
+              "Desen App application shell preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+              "Desen App application shell preserves the selected layer, preview, and focus when deletion is rejected",
+              "Desen App application shell reacts to browser traversal and keeps route focus inside the content landmark",
+              "Desen App application shell rejects a root-containing multi-selection as one drag group",
+              "Desen App application shell rejects a structurally admitted foreign capability through the real Catalog preflight",
+              "Desen App application shell rejects stale hidden authoring callbacks while Run interactions leave Source unchanged",
+              "Desen App application shell remounts the complete surface session when its workspace profile changes",
+              "Desen App application shell remounts the managed canvas synchronously when routing to another admitted surface",
+              "Desen App application shell renders an app-native projects gallery with explicit landmarks and current navigation",
+              "Desen App application shell renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
+              "Desen App application shell reorders a multi-selection through one App-owned native drag without reading platform payload",
+              "Desen App application shell reorders a selected Source node through the keyboard placement control",
+              "Desen App application shell resets local drafts across Source identities and qualifies repeated edit actions",
+              "Desen App application shell resets the ephemeral mode to Design when a new surface route mounts",
+              "Desen App application shell retains the project clipboard across admitted surface remounts",
+              "Desen App application shell revokes the previous fixture authority synchronously when a scenario replaces its Bundle",
+              "Desen App application shell runs real pending lifecycle and settles only exact synthetic success and failure fixtures",
+              "Desen App application shell selects Source layers accessibly while keeping the preview frame free of editor chrome",
+              "Desen App application shell snaps a native layer drag to the before or after half of a visible layer row",
+              "Desen App application shell switches modes accessibly while preserving selection, authoring views, and local drafts",
+              "Desen App application shell updates surface-local state and changes a compatible binding in the live preview",
+              "Desen App application shell uses only the App-owned drag intent and ignores forged native transfer authority",
+              "Desen App application shell uses opaque handle identity when public profile and route identities are equal",
+              "Desen App application shell uses same-document navigation and focuses the new route heading",
+              "Desen App application shell uses the release position when it crosses a row midpoint after the last dragover"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/authoring-data.test.ts",
+            "tests": [
+              "Desen App active authoring canvas frame projection never fabricates a frame for a missing surface or missing authoring metadata",
+              "Desen App active authoring canvas frame projection projects the exact Sign-in frame without exposing Source-space placement",
+              "Desen App active authoring canvas frame projection rejects invalid documents, surface identities, and accessor metadata",
+              "Desen App active authoring canvas frame projection rejects malformed or unbounded frame metadata before it can influence layout",
+              "Desen App catalog authoring read model accepts optional authoring metadata and falls back only to exact inert contract fields",
+              "Desen App catalog authoring read model defers schema-inspector derivation to one exact validator-admitted component",
+              "Desen App catalog authoring read model fails closed before projecting malformed Catalog or unresolved Source data",
+              "Desen App catalog authoring read model merges capabilities from every Catalog required by a multi-Catalog Source",
+              "Desen App catalog authoring read model preserves absent slots, own empty slots, and Source child-array order",
+              "Desen App catalog authoring read model projects the exact Catalog library and official Source surface trees",
+              "Desen App catalog authoring read model rejects a missing or requirement-incompatible Catalog without a partial model",
+              "Desen App catalog authoring read model rejects a valid but over-depth Source atomically at the authoring projection boundary",
+              "Desen App catalog authoring read model rejects a valid but over-width Source before its pending authoring work can exceed the occurrence budget"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/authoring-design-tokens.test.ts",
+            "tests": [
+              "resolveAuthoringDesignTokens fails closed when a persisted project has no admissible token selection",
+              "resolveAuthoringDesignTokens shares an immutable deep canonical clone with the Runtime token port",
+              "resolveAuthoringDesignTokens uses the persisted DESEN Neutral T02 token sources for both authoring and runtime"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/authoring-inspector.test.ts",
+            "tests": [
+              "Desen App schema-driven authoring inspector captures exact own-data edit fields before authorization and rejects accessor drift",
+              "Desen App schema-driven authoring inspector changes and detaches an exact compatible local-state binding atomically",
+              "Desen App schema-driven authoring inspector counts only changed root props against the synchronous transition budget",
+              "Desen App schema-driven authoring inspector creates an absent optional group with one atomic whole-group set",
+              "Desen App schema-driven authoring inspector deletes only an existing optional prop and rejects absent or required deletion atomically",
+              "Desen App schema-driven authoring inspector derives nested closed-object groups and edits RFC 6901-escaped child pointers",
+              "Desen App schema-driven authoring inspector derives the exact canonical primitive and enum matrix for every reference component",
+              "Desen App schema-driven authoring inspector disambiguates repeated schema titles and names an empty property accessibly",
+              "Desen App schema-driven authoring inspector distinguishes literal, absent, and dynamic Source values without coercion",
+              "Desen App schema-driven authoring inspector edits a structured-JSON property while rejecting dynamic marker injection",
+              "Desen App schema-driven authoring inspector keeps dynamic object values bound instead of presenting the structured fallback",
+              "Desen App schema-driven authoring inspector keeps dynamic props outside T05 mutation authority and preserves their exact objects",
+              "Desen App schema-driven authoring inspector locks only the dynamic child while preserving edits to its literal group sibling",
+              "Desen App schema-driven authoring inspector locks whole-group replacement and deletion around an optional dynamic child",
+              "Desen App schema-driven authoring inspector mutates the validator-admitted Source snapshot when a hostile document Proxy drifts",
+              "Desen App schema-driven authoring inspector preserves integer and mixed primitive enum values with exact JSON types",
+              "Desen App schema-driven authoring inspector projects only directly addressable primitive local state for compatible bindings",
+              "Desen App schema-driven authoring inspector rejects a wide root replacement before public per-prop commands can block the UI",
+              "Desen App schema-driven authoring inspector rejects incompatible, forged, and runtime binding transitions without mutation",
+              "Desen App schema-driven authoring inspector rejects invalid enum and numeric values without mutating the current Source",
+              "Desen App schema-driven authoring inspector rejects selection accessors unread and captures a data-descriptor Proxy exactly once",
+              "Desen App schema-driven authoring inspector rejects stale routes and forged selection identity before exposing or applying controls",
+              "Desen App schema-driven authoring inspector replaces all props through an honest root structured-JSON fallback",
+              "Desen App schema-driven authoring inspector replaces disjoint near-limit root props without exceeding the private transition budget",
+              "Desen App schema-driven authoring inspector sets string, enum, boolean, and number props through fresh immutable Source snapshots",
+              "Desen App schema-driven authoring inspector shrinks an existing near-limit root prop before adding lexically earlier growth",
+              "Desen App schema-driven authoring inspector treats __proto__ and constructor as exact JSON property names without pollution"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/authoring-persistence.test.ts",
+            "tests": [
+              "Desen App authored Source persistence state binds every controller to the exact opaque profile handle that created it",
+              "Desen App authored Source persistence state captures port methods as receiver-independent stable callbacks",
+              "Desen App authored Source persistence state clears stale open and save notices when a new idle authored edit becomes unsaved",
+              "Desen App authored Source persistence state derives clean replacements from complete canonical authored content",
+              "Desen App authored Source persistence state derives the exact project-owned local key without consulting Source.id",
+              "Desen App authored Source persistence state fails closed and remains retryable for malformed open settlements without invoking accessors",
+              "Desen App authored Source persistence state fails closed for unknown routes, malformed ports, and document mismatch",
+              "Desen App authored Source persistence state fails closed when a structurally plausible workspace-profile handle was not factory-authenticated",
+              "Desen App authored Source persistence state keeps generation exhaustion locked across a failed open until storage is observed",
+              "Desen App authored Source persistence state keeps opened, missing, and failed results distinct",
+              "Desen App authored Source persistence state keeps save settlement 0 distinct",
+              "Desen App authored Source persistence state keeps save settlement 1 distinct",
+              "Desen App authored Source persistence state keeps save settlement 2 distinct",
+              "Desen App authored Source persistence state keeps save settlement 3 distinct",
+              "Desen App authored Source persistence state keeps save settlement 4 distinct",
+              "Desen App authored Source persistence state keeps save settlement 5 distinct",
+              "Desen App authored Source persistence state prevents an open settlement from overwriting an authored edit made while reading",
+              "Desen App authored Source persistence state publishes opening synchronously and swaps document plus preview atomically after admission",
+              "Desen App authored Source persistence state rechecks open authority after settlement capture and opened-document admission",
+              "Desen App authored Source persistence state rechecks save authority after settlement capture re-entry",
+              "Desen App authored Source persistence state rejects a structurally valid opened document with the wrong exact document identity",
+              "Desen App authored Source persistence state rejects concurrent operations without dispatching a second port request",
+              "Desen App authored Source persistence state replaces only a completely admitted authored document and matching preview",
+              "Desen App authored Source persistence state requires an explicit reopen after conflict and never retries or merges",
+              "Desen App authored Source persistence state requires an explicit reopen after indeterminate and never retries or merges",
+              "Desen App authored Source persistence state retains a newer authored edit while an earlier save snapshot settles",
+              "Desen App authored Source persistence state revokes pending async authority on dispose and stops future notifications",
+              "Desen App authored Source persistence state saves the authored snapshot with exact route key and generation precondition",
+              "Desen App authored Source persistence state starts with one admitted authored session and a stable immutable external-store snapshot",
+              "Desen App authored Source persistence state supports stable subscribe/unsubscribe semantics without trusting observer success",
+              "Desen App authored Source persistence state treats an unexpected dispatched save rejection as indeterminate but an open rejection as failed",
+              "Desen App authored Source persistence state treats every malformed dispatched save settlement as indeterminate until reopen"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/authoring-style-preview-runtime.test.ts",
+            "tests": [
+              "createAuthoringStylePreviewHostPorts exposes only the selected App-owned responsive viewport and resolved project tokens",
+              "createAuthoringStylePreviewHostPorts keeps a resizable base canvas and its Runtime viewport in lockstep",
+              "createAuthoringStylePreviewHostPorts refuses unknown viewport identifiers instead of accepting free-form environment data",
+              "createAuthoringStylePreviewHostPorts rejects free-form or non-base preview-frame authority"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/authoring-styles.test.ts",
+            "tests": [
+              "Desen App Catalog-authorized style authoring accepts only explicit compatible resolved tokens and stores only their token reference",
+              "Desen App Catalog-authorized style authoring creates, edits, and deletes only exact responsive node overrides without reordering existing variants",
+              "Desen App Catalog-authorized style authoring fails closed when existing owned responsive variants cascade from mobile into tablet",
+              "Desen App Catalog-authorized style authoring keeps dynamic base and responsive leaves read-only for literal and token edits",
+              "Desen App Catalog-authorized style authoring refuses to guess through a malformed app-owned breakpoint marker",
+              "Desen App Catalog-authorized style authoring rejects a known starter adapter-unprojectable DTCG literal without changing Source",
+              "Desen App Catalog-authorized style authoring rejects raw dynamic literals and unsealed breakpoint targets before Editor Core mutation",
+              "Desen App Catalog-authorized style authoring retains exact declared parts, detached schemas, visual states, and only closed controls",
+              "Desen App Catalog-authorized style authoring sets only declared literal leaves, continuously validates them, and resets the exact base leaf"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/local-project-workspace-persistence.test.ts",
+            "tests": [
+              "local application project-workspace persistence has no ambient injected-config fallback in ordinary browser tests",
+              "local application project-workspace persistence preserves uncertain writes and rejects invalid local identities before issuing a request",
+              "local application project-workspace persistence reopens only an app-admitted aggregate registry and maps a known missing response",
+              "local application project-workspace persistence writes the complete admitted T02 project registry through only its fixed workspace route"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/main-lifecycle.test.tsx",
+            "tests": [
+              "fails closed without mounting fixture data when no runtime persistence was configured",
+              "keeps the durable product available when independent publication configuration is rejected",
+              "normalizes the root and mounts the empty durable product workspace",
+              "passes only the profile-matched publication authority to the normal Flow workspace ('another-channel'/'reference-host-web')",
+              "passes only the profile-matched publication authority to the normal Flow workspace ('preview'/'another-host')",
+              "passes only the profile-matched publication authority to the normal Flow workspace ('preview'/'reference-host-web')",
+              "preserves an opened product Source for BFCache and unmounts only on final pagehide",
+              "throws before composing persistence when the production root container is absent"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/persistence-application.test.tsx",
+            "tests": [
+              "Desen App Source persistence integration does not attach a prepared controller to a sibling opaque workspace profile",
+              "Desen App Source persistence integration ignores an old port settlement after trusted host authority is replaced",
+              "Desen App Source persistence integration ignores stale open and save settlements after the owning surface route unmounts",
+              "Desen App Source persistence integration keeps a newer authored edit when an older Open settles through the React wiring",
+              "Desen App Source persistence integration keeps a newer edit dirty when an older Source snapshot settles in flight",
+              "Desen App Source persistence integration keeps one injected persistence controller live through StrictMode replay",
+              "Desen App Source persistence integration keeps persistence visibly unavailable when the host injects no public port",
+              "Desen App Source persistence integration keeps rejected-candidate diagnostics outside Source, dirty state, and Save requests",
+              "Desen App Source persistence integration keeps the prior Source and canvas for failed, wrong-document, and wrong-route opens",
+              "Desen App Source persistence integration locks Save after conflict or indeterminate settlement until an explicit Open",
+              "Desen App Source persistence integration never sends Catalog scenario values or Runtime form secrets to the persistence port",
+              "Desen App Source persistence integration opens one exact accepted Source atomically and clears transient editor and fixture state",
+              "Desen App Source persistence integration preserves the session after a missing Open and authorizes a create-only Save",
+              "Desen App Source persistence integration protects a dirty pending session across canceled links, traversal, and page exit",
+              "Desen App Source persistence integration protects an edited no-port draft across navigation, traversal, and page exit",
+              "Desen App Source persistence integration requires explicit, cancelable confirmation before dirty Open can replace the draft",
+              "Desen App Source persistence integration revokes a dirty Open confirmation when trusted host authority is replaced",
+              "Desen App Source persistence integration saves with explicit create, update, and unchanged generation preconditions"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/preview-fidelity.test.ts",
+            "tests": [
+              "preview fidelity projection deduplicates deterministically regardless of traversal and component-library order",
+              "preview fidelity projection fails closed to undeclared for missing or invalid fidelity metadata",
+              "preview fidelity projection reports the current reference surface as same-fidelity",
+              "preview fidelity projection retains all approximate differences and supplies an explicit empty-declaration fallback",
+              "preview fidelity projection uses approximate, undeclared, equivalent, same precedence over unique nested capabilities",
+              "preview fidelity projection uses structural App routes without coupling fidelity to one project identity"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/product-bootstrap.test.tsx",
+            "tests": [
+              "Desen App normal product bootstrap blocks discard after an indeterminate save until the stored Source is reopened",
+              "Desen App normal product bootstrap blocks navigation while a prepared-controller save can still commit the current draft",
+              "Desen App normal product bootstrap clears a stale create dialog when retry later opens the stored project",
+              "Desen App normal product bootstrap creates the exact admitted empty Source before routing into its editor",
+              "Desen App normal product bootstrap does not offer a false retry when the trusted host supplied no persistence authority",
+              "Desen App normal product bootstrap fails closed on unavailable or rejected storage and retries only on user request",
+              "Desen App normal product bootstrap keeps create conflicts visible and offers an explicit non-overwriting reopen",
+              "Desen App normal product bootstrap opens an existing admitted Source without substituting fixture projects",
+              "Desen App normal product bootstrap opens the durable workspace exactly once through StrictMode before mounting product data",
+              "Desen App normal product bootstrap passes an explicit fixed-destination publication authority into the normal product editor",
+              "Desen App normal product bootstrap permanently discards a confirmed prepared-controller draft before it can be reopened",
+              "Desen App normal product bootstrap rejects an admitted Source that exceeds the exact one-surface local product profile",
+              "Desen App normal product bootstrap revokes an in-flight create when the owning product composition unmounts"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-authoring-application.test.tsx",
+            "tests": [
+              "authors linked components in normal DESEN Neutral, retaining aggregate history and metadata-only saves",
+              "preserves rejected managed Source drafts and carries project history across surface remounts"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-authoring-controller.test.ts",
+            "tests": [
+              "aggregate project authoring authority accepts unmanaged Source edits, preserving all metadata and canonical no-op redo",
+              "aggregate project authoring authority blocks edits/history during the shared save and retains the candidate after indeterminate storage",
+              "aggregate project authoring authority blocks reentrant mutation from candidate reflection and disposes without writing",
+              "aggregate project authoring authority does not combine stale Source with the latest recipe metadata or write after a CAS conflict",
+              "aggregate project authoring authority keeps a cross-surface master update in one aggregate history step",
+              "aggregate project authoring authority rejects foreign profile identity and preserves opaque project metadata",
+              "aggregate project authoring authority rejects incompatible opened projects, including unused masters, before changing lifecycle or authoring authority",
+              "aggregate project authoring authority rejects stale and managed structural Source edits without changing any authoring state",
+              "aggregate project authoring authority releases only the save edit lock when the trusted bridge throws, preserving the full draft",
+              "aggregate project authoring authority saves Source-identical detach through the existing Source port as a whole-project generation",
+              "aggregate project authoring authority treats metadata-only detach as dirty, retains its exact Source and clears dirty by undo or discard",
+              "aggregate project authoring authority turns an ordinary editor prop command into one durable override/history transaction",
+              "aggregate project authoring authority updates linked instances, preserves override and detached Source, and restores the whole project with undo/redo"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-authoring-source-controller.test.ts",
+            "tests": [
+              "aggregate-backed existing Source persistence controls creates, saves Source-identical master metadata, undoes and reopens the exact aggregate",
+              "aggregate-backed existing Source persistence controls locks the aggregate before pending-save observers can change Source-identical metadata",
+              "aggregate-backed existing Source persistence controls preserves current project/history when stored unused-master semantics are invalid",
+              "aggregate-backed existing Source persistence controls rejects forged controllers, standalone Source ports and a different lifecycle pairing",
+              "aggregate-backed existing Source persistence controls routes legacy Source replacement into whole-project history without a second draft"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-lifecycle-admission.test.ts",
+            "tests": [
+              "project lifecycle pre-replacement admission blocks reentrant edits, discard and save while validating a complete mutation",
+              "project lifecycle pre-replacement admission captures the callback once without invoking an accessor and treats thrown preflight as rejection",
+              "project lifecycle pre-replacement admission checks the complete migrated workspace, including recoverable members, before open replacement",
+              "project lifecycle pre-replacement admission does not establish a baseline from an incoherent save receipt {\"status\":\"created\",\"generation\":1}",
+              "project lifecycle pre-replacement admission does not establish a baseline from an incoherent save receipt {\"status\":\"unchanged\",\"generation\":4}",
+              "project lifecycle pre-replacement admission does not establish a baseline from an incoherent save receipt {\"status\":\"unrecognized\"}",
+              "project lifecycle pre-replacement admission does not establish a baseline from an incoherent save receipt {\"status\":\"updated\",\"generation\":3}",
+              "project lifecycle pre-replacement admission does not establish a baseline from an incoherent save receipt {\"status\":\"updated\",\"generation\":8}",
+              "project lifecycle pre-replacement admission does not establish a baseline from an incoherent save receipt {\"status\":\"updated\",\"generation\":null}",
+              "project lifecycle pre-replacement admission does not revive a disposed controller when a pending open or save settles",
+              "project lifecycle pre-replacement admission preserves an uncertain write and requires reopen when the host throws after dispatch",
+              "project lifecycle pre-replacement admission rechecks disposal after trusted preflight and before replacing the workspace",
+              "project lifecycle pre-replacement admission rejects a non-true preflight result without publishing a candidate (1)",
+              "project lifecycle pre-replacement admission rejects a non-true preflight result without publishing a candidate (Promise{…})",
+              "project lifecycle pre-replacement admission rejects a non-true preflight result without publishing a candidate (false)",
+              "project lifecycle pre-replacement admission rejects a non-true preflight result without publishing a candidate (undefined)"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-lifecycle.test.ts",
+            "tests": [
+              "ordinary project and surface lifecycle adds and deletes one complete Source surface atomically without permitting entry deletion",
+              "ordinary project and surface lifecycle can restore the last good registry before a navigation guard accepts discard",
+              "ordinary project and surface lifecycle captures options and host settlements without invoking accessors or binding a receiver",
+              "ordinary project and surface lifecycle does not save over a stale registry generation",
+              "ordinary project and surface lifecycle keeps the last good registry on unsupported incoming versions and interrupted saves",
+              "ordinary project and surface lifecycle opens visible and deleted v1 projects without writing and saves v2 at the observed generation",
+              "ordinary project and surface lifecycle rejects a malformed v1 member in deletedProjects without replacing the prior workspace or generation",
+              "ordinary project and surface lifecycle rejects a malformed v1 member in projects without replacing the prior workspace or generation",
+              "ordinary project and surface lifecycle reports automatic and explicit save origins while preserving the same CAS boundary",
+              "ordinary project and surface lifecycle requires coherent entry, frame and surface identities when applying next Source envelopes",
+              "ordinary project and surface lifecycle round-trips the complete T02 envelope, labels, ordering and recoverable project deletion"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-master-draft-application.test.tsx",
+            "tests": [
+              "contains visual master drafts, rejects foreign Source edits and discards without touching the live project"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-master-draft-controller.test.ts",
+            "tests": [
+              "visual master draft controller contains hostile command reflection without changing the draft",
+              "visual master draft controller discards only the isolated draft and preserves pre-existing unsaved live edits",
+              "visual master draft controller preflights isolated edits, undo/redo and applies exactly one live history step before save/reopen",
+              "visual master draft controller preserves the draft on stale live replacement and rejects foreign profile authority",
+              "visual master draft controller rejects foreign edits and removal of an overridden conceptual owner",
+              "visual master draft controller shares lifecycle locks without losing the draft and fences reentrant observers"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/project-workspace-authoring-persistence.test.ts",
+            "tests": [
+              "createProjectWorkspaceAuthoringPersistencePort creates a missing Source through an existing aggregate generation fence",
+              "createProjectWorkspaceAuthoringPersistencePort creates and reopens a Source through one persisted aggregate T02 workspace",
+              "createProjectWorkspaceAuthoringPersistencePort does not use an unrelated source key as a second storage namespace",
+              "createProjectWorkspaceAuthoringPersistencePort rejects a malformed aggregate creation generation rather than coercing it to Source generation one"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/publication-application.test.tsx",
+            "tests": [
+              "Desen App publication integration authors, runs, saves, publishes, and visibly activates one exact edited durable revision",
+              "Desen App publication integration does not ask the reference host to activate a control-plane conflict",
+              "Desen App publication integration does not surface late replaced-port or unmounted settlements as current success",
+              "Desen App publication integration keeps a non-entry canvas transient while Save and Publish retain the authored entry",
+              "Desen App publication integration keeps persistence and publication independently unavailable without trusted public ports",
+              "Desen App publication integration shows a mismatched durable host revision only as last-known-good preservation",
+              "Desen App publication integration single-dispatches pending work and fences persistence, modes, navigation, and authoring mutation"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/starter-neutral-workspace-profile.test.ts",
+            "tests": [
+              "DESEN Neutral workspace profile adds a separate reviewed starter workspace without changing reference identities"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/starter-project.test.ts",
+            "tests": [
+              "DESEN Neutral blank starter project creates an admitted one-surface project from the complete installed starter catalog",
+              "DESEN Neutral blank starter project does not make an invalid external project identity part of a Source"
+            ]
+          },
+          {
+            "path": "apps/desen-app/test/style-panel.test.tsx",
+            "tests": [
+              "Desen App T12 Style panel authors typed color and dimension literals, token references, responsive selection, and exact reset",
+              "Desen App T12 Style panel fails closed for an idle selection without exposing a raw style editor",
+              "Desen App T12 Style panel uses bounded visual controls for gradient, border, shadow, and typography composites"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "browser-types",
+      "result": "PASS",
+      "observation": null
+    },
+    {
+      "id": "theme-browser",
+      "result": "PASS",
+      "observation": {
+        "browser": {
+          "profile": "desen.m10a-t03.browser-proof.v1",
+          "result": "PASS",
+          "tests": [
+            {
+              "title": "applies a color literal to live preview and supports undo and redo",
+              "result": "PASS"
+            },
+            {
+              "title": "edits typography atomically and redirects a whole-token alias",
+              "result": "PASS"
+            },
+            {
+              "title": "round-trips deterministic export and retains working data after invalid import",
+              "result": "PASS"
+            },
+            {
+              "title": "shows the editable Neutral foundation and switches light and dark modes",
+              "result": "PASS"
+            }
+          ],
+          "graphReceipts": ["theme-workbench"],
+          "assertions": {
+            "visibleNeutralFoundation": true,
+            "lightDarkModeSelection": true,
+            "literalColorAuthoring": true,
+            "exactColorAlpha": true,
+            "livePreview": true,
+            "atomicTypographyComposite": true,
+            "unitAwareTypography": true,
+            "wholeTokenAliasAuthoring": true,
+            "tokenCreation": true,
+            "structuredThemeModeAuthoring": true,
+            "undoRedoInteraction": true,
+            "deterministicExportReimport": true,
+            "invalidImportRetention": true,
+            "unsupportedModePreviewBlocked": true,
+            "isolatedProofGraph": true
+          }
+        },
+        "graph": {
+          "schemaVersion": 1,
+          "graph": "theme-workbench",
+          "assertions": {
+            "designSystemAuthoringPresent": true,
+            "isolatedProofGraph": true,
+            "forbiddenAuthorities": {
+              "desenApp": false,
+              "editor": false,
+              "publisher": false,
+              "runtime": false,
+              "starterCatalog": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "style-browser",
+      "result": "PASS",
+      "observation": {
+        "assertions": {
+          "aggregateWorkspacePersistence": true,
+          "desktopPreview": true,
+          "distinctComponentBrandPresentations": true,
+          "literalBrandPresentation": true,
+          "mobilePreview": true,
+          "noJsxCssJsonAuthoring": true,
+          "normalStarterProfile": true,
+          "resetInheritance": true,
+          "resolvedTokenBrandPresentation": true,
+          "responsiveOverrideOrder": true,
+          "tabletPreview": true
+        },
+        "profile": "desen.m10a-t12.browser-proof.v1",
+        "result": "PASS",
+        "tests": [
+          {
+            "result": "PASS",
+            "title": "authors two component-level visual presentations and ordered responsive overrides through the normal DESEN Neutral product"
+          }
+        ]
+      }
+    },
+    {
+      "id": "master-browser",
+      "result": "PASS",
+      "observation": {
+        "profile": "desen.m10a-t15.browser-proof.v1",
+        "result": "PASS",
+        "tests": [
+          {
+            "title": "visually edits a master in normal Desen App, preserving linked overrides, detached Source, atomic history and complete reopen",
+            "result": "PASS"
+          }
+        ],
+        "observations": {
+          "allLinkedProjectSha256": "38562880eee6f623ad851ac631c3c9f370bcc7b792042e276e07bfbf2bfe856f",
+          "beforeMasterProjectSha256": "f6df7f6768289883ea7066ba72040b53ee51eebed0a6191f772437c60d4b57c1",
+          "updatedProjectSha256": "3e4750e1f00a0da4e0a25e3497f31f7ad43864b0c8bdd239cb2470fc235d6825",
+          "reopenedProjectSha256": "3e4750e1f00a0da4e0a25e3497f31f7ad43864b0c8bdd239cb2470fc235d6825",
+          "instanceIds": ["instance.1", "instance.2"],
+          "detachedRootId": "Q2a3408e67ac51548e0ecd21304a1bb67010b2d5a800d6a86b211634e3a3e861b",
+          "observedWorkspacePutCount": 6
+        }
+      }
+    }
+  ],
+  "claims": {
+    "projectSchemaV2LosslessMigration": true,
+    "explicitAuthoringOnlyRecipeGraph": true,
+    "stableQualifiedSourceIdentityAndWiring": true,
+    "exactStoredMaterializationBeforePublisher": true,
+    "atomicWholeProjectHistoryAndWorkspaceCas": true,
+    "normalAppVisualMasterDraft": true,
+    "twoLinkedUpdatesWithLocalOverrideAndDetachedThird": true,
+    "isolatedDraftUndoAndOneLiveApplyTransaction": true,
+    "completeSaveReopenEquality": true,
+    "staleRecursiveConflictingAndForeignChangesRejected": true,
+    "inheritedThemeStyleAssetAndReuseCoverageRunsFresh": true,
+    "runtimeCoreAndProtocolUnchanged": true
+  },
+  "nonClaims": [
+    "Local evidence is not exact-head hosted Quality gate, merge or fresh-main closure.",
+    "Masters are project-local authoring data, not new Runtime or Publisher recipe semantics.",
+    "T15 does not add variants, library releases, multiplayer editing, production integration, G10A or M11 authority.",
+    "The master browser journey proves local authoring/persistence, not master publication or host activation."
+  ]
+}

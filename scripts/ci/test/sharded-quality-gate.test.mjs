@@ -91,19 +91,19 @@ function runShadow(plan, options = {}) {
   });
 }
 
-test("CI-04 three fixed shards preserve all 258 workloads and 122 complete proof pairs", () => {
+test("CI-04 three fixed shards preserve all 260 workloads and 123 complete proof pairs", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const full = createRequiredExhaustivePlan();
   const shards = SHARD_IDS.map((id) => createRequiredExhaustiveProofShardPlan(id));
-  assert.equal(inventory.workloadCount, 258);
-  assert.equal(inventory.proofUnitCount, 122);
+  assert.equal(inventory.workloadCount, 260);
+  assert.equal(inventory.proofUnitCount, 123);
   assert.deepEqual(
     shards.map(({ proofPairCount }) => proofPairCount),
-    [53, 32, 37],
+    [81, 30, 12],
   );
   const pairIds = shards.flatMap(({ proofPairs }) => proofPairs.map(({ id }) => id));
-  assert.equal(pairIds.length, 122);
-  assert.equal(new Set(pairIds).size, 122);
+  assert.equal(pairIds.length, 123);
+  assert.equal(new Set(pairIds).size, 123);
   assert.deepEqual(
     pairIds,
     full.proofPairs.map(({ id }) => id),
@@ -129,46 +129,82 @@ test("CI-04 three fixed shards preserve all 258 workloads and 122 complete proof
     shards.map(
       ({ proofPairs }) => proofPairs.filter(({ id }) => classifyProofPairState(id).barrier).length,
     ),
-    [11, 0, 5],
+    [11, 0, 4],
   );
   assert.deepEqual(
-    shards[1].proofPairs.slice(-8).map(({ id }) => id),
+    shards[0].proofPairs.slice(-8).map(({ id }) => id),
     [
+      "editor-core-structural-edits",
+      "editor-core-content-edits",
+      "editor-core-state-binding-edits",
+      "editor-core-event-action-edits",
       "editor-core-authoring-round-trip",
       "editor-core-persistence",
       "editor-core-continuous-validation",
       "editor-core-terminal-integration",
+    ],
+  );
+  assert.deepEqual(
+    shards[1].proofPairs.slice(0, 8).map(({ id }) => id),
+    [
       "desen-app-shell-navigation",
       "desen-app-catalog-panel-layer-tree",
       "desen-app-real-adapter-canvas",
       "desen-app-selection-overlay",
+      "desen-app-schema-inspector",
+      "desen-app-structured-inspector",
+      "desen-app-named-slot-authoring",
+      "desen-app-state-binding-editor",
+    ],
+  );
+  assert.deepEqual(
+    shards[1].proofPairs.slice(-8).map(({ id }) => id),
+    [
+      "historical-archive-redaction",
+      "desen-app-published-host-update",
+      "desen-app-invalid-publication",
+      "desen-app-last-known-good-recovery",
+      "desen-app-repeatable-demo",
+      "runtime-core-baseline",
+      "m10-gate",
+      "m10a-t01",
     ],
   );
   assert.deepEqual(
     shards[2].proofPairs.slice(0, 8).map(({ id }) => id),
     [
-      "desen-app-schema-inspector",
-      "desen-app-structured-inspector",
-      "desen-app-named-slot-authoring",
-      "desen-app-state-binding-editor",
-      "desen-app-event-action-editor",
-      "desen-app-design-run-modes",
-      "desen-app-fixtures-scenarios-fidelity",
-      "desen-app-source-persistence",
+      "m10a-t02",
+      "m10a-t03",
+      "m10a-t04",
+      "m10a-t05",
+      "m10a-t06",
+      "m10a-t07",
+      "m10a-t08",
+      "m10a-t09",
     ],
   );
   assert.deepEqual(
-    shards[2].proofPairs.slice(-7).map(({ id }) => id),
-    ["m10a-t06", "m10a-t07", "m10a-t08", "m10a-t09", "m10a-t12", "m10a-t13", "m10a-t14"],
+    shards[2].proofPairs.slice(-8).map(({ id }) => id),
+    [
+      "m10a-t06",
+      "m10a-t07",
+      "m10a-t08",
+      "m10a-t09",
+      "m10a-t12",
+      "m10a-t13",
+      "m10a-t14",
+      "m10a-t15",
+    ],
   );
   assert.equal(classifyProofPairState("m10a-t01").barrier, false);
-  assert.equal(classifyProofPairState("m10a-t03").barrier, true);
+  assert.equal(classifyProofPairState("m10a-t03").barrier, false);
   assert.equal(classifyProofPairState("m10a-t05").barrier, false);
   assert.equal(classifyProofPairState("m10a-t06").barrier, false);
   assert.equal(classifyProofPairState("m10a-t07").barrier, true);
   assert.equal(classifyProofPairState("m10a-t08").barrier, true);
   assert.equal(classifyProofPairState("m10a-t09").barrier, true);
-  assert.equal(classifyProofPairState("m10a-t12").barrier, true);
+  assert.equal(classifyProofPairState("m10a-t12").barrier, false);
+  assert.equal(classifyProofPairState("m10a-t15").barrier, true);
 });
 
 test("CI-04 static shard membership agrees with executable membership and stays immutable", () => {
@@ -176,15 +212,15 @@ test("CI-04 static shard membership agrees with executable membership and stays 
   assert.equal(Object.isFrozen(partition), true);
   assert.equal(
     partition.planSha256,
-    "bba70b76fc324997edd52dfed6e70f2ea1dbe5e1146b3f8ad61b9e3f272f7bf2",
+    "2a687f1ecb748e6782d73396166aba4e28c1fde42e0f802f0f65354fa436cc0f",
   );
   assert.equal(
     partition.parentPlanSha256,
-    "0b783ea5a4a674bdc72f3a2c585372aee3e6e91535cf850079acc4af00951023",
+    "6bf51ad33339d1e3cef850c80a40d9796b65fb5570cfec58088e74ac64d58569",
   );
-  assert.equal(partition.logicalWorkloadCount, 258);
-  assert.equal(partition.proofPairCount, 122);
-  assert.equal(partition.physicalWorkloadCount, 283);
+  assert.equal(partition.logicalWorkloadCount, 260);
+  assert.equal(partition.proofPairCount, 123);
+  assert.equal(partition.physicalWorkloadCount, 285);
   assert.equal(partition.repeatedPrefixWorkloadCount, 24);
   assert.equal(partition.additionalJoinPreparationCount, 1);
   for (const shardId of SHARD_IDS) {
@@ -284,6 +320,26 @@ test("CI-04 retained successful needs from an earlier same-run attempt remain ex
       summary.workflowRunAttempt = workflowRunAttempt;
     });
     assert.throws(() => validateRequiredShardJoinNeeds(needs, HOSTED_CONTEXT));
+  }
+});
+
+test("T15 rejects every old-partition shard receipt even with the same run, revision and total coverage", () => {
+  for (const replacedIds of [SHARD_IDS, ...SHARD_IDS.map((id) => [id])]) {
+    const needs = successfulNeeds();
+    for (const id of replacedIds) {
+      changeSummary(needs, id, (summary) => {
+        summary.planSha256 = "aab26c35886d8bd6354b20e0e7515709412184d357a4d3833f56951c5071744f";
+        summary.proofPairCount = [53, 32, 38][SHARD_IDS.indexOf(id)];
+        summary.stepCount = 12 + 2 * summary.proofPairCount;
+        summary.observedClosedCount = summary.stepCount;
+      });
+    }
+    assert.throws(
+      () => validateRequiredShardJoinNeeds(needs, HOSTED_CONTEXT),
+      (error) =>
+        error instanceof ShardedQualityGateAuthorityError &&
+        error.code === "SHARDED_QUALITY_GATE_JOIN_REJECTED",
+    );
   }
 });
 

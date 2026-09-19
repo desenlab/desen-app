@@ -8,7 +8,7 @@ The original T01 harness imports the production `DesenAppApplication`, its style
 empty reference project directly from `@desen/app-web` source. The later journeys use the ordinary
 product entry with temporary instances of its local persistence service. Its package-level
 `test:e2e` command first builds the complete product dependency closure and the independent
-reference host, then typechecks and builds the harness before running all ten Chromium journeys.
+reference host, then typechecks and builds the harness before running all eleven Chromium journeys.
 The original in-memory compare-and-set
 adapter is test-only and is never imported by the product entry.
 
@@ -36,7 +36,7 @@ Playwright writes retained failure traces, screenshots, and video under `test-re
 HTML report under `playwright-report/`. Both directories and the production proof bundle in
 `dist/` are generated outputs and must not be committed.
 
-The ten independently configured journeys cover:
+The eleven independently configured journeys cover:
 
 - M10-T01: empty-project visual authoring, authenticated native drag, canonical persistence,
   structural re-admission, and exact Design/Run static parity.
@@ -76,6 +76,27 @@ The ten independently configured journeys cover:
   presentation. It proves fixed Desktop, Tablet, and Mobile preview frames, narrower responsive
   override precedence, reset inheritance, and aggregate-workspace persistence after reload. It
   does not claim named-theme CRUD or a generic CSS, JSX, or JSON authoring escape hatch.
+- M10A-T15: the existing Components pane captures a visually inserted Text as a named master,
+  inserts two more instances, overrides/resets one and detaches the third. Edit master uses the
+  same Inspector and Style panel for text/color changes, with isolated undo/redo and disabled
+  Save/Open/Run. Apply updates both linked appearances while preserving the local text override,
+  stable Source IDs/mappings and the detached subtree. One live undo restores the complete prior
+  project; redo, save and reload reproduce the complete updated V2 record. The test observes real
+  workspace PUT/GET bodies and visible output, without intercepting requests, injecting Source,
+  writing to the legacy Source endpoint or bypassing the normal product entry. It does not claim
+  master publication/host activation or complete T15 closure.
+
+Run only the masters/instances slice, including its ordinary build prerequisites:
+
+```bash
+pnpm --filter @desen/app-browser-e2e test:m10a-t15
+```
+
+T15 keeps screenshots and action traces but excludes network snapshots, source files and trace
+attachments that could retain temporary credentials. `DESEN_M10A_T15_PROOF_TEMP`, when explicitly
+provided by a proof runner, receives an exclusive-write observation receipt only after the entire
+journey passes; the receipt contains project fingerprints and finite identities, never credentials.
+This browser check alone does not replace Core/App negative tests, task evidence or hosted closure.
 
 The T04 server uses `product-proof-server.mjs --with-operations` on port 4176. It starts the same
 bounded loopback operation service used by the normal developer launcher, with fresh credentials

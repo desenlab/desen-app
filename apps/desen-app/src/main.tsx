@@ -23,6 +23,9 @@ import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "./reference-sign-in-workspa
 import { STARTER_NEUTRAL_WORKSPACE_PROFILE } from "./starter-neutral-workspace-profile.js";
 import { createStarterProject } from "./starter-project.js";
 import { StarterWorkspaceProduct } from "./starter-workspace-product.js";
+import { createProjectWorkspaceAuthoringAdmission } from "./project-authoring-session.js";
+import { createProjectAuthoringController } from "./project-authoring-controller.js";
+import type { ProjectAuthoringController } from "./project-authoring-controller.js";
 import "./styles.css";
 
 import type { DesenEditorPersistencePort } from "@desen/editor-core";
@@ -66,6 +69,7 @@ let persistencePort: DesenEditorPersistencePort | null = null;
 let publicationPort: AuthoringPublicationPort | null = null;
 const starterProject = createStarterProject("desen-neutral");
 let starterLifecycle: ProjectLifecycleController | null = null;
+let starterAuthoring: ProjectAuthoringController | null = null;
 let starterPersistencePort: DesenEditorPersistencePort | null = null;
 try {
   const browserFetch = globalThis.fetch.bind(globalThis);
@@ -89,9 +93,18 @@ try {
     const lifecycle = createProjectLifecycleController({
       initialWorkspace: createEmptyProjectWorkspace(),
       storagePort,
+      admitWorkspace: createProjectWorkspaceAuthoringAdmission([STARTER_NEUTRAL_WORKSPACE_PROFILE]),
     });
-    const bridge =
+    const authoring =
       lifecycle === null
+        ? null
+        : createProjectAuthoringController({
+            profile: STARTER_NEUTRAL_WORKSPACE_PROFILE,
+            initialProject: starterProject.record,
+            lifecycle,
+          });
+    const bridge =
+      lifecycle === null || authoring === null
         ? Object.freeze({ ok: false as const })
         : createProjectWorkspaceAuthoringPersistencePort({
             lifecycle,
@@ -99,10 +112,15 @@ try {
             projectName: "DESEN Neutral",
             sourceKey: "desen-neutral-source",
             surfaceNames: starterProject.surfaceNames,
+            authoringController: authoring,
           });
     if (lifecycle !== null && bridge.ok) {
       starterLifecycle = lifecycle;
+      starterAuthoring = authoring;
       starterPersistencePort = bridge.persistencePort;
+    } else {
+      authoring?.dispose();
+      lifecycle?.dispose();
     }
   }
 } catch {
@@ -147,6 +165,7 @@ root.render(
               />
             ) : (
               <StarterWorkspaceProduct
+                authoringController={starterAuthoring}
                 initialProject={starterProject.record}
                 lifecycle={starterLifecycle}
                 persistencePort={starterPersistencePort}
@@ -161,6 +180,7 @@ root.render(
 function disposeOnFinalPageHide(event: PageTransitionEvent): void {
   if (event.persisted) return;
   window.removeEventListener("pagehide", disposeOnFinalPageHide);
+  starterAuthoring?.dispose();
   starterLifecycle?.dispose();
   root.unmount();
 }

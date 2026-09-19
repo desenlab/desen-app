@@ -22,6 +22,11 @@ import {
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 
 import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
+import { useProjectAuthoringController } from "./project-authoring-context.js";
+import { MasterInstancePanel } from "./master-instance-panel.js";
+import { MasterDraftBanner } from "./master-draft-banner.js";
+import { createProjectMasterDraftController } from "./project-master-draft-controller.js";
+import type { ProjectMasterDraftController } from "./project-master-draft-controller.js";
 import { projectAuthoringBehaviorControls } from "./authoring-behavior-projection.js";
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
@@ -2106,6 +2111,7 @@ function ComponentLibrary({
 
 function AuthoringPanel({
   hidden,
+  masterControls,
   interactive,
   model,
   onBatchSlotPlacement,
@@ -2119,6 +2125,7 @@ function AuthoringPanel({
   selectedSurface,
 }: Readonly<{
   readonly hidden: boolean;
+  readonly masterControls?: ReactNode;
   readonly interactive: boolean;
   readonly model: CatalogAuthoringModel;
   readonly onBatchSlotPlacement: (
@@ -2422,6 +2429,7 @@ function AuthoringPanel({
           ref={componentsPane}
           tabIndex={-1}
         >
+          {masterControls}
           <ComponentLibrary
             active
             dragIntent={dragIntent}
@@ -2545,6 +2553,34 @@ function SurfaceEditor({
   readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
 }>) {
   const [mode, setMode] = useState<SurfaceEditorMode>("design");
+  const projectController = useProjectAuthoringController(workspaceProfile);
+  const liveProjectState = useSyncExternalStore(
+    projectController?.subscribe ?? subscribeUnavailablePersistence,
+    projectController?.read ?? readUnavailablePersistence,
+    projectController?.read ?? readUnavailablePersistence,
+  );
+  const [masterController, setMasterController] = useState<ProjectMasterDraftController | null>(
+    null,
+  );
+  const masterControllerRef = useRef<ProjectMasterDraftController | null>(null);
+  const masterLifetime = useRef<ProjectMasterDraftController | null>(null);
+  const masterState = useSyncExternalStore(
+    masterController?.subscribe ?? subscribeUnavailablePersistence,
+    masterController?.read ?? readUnavailablePersistence,
+    masterController?.read ?? readUnavailablePersistence,
+  );
+  const editorProjectController = masterController ?? projectController;
+  const projectState = masterState ?? liveProjectState;
+  const [masterNotice, setMasterNotice] = useState("");
+  useEffect(() => {
+    masterLifetime.current = masterController;
+    return () => {
+      if (masterLifetime.current === masterController) masterLifetime.current = null;
+      queueMicrotask(() => {
+        if (masterLifetime.current !== masterController) masterController?.dispose();
+      });
+    };
+  }, [masterController]);
   const [executionContext, setExecutionContext] = useState<"synthetic" | "integration">(
     "synthetic",
   );
@@ -2595,7 +2631,7 @@ function SurfaceEditor({
   // different Source; prop identity changes cannot replace only persistence/publication authority.
   const [mountedInitialDocument] = useState(() => initialDocument);
   const [initialDocumentCanonical] = useState(() => canonicalizeJson(mountedInitialDocument));
-  const [authoringSession, setAuthoringSession] = useState(() =>
+  const [localAuthoringSession, setAuthoringSession] = useState(() =>
     Object.freeze({
       document: mountedInitialDocument,
       preview: prepareAuthoringPreviewBundle(
@@ -2604,8 +2640,9 @@ function SurfaceEditor({
       ),
     }),
   );
+  const authoringSession = projectState?.session ?? localAuthoringSession;
   const authoringHistory = useRef<DesenEditorHistory | null>(null);
-  if (authoringHistory.current === null) {
+  if (projectController === null && authoringHistory.current === null) {
     const createdHistory = createDesenEditorHistory(mountedInitialDocument);
     if (createdHistory === undefined)
       throw new TypeError("The bounded authoring history could not be created.");
@@ -2676,10 +2713,16 @@ function SurfaceEditor({
     persistenceController?.read ?? readUnavailablePersistence,
   );
   const persistenceControllerLifetime = useRef<AuthoringPersistenceController | null>(null);
-  const persistenceProjection = useMemo(
-    () => projectPersistenceControls(persistenceState, inMemoryDirtyProjection),
-    [inMemoryDirtyProjection, persistenceState],
-  );
+  const persistenceProjection = useMemo(() => {
+    const projection = projectPersistenceControls(persistenceState, inMemoryDirtyProjection);
+    return projectState === null
+      ? projection
+      : Object.freeze({
+          ...projection,
+          dirty: projectState.dirty || (persistenceState?.dirty ?? false),
+          reopenRequired: projectState.reopenRequired || projection.reopenRequired,
+        });
+  }, [inMemoryDirtyProjection, persistenceState, projectState]);
   const publicationBinding = useMemo(() => {
     if (publicationPort === null) return null;
     const initialPreview = prepareAuthoringPreviewBundle(
@@ -2740,14 +2783,19 @@ function SurfaceEditor({
           : livePersistence.reopenRequired
             ? "reopen-required"
             : "ready";
+    // Publication always observes the live aggregate, never an isolated master projection.
+    const liveSession = projectController?.read().session;
+    const publicationPreview = liveSession?.preview ?? preview;
     return Object.freeze({
-      document,
+      document: liveSession?.document ?? document,
       savedDocument: livePersistence?.savedDocument ?? null,
       sourceGeneration: livePersistence?.generation ?? null,
       persistenceAuthority,
-      previewRevision: preview.ok ? preview.revision : UNAVAILABLE_PREVIEW_REVISION,
+      previewRevision: publicationPreview.ok
+        ? publicationPreview.revision
+        : UNAVAILABLE_PREVIEW_REVISION,
     });
-  }, [document, persistenceController, preview]);
+  }, [document, persistenceController, preview, projectController]);
   const preparedModel = useMemo(
     () => prepareCatalogAuthoringModel(workspaceSnapshot.catalogs, document),
     [document, workspaceSnapshot.catalogs],
@@ -3151,15 +3199,23 @@ function SurfaceEditor({
   useEffect(() => {
     if (
       !publicationPending &&
+      masterController === null &&
       sourceDraft === null &&
       persistenceController !== null &&
+      persistenceState?.pending === null &&
+      !persistenceState.reopenRequired &&
       (persistenceState === null || persistenceState.disposed || !persistenceState.dirty)
     ) {
       return;
     }
 
     const hasCurrentUnsavedSource = () => {
+      if (masterControllerRef.current !== null) return true;
       if (sourceDraftRef.current !== null) return true;
+      if (projectController !== null) {
+        const current = projectController.read();
+        return current.disposed || current.unavailable ? null : current.dirty;
+      }
       if (persistenceController === null) return inMemoryDraftDirty.current;
       if (persistenceControllerLifetime.current !== persistenceController) return null;
       const current = persistenceController.read();
@@ -3180,21 +3236,40 @@ function SurfaceEditor({
       if (current.disposed) return null;
       return current.pending !== null || current.reopenRequired;
     };
-    const removeNavigationGuard = installDesenAppNavigationGuard(() => {
+    const removeNavigationGuard = installDesenAppNavigationGuard((destination) => {
+      if (masterControllerRef.current !== null) {
+        setMasterNotice(
+          "Apply or discard the master draft before leaving this editor. The project is unchanged.",
+        );
+        return false;
+      }
       const publishing = hasCurrentPublication();
       if (publishing === null || publishing) return false;
       const persistenceHazard = hasCurrentPersistenceHazard();
       if (persistenceHazard === null || persistenceHazard) return false;
       const dirty = hasCurrentUnsavedSource();
       if (dirty === null) return false;
+      const nextRoute = readDesenAppRoute(destination);
+      if (
+        projectController !== null &&
+        sourceDraftRef.current === null &&
+        nextRoute.kind === "project" &&
+        nextRoute.projectId === project.id &&
+        nextRoute.surfaceId !== undefined
+      )
+        return true;
       if (!dirty) return true;
       if (
         !window.confirm(
-          "Discard unsaved changes? Leaving this surface will permanently discard the current authored Source draft.",
+          projectController === null
+            ? "Discard unsaved changes? Leaving this surface will permanently discard the current authored Source draft."
+            : "Discard unsaved project changes? This includes masters, instances and all surface edits.",
         )
       ) {
         return false;
       }
+      if (projectController !== null)
+        return projectController.discard(projectController.read().session.digest).ok;
       if (persistenceController === null || ownsPersistenceController) return true;
       const current = persistenceController.read();
       if (current.disposed || current.savedDocument === null) return false;
@@ -3223,10 +3298,14 @@ function SurfaceEditor({
     publicationController,
     publicationPending,
     sourceDraft,
+    projectController,
+    project.id,
+    masterController,
   ]);
 
   useEffect(() => {
     if (
+      projectController !== null ||
       persistenceController === null ||
       persistenceController.read().disposed ||
       persistenceController.read().session.document === document
@@ -3234,7 +3313,7 @@ function SurfaceEditor({
       return;
     }
     persistenceController.replaceAuthoredDocument(document);
-  }, [document, persistenceController]);
+  }, [document, persistenceController, projectController]);
 
   useEffect(() => {
     if (publicationController === null || !preview.ok) return;
@@ -3244,6 +3323,19 @@ function SurfaceEditor({
   function isDesignMode(allowSourceDraft = false): boolean {
     if (modeRef.current !== "design") return false;
     if (!allowSourceDraft && sourceDraftRef.current !== null) return false;
+    if (projectController !== null) {
+      const persistence = persistenceController?.read();
+      if (persistence?.disposed === true || persistence?.pending != null) return false;
+      const aggregate = projectController.read();
+      if (aggregate.disposed || aggregate.unavailable || aggregate.pending !== null) return false;
+      if (aggregate.reopenRequired) return false;
+      const draft = masterControllerRef.current?.read();
+      if (
+        draft !== undefined &&
+        (draft.disposed || draft.unavailable || draft.pending !== null || draft.reopenRequired)
+      )
+        return false;
+    }
     if (publicationController === null) return true;
     if (publicationControllerLifetime.current !== publicationController) return false;
     const current = publicationController.read();
@@ -3376,18 +3468,44 @@ function SurfaceEditor({
       replaceSourceDraft(Object.freeze({ ...current, failure: result }));
       return;
     }
+    if (
+      !commitAuthoringSession(Object.freeze({ document: result.document, preview: result.preview }))
+    ) {
+      setSourceDraftNotice(
+        "Source was not applied. Managed structure requires a master edit or explicit detach; the draft and current project are preserved.",
+      );
+      return;
+    }
     replaceSourceDraft(null);
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: result.preview }));
     selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
-    setSourceDraftNotice("Source applied locally. Save source, then Publish to update the host.");
+    setSourceDraftNotice(
+      masterControllerRef.current === null
+        ? "Source applied locally. Save source, then Publish to update the host."
+        : "Source applied only to the master draft. Apply master changes to update the project.",
+    );
   }
 
   function commitAuthoringSession(
-    nextSession: typeof authoringSession,
+    nextSession: typeof localAuthoringSession,
     establishesBaseline = false,
     resetsHistory = false,
-  ): void {
+  ): boolean {
+    if (editorProjectController !== null && projectState !== null) {
+      const result = editorProjectController.replaceSource(
+        projectState.session.digest,
+        nextSession.document,
+      );
+      if (!result.ok) {
+        setHistoryNotice(
+          `Project edit rejected (${result.reason}). Managed structure requires a master edit or explicit detach. The project and history are unchanged.`,
+        );
+        return false;
+      }
+      clearTransientDiagnostics();
+      setHistoryNotice("");
+      return true;
+    }
     let nextHistory: DesenEditorHistory;
     const currentHistory = authoringHistory.current;
     if (resetsHistory || currentHistory === null) {
@@ -3409,10 +3527,12 @@ function SurfaceEditor({
     clearTransientDiagnostics();
     setHistoryNotice("");
     setAuthoringSession(nextSession);
+    return true;
   }
 
   function chooseMode(nextMode: SurfaceEditorMode): void {
     if (
+      masterControllerRef.current !== null ||
       sourceDraftRef.current !== null ||
       persistenceState?.pending === "opening" ||
       publicationPending
@@ -3434,6 +3554,71 @@ function SurfaceEditor({
     });
   }
 
+  function openMasterDraft(masterId: string): void {
+    if (
+      !isDesignMode() ||
+      projectController === null ||
+      liveProjectState === null ||
+      masterControllerRef.current !== null
+    )
+      return;
+    const created = createProjectMasterDraftController(
+      projectController,
+      workspaceProfile,
+      masterId,
+      selectedSurface.sourceId,
+      liveProjectState.session.digest,
+    );
+    if (!created.ok) {
+      setHistoryNotice(
+        `Master draft was not opened (${created.reason}). The project is unchanged.`,
+      );
+      return;
+    }
+    masterControllerRef.current = created.controller;
+    setMasterController(created.controller);
+    setMasterNotice("");
+    selectOne(null);
+    clearTransientDiagnostics();
+    setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
+  }
+
+  function closeMasterDraft(applied: boolean): void {
+    const current = masterControllerRef.current;
+    if (current === null) return;
+    masterControllerRef.current = null;
+    current.dispose();
+    setMasterController(null);
+    replaceSourceDraft(null);
+    selectOne(null);
+    clearTransientDiagnostics();
+    setMasterNotice("");
+    setHistoryNotice(
+      applied
+        ? "Master changes applied as one project edit. Save project to persist."
+        : "Master draft discarded. The project and its history are unchanged.",
+    );
+    setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
+  }
+
+  function applyMasterDraft(): void {
+    if (
+      !isDesignMode() ||
+      masterController === null ||
+      masterControllerRef.current !== masterController ||
+      masterState === null
+    )
+      return;
+    const result = masterController.apply(masterState.session.digest);
+    if (!result.ok) {
+      setMasterNotice(
+        `Master changes were not applied (${result.reason}). The draft and project are preserved.`,
+      );
+      return;
+    }
+    closeMasterDraft(true);
+  }
+
   function restartRun(context: "synthetic" | "integration" = executionContext): void {
     if (modeRef.current !== "run" || (context === "integration" && integrationDescriptor === null))
       return;
@@ -3451,7 +3636,8 @@ function SurfaceEditor({
   }
 
   async function openAuthoredSource(): Promise<void> {
-    if (!isDesignMode() || persistenceController === null) return;
+    if (masterControllerRef.current !== null || !isDesignMode() || persistenceController === null)
+      return;
     const result = await persistenceController.open();
     if (
       result.status !== "opened" ||
@@ -3462,18 +3648,20 @@ function SurfaceEditor({
     ) {
       return;
     }
-    commitAuthoringSession(result.session, true, true);
+    if (projectController === null && !commitAuthoringSession(result.session, true, true)) return;
     selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
   }
 
   function saveAuthoredSource(): void {
-    if (!isDesignMode() || persistenceController === null) return;
+    if (masterControllerRef.current !== null || !isDesignMode() || persistenceController === null)
+      return;
     void persistenceController.save();
   }
 
   function publishSavedSource(): void {
     if (
+      masterControllerRef.current !== null ||
       !isDesignMode() ||
       publicationController === null ||
       publicationControllerLifetime.current !== publicationController ||
@@ -3532,7 +3720,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3560,7 +3749,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false as const, reason: "source-invalid" as const });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3585,7 +3775,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3607,7 +3798,8 @@ function SurfaceEditor({
       workspaceSnapshot.catalogPackages,
     );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3631,7 +3823,8 @@ function SurfaceEditor({
       workspaceSnapshot.catalogPackages,
     );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3653,7 +3846,8 @@ function SurfaceEditor({
       workspaceSnapshot.catalogPackages,
     );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     selectOne(
       createAuthoringComponentSelection({
         projectId: selection.projectId,
@@ -3679,7 +3873,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3704,7 +3899,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3729,7 +3925,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok) {
       const component = preparedModel.model.components.find(({ id }) => id === edit.componentId);
       if (component !== undefined) {
@@ -3771,7 +3968,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     return result;
   }
 
@@ -3788,7 +3986,8 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
     selectOne(null);
     return result;
   }
@@ -3885,9 +4084,14 @@ function SurfaceEditor({
       );
       return;
     }
-    commitAuthoringSession(Object.freeze({ document: result.document, preview: admitted.preview }));
+    if (
+      !commitAuthoringSession(
+        Object.freeze({ document: result.document, preview: admitted.preview }),
+      )
+    )
+      return;
     setHistoryNotice(
-      `Pasted ${result.insertedNodeIds.length} fresh layer${result.insertedNodeIds.length === 1 ? "" : "s"}.`,
+      `Pasted ${result.insertedNodeIds.length} fresh layer${result.insertedNodeIds.length === 1 ? "" : "s"}.${projectController === null ? "" : " Copies are detached; insert a master for a linked instance."}`,
     );
   }
 
@@ -3903,6 +4107,25 @@ function SurfaceEditor({
 
   function transitionHistory(direction: "undo" | "redo"): void {
     if (!isDesignMode()) return;
+    if (editorProjectController !== null && projectState !== null) {
+      const result = editorProjectController[direction](projectState.session.digest);
+      if (!result.ok) {
+        setHistoryNotice(`Project history was not changed (${result.reason}).`);
+        return;
+      }
+      clearTransientDiagnostics();
+      selectOne(null);
+      setHistoryNotice(
+        masterController === null
+          ? direction === "undo"
+            ? "Last project edit undone."
+            : "Project edit restored."
+          : direction === "undo"
+            ? "Last master draft edit undone."
+            : "Master draft edit restored.",
+      );
+      return;
+    }
     const current = authoringHistory.current;
     if (current === null) return;
     const result =
@@ -3987,10 +4210,32 @@ function SurfaceEditor({
     mode === "design" && previewSurfaceId === selectedSurface.sourceId
       ? selectedSourceNodeIds
       : Object.freeze([]);
-  const historyState = authoringHistory.current;
-  const canUndo = mode === "design" && historyState !== null && historyState.past.length > 0;
-  const canRedo = mode === "design" && historyState !== null && historyState.future.length > 0;
-  const canReuseSelection = mode === "design" && selectedSourceNodeIds.length > 0;
+  const historyState = projectState?.history ?? authoringHistory.current;
+  // Render availability from subscribed snapshots. Lifetime refs authenticate event handlers,
+  // but their effect-time installation cannot leave first-render controls permanently disabled.
+  const aggregateEditsBlocked =
+    projectController !== null &&
+    (liveProjectState === null ||
+      liveProjectState.disposed ||
+      liveProjectState.unavailable ||
+      liveProjectState.reopenRequired ||
+      liveProjectState.pending !== null ||
+      persistenceState?.disposed === true ||
+      persistenceState?.pending != null ||
+      (masterState !== null &&
+        (masterState.disposed ||
+          masterState.unavailable ||
+          masterState.reopenRequired ||
+          masterState.pending !== null)));
+  const designEditsAvailable =
+    mode === "design" &&
+    sourceDraft === null &&
+    !publicationPending &&
+    publicationState?.disposed !== true &&
+    !aggregateEditsBlocked;
+  const canUndo = designEditsAvailable && historyState !== null && historyState.past.length > 0;
+  const canRedo = designEditsAvailable && historyState !== null && historyState.future.length > 0;
+  const canReuseSelection = designEditsAvailable && selectedSourceNodeIds.length > 0;
   const canPaste = canReuseSelection && authoringClipboard.current !== null;
 
   return (
@@ -3999,7 +4244,25 @@ function SurfaceEditor({
         {project.name}
       </h1>
 
-      <header aria-label="Workspace commands" className={styles.workspaceCommandBar}>
+      <header
+        aria-label="Workspace commands"
+        className={styles.workspaceCommandBar}
+        data-master-editing={masterController !== null}
+      >
+        {masterController !== null && masterState !== null && (
+          <MasterDraftBanner
+            name={
+              masterState.session.record.designSystem.recipeGraph.definitions.find(
+                ({ id }) => id === masterController.draft.masterId,
+              )?.name ?? masterController.draft.masterId
+            }
+            dirty={masterState.dirty}
+            blocked={!designEditsAvailable}
+            notice={masterNotice}
+            onApply={applyMasterDraft}
+            onDiscard={() => closeMasterDraft(false)}
+          />
+        )}
         <div className={styles.workspaceIdentity}>
           <div className={styles.workspaceIdentityCopy}>
             <h2 id="workspace-title">{previewSurface.name}</h2>
@@ -4057,6 +4320,7 @@ function SurfaceEditor({
               aria-describedby={modeStatusId}
               aria-pressed={mode === "run"}
               disabled={
+                masterController !== null ||
                 sourceDraft !== null ||
                 persistenceState?.pending === "opening" ||
                 publicationPending
@@ -4128,13 +4392,15 @@ function SurfaceEditor({
             </summary>
             <div className={styles.workspaceLifecycleBody}>
               <PersistenceControls
+                aggregate={projectController !== null}
                 busy={
+                  masterController !== null ||
                   sourceDraft !== null ||
                   publicationPending ||
                   persistenceState?.pending === "opening" ||
                   persistenceState?.pending === "saving"
                 }
-                confirmationScope={persistenceController}
+                confirmationScope={projectState?.session ?? persistenceController}
                 designMode={mode === "design"}
                 onOpen={() => {
                   void openAuthoredSource();
@@ -4145,6 +4411,7 @@ function SurfaceEditor({
 
               <PublicationControls
                 busy={
+                  masterController !== null ||
                   sourceDraft !== null ||
                   persistenceState?.pending === "opening" ||
                   persistenceState?.pending === "saving"
@@ -4207,8 +4474,32 @@ function SurfaceEditor({
       </header>
 
       <AuthoringPanel
+        masterControls={
+          projectController === null || projectState === null ? null : (
+            <MasterInstancePanel
+              state={projectState}
+              model={model}
+              surfaceId={selectedSurface.sourceId}
+              selection={selection}
+              disabled={!designEditsAvailable}
+              {...(masterController === null
+                ? { onEditMaster: openMasterDraft }
+                : { editingMasterId: masterController.draft.masterId })}
+              onCommand={(command) => {
+                if (!isDesignMode())
+                  return Object.freeze({ ok: false, reason: "operation-in-progress" });
+                const result = (masterController ?? projectController).applyRecipe(command);
+                if (result.ok) {
+                  clearTransientDiagnostics();
+                  setHistoryNotice("");
+                }
+                return result;
+              }}
+            />
+          )
+        }
         hidden={mode === "run"}
-        interactive={mode === "design" && !publicationPending && sourceDraft === null}
+        interactive={designEditsAvailable}
         model={model}
         onBatchSlotPlacement={placeSelectedLayers}
         onDeleteSelection={deleteSelectedLayer}
@@ -4241,7 +4532,7 @@ function SurfaceEditor({
           }
         >
           <CanvasManipulationControls
-            disabled={mode !== "design" || publicationPending || sourceDraft !== null}
+            disabled={!designEditsAvailable}
             frame={effectiveCanvasFrame}
             onPan={(delta) => {
               if (!isDesignMode()) return;

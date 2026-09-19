@@ -1063,6 +1063,53 @@ const LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/local-preflight.mjs",
   "scripts/ci/test/local-preflight.test.mjs",
 ]);
+const M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/t15-masters-instances.pw.ts",
+  "apps/desen-app-browser-e2e/t15-playwright.config.ts",
+  "apps/desen-app/src/authoring-persistence-types.ts",
+  "apps/desen-app/src/master-draft-banner.module.css",
+  "apps/desen-app/src/master-draft-banner.tsx",
+  "apps/desen-app/src/master-instance-panel.module.css",
+  "apps/desen-app/src/master-instance-panel.tsx",
+  "apps/desen-app/src/project-authoring-context.tsx",
+  "apps/desen-app/src/project-authoring-controller.ts",
+  "apps/desen-app/src/project-authoring-session.ts",
+  "apps/desen-app/src/project-authoring-source-controller.ts",
+  "apps/desen-app/src/project-master-draft-controller.ts",
+  "apps/desen-app/test/project-authoring-application.test.tsx",
+  "apps/desen-app/test/project-authoring-controller.test.ts",
+  "apps/desen-app/test/project-authoring-fixture.ts",
+  "apps/desen-app/test/project-authoring-source-controller.test.ts",
+  "apps/desen-app/test/project-lifecycle-admission.test.ts",
+  "apps/desen-app/test/project-master-draft-application.test.tsx",
+  "apps/desen-app/test/project-master-draft-controller.test.ts",
+  "docs/proof/M10A-T15.md",
+  "docs/proof/artifacts/m10a-t15.json",
+  "packages/design-system-core/src/master-edit-types.ts",
+  "packages/design-system-core/src/master-edit.ts",
+  "packages/design-system-core/src/master-instance-materialization.ts",
+  "packages/design-system-core/src/master-instance-types.ts",
+  "packages/design-system-core/src/project-history.ts",
+  "packages/design-system-core/src/recipe-capture.ts",
+  "packages/design-system-core/src/recipe-graph.ts",
+  "packages/design-system-core/src/recipe-source-edits.ts",
+  "packages/design-system-core/src/recipe-source.ts",
+  "packages/design-system-core/src/recipe-transaction-types.ts",
+  "packages/design-system-core/src/recipe-transactions.ts",
+  "packages/design-system-core/test/master-edit.test.ts",
+  "packages/design-system-core/test/master-instance-materialization.test.ts",
+  "packages/design-system-core/test/project-history.test.ts",
+  "packages/design-system-core/test/recipe-graph.test.ts",
+  "packages/design-system-core/test/recipe-source-edits.test.ts",
+  "packages/design-system-core/test/recipe-transactions.test.ts",
+  "scripts/generate-m10a-t15-proof.mjs",
+  "scripts/lib/m10a-t15-execution.mjs",
+  "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
+  "scripts/lib/m10a-t15-proof.mjs",
+  "scripts/lib/m10a-t15-workloads.mjs",
+  "scripts/verify-m10a-t15.mjs",
+  "tests/m10a-t15.test.mjs",
+]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
   ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
@@ -1341,6 +1388,22 @@ const LOCAL_PREFLIGHT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: "229cf86ef50580fb35b87ed07e540bec3a9727a55cee768c29d6285ec6ec8c31",
+});
+const M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: 1912,
+  trackedPathSetSha256: "4d298307879bb63be0afbc3a2e63e4ec3a72a867bdf24059ce5f6be76ec086e3",
+  proofOwnedPathCount: 246,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 246,
+    CI_POLICY: 50,
+    DEPENDENCY_POLICY: 39,
+    FROZEN_INPUT: 172,
+    PACKAGE_OR_APPLICATION: 801,
+    SHARED_PROOF_INFRASTRUCTURE: 418,
+    PROJECT_DOCUMENTATION: 175,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: "553b7498aa5862b92b7e7c7831261f64fb650d4bb0fd5b00cf24360e2fcca75f",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -1744,10 +1807,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 139,
-  headSha256: "2c78400cce912bf5d7baa448e82ddfef8d365e666f3bb71ff83bf52ca44f65c8",
-  frozenArtifactCount: 76,
-  currentReaderCount: 152,
+  sequence: 142,
+  headSha256: "58f6aab69cf3be5256dd4a81ffbf3b0d3f2c4f15417c7adef4a2d2bd39d222ac",
+  frozenArtifactCount: 77,
+  currentReaderCount: 154,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2146,13 +2209,39 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorAuthority = createAffectedWorkloadOwnership(boundary.trackedPaths);
   const successorReview = ownershipReviewProjection(successorAuthority);
-  if (!isDeepStrictEqual(successorReview, LOCAL_PREFLIGHT_SUCCESSOR_OWNERSHIP_REVIEW)) {
+  if (!isDeepStrictEqual(successorReview, M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW)) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
       "The authenticated boundary does not reproduce the reviewed current ownership successor.",
     );
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
+  if (
+    M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 45 ||
+    new Set(M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 45 ||
+    M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.some(
+      (trackedPath) => !successorPaths.includes(trackedPath),
+    )
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "The authenticated T15 successor must include exactly the reviewed 45 added paths.",
+    );
+  }
+  const localPreflightSuccessorPaths = successorPaths.filter(
+    (trackedPath) => !M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  );
+  if (
+    !isDeepStrictEqual(
+      calculateAffectedWorkloadOwnershipReview(localPreflightSuccessorPaths),
+      LOCAL_PREFLIGHT_SUCCESSOR_OWNERSHIP_REVIEW,
+    )
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "Removing the exact T15 append must reproduce the complete local-preflight predecessor.",
+    );
+  }
   if (
     LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 2 ||
     new Set(LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 2
@@ -2171,7 +2260,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       );
     }
   }
-  const m10aT14SuccessorPaths = successorPaths.filter(
+  const m10aT14SuccessorPaths = localPreflightSuccessorPaths.filter(
     (trackedPath) => !LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   const m10aT14SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT14SuccessorPaths);
@@ -3645,12 +3734,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 258 ||
-    currentInventory.proofUnitCount !== 122
+    currentInventory.workloadCount !== 260 ||
+    currentInventory.proofUnitCount !== 123
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M10A-T13 append-only successor.",
+      "The current workload graph is not the exact reviewed M10A-T15 successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -3660,10 +3749,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 106 || currentProofPairClasses.barrier !== 16) {
+  if (currentProofPairClasses.ordinary !== 108 || currentProofPairClasses.barrier !== 15) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10A-T14 proof-pair authority is not exactly 106 ordinary and 16 barrier pairs.",
+      "The current M10A-T15 proof-pair authority is not exactly 108 ordinary and 15 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -3671,14 +3760,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 88 ||
-    archiveRedactionClosure.workloadCount !== 190 ||
+    archiveRedactionClosure.proofUnitCount !== 91 ||
+    archiveRedactionClosure.workloadCount !== 196 ||
     archiveRedactionClosure.impactSha256 !==
-      "9f49a7f99fd05a289935c05289785faa45819a9647024272ae32a803c0c76aa2"
+      "5d12c4a8eab896391dbb13adfeee287dee835568ad0fa49cb2c3a1dada3b9bc3"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10A-T13 successor closure from AR-01 is not exactly 88 proof units and 190 workloads.",
+      "The current M10A-T15 successor closure from AR-01 is not exactly 91 proof units and 196 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

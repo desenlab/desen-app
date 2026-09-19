@@ -310,10 +310,10 @@ test("[M10A-T12 successor] keeps frozen M09 while authenticating current rich au
     sha256: "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6",
   });
   assert.deepEqual(m10aT12Successor.sourceInventory, {
-    sourceFiles: 67,
-    reachableProductionSourceFiles: 64,
-    intentionallyUnreachableSourceFiles: 3,
-    exactReceiptCoverage: 67,
+    sourceFiles: 78,
+    reachableProductionSourceFiles: 73,
+    intentionallyUnreachableSourceFiles: 5,
+    exactReceiptCoverage: 78,
   });
   assert.deepEqual(m10aT12Successor.retainedDirectManipulation, {
     sourcePath: "apps/desen-app/src/authoring-direct-manipulation.ts",

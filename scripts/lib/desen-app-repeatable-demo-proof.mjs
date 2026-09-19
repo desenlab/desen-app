@@ -92,6 +92,7 @@ const M10A_T01_CHANGED_T08_INPUTS = Object.freeze([
 // T12 changed these normal-App composition inputs after the historical T08 receipt. Project its
 // exact successor first; the existing T01 bridge then remains the sole owner of older receipts.
 const M10A_T12_CHANGED_T08_INPUTS = Object.freeze([
+  "apps/desen-app/README.md",
   "apps/desen-app/package.json",
   BROWSER_PACKAGE_PATH,
   "apps/desen-app-browser-e2e/README.md",

@@ -423,6 +423,13 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[2], () => {
       "if (!allowSourceDraft && sourceDraftRef.current !== null) return false;",
       "if (!allowSourceDraft && sourceDraftRef.current !== null) return true;",
     ],
+    ["application", "interactive={designEditsAvailable}", "interactive={true}"],
+    [
+      "application",
+      'mode === "design" &&\n    sourceDraft === null &&',
+      'mode === "design" &&\n    sourceDraft !== null &&',
+    ],
+    ["application", "!aggregateEditsBlocked;", "true;"],
     ["diagnostics", "report.invalidSubjects", "report.diagnostics"],
     ["diagnosticsPanel", "onSelect(occurrence.selectionKey)", "onSelect(diagnostic.pointer)"],
   ];

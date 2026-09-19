@@ -1968,7 +1968,8 @@ export function verifyDesenAppInvalidPublicationSourcePolicy(rawInput) {
     [
       "if (!allowSourceDraft && sourceDraftRef.current !== null) return false",
       'sourceDraftRef.current !== null || persistenceState?.pending === "opening" || publicationPending',
-      'interactive={mode === "design" && !publicationPending && sourceDraft === null}',
+      'const designEditsAvailable = mode === "design" && sourceDraft === null && !publicationPending && publicationState?.disposed !== true && !aggregateEditsBlocked',
+      "interactive={designEditsAvailable}",
       "baselineFingerprint: committedDocumentFingerprint",
       "onApply={applySourceDraft}",
       "onDiscard={discardSourceDraft}",

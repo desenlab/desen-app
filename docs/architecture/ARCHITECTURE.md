@@ -1,6 +1,6 @@
 # Architecture
 
-Last reviewed: 2026-09-13
+Last reviewed: 2026-09-19
 
 ## Purpose
 
@@ -214,10 +214,8 @@ success.
 
 ## M10A design-first workbench
 
-M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
-T02's platform-neutral project/token foundation, T03's authoring/workbench slice, T04's immutable
-release identity, T05's private layout/content Catalog slice, and T06's form-control slice are `DONE`;
-T07 is `DONE` with exact-head hosted and fresh-`main` isolated selection/numeric Catalog proof, and the other 21 tasks remain `NOT_STARTED`.
+M10A inserts 28 tasks and the G10A gate before M11. The [task board](../plan/TASKS.md) owns current
+progress and task proofs own hosted closure; this system map does not duplicate changing counts.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
@@ -225,15 +223,16 @@ while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
 [Workbench contract](../plan/DESIGN-SYSTEM-WORKBENCH.md) own execution detail.
 
 The package boundary is additive. T01 delivers the starter package and its dependency direction;
-T02 adds `@desen/design-system-core`, while normal App composition remains later work:
+T02 adds `@desen/design-system-core`, with later App composition retaining public package boundaries:
 
 - `@desen/starter-catalog-web` supplies target-specific DESEN capabilities through trusted,
   statically registered production and authoring adapters built on pinned Base UI and the DESEN
   Neutral theme;
-- `@desen/design-system-core` admits the App-owned v1 envelope, canonical Source, inert token,
-  recipe, asset, and connection metadata, and a bounded deterministic DTCG resolver. It imports only
-  `protocol` and `editor-core`; it cannot import React, DOM, CSS, Base UI, browser APIs, App code, or
-  host bindings, and owns no persistence, release, materialization, Publisher, or Runtime authority;
+- `@desen/design-system-core` owns the App project envelope and bounded DTCG resolver. T15's candidate
+  adds a V2 recipe graph, lossless V1 migration, deterministic ordinary-Source materialization and
+  whole-project history. It imports only `protocol` and `editor-core`; it cannot import React, DOM,
+  CSS, Base UI, browser APIs, App code or host bindings, and owns no storage, release, Publisher or
+  Runtime authority. T15's local evidence is not hosted closure;
 - `@desen/design-system-authoring` provides platform-neutral structured theme, mode, token, and
   whole-alias edits, exact sRGB and px/rem handling, and atomic history/import over T02 data;
 - `@desen/design-system-release` provides detached immutable token, asset, and inert-recipe
@@ -246,19 +245,19 @@ T02 adds `@desen/design-system-core`, while normal App composition remains later
   unreviewed or invalid forms fail closed and the workbench remains outside normal App persistence;
 - `@desen/starter-catalog-web` follows the existing target-package edges to `protocol`,
   `catalog-sdk`, and `runtime-react`, plus its pinned external Base UI dependency; and
-- Desen App will compose those packages with existing Editor, Validator, Publisher, and Runtime
+- Desen App composes those packages with existing Editor, Validator, Publisher, and Runtime
   public APIs. None of these packages becomes a hidden Runtime Core or protocol owner. Publisher and
   Runtime packages do not depend on `design-system-core` or interpret its recipe graph.
 
 T04, T05, and T06 task-owned proofs record their exact-head and fresh-`main` closures. They do not
 authorize Runtime activation, normal App integration, durable production storage, materialization,
 Publisher or Runtime changes, protocol changes, or M11. T06's `DONE` closure remains limited to its
-private form-control Catalog and isolated harness. T07's local proof remains bounded to its private
-selection/numeric Catalog and does not authorize T07+, Runtime activation, normal-App integration or persistence,
+private form-control Catalog and isolated harness. T07's proof remains bounded to its private
+selection/numeric Catalog and does not authorize later tasks, Runtime activation, normal-App integration or persistence,
 Publisher/Core/protocol changes, G10A, or M11.
 
-Across later M10A tasks, an App-owned versioned editable-project record becomes the durable authoring aggregate. It atomically
-stores one exact canonical Source, editable DTCG data, immutable design-system release references,
+Across M10A, the target durable aggregate is one App-owned versioned editable-project record. It must atomically
+store one exact canonical Source, editable DTCG data, immutable design-system release references,
 the bounded master/instance/override graph, and inert connection and Workbench drafts under
 generation compare-and-set. It is not a DESEN protocol document. Every open verifies the complete
 record and every save advances one complete generation; partial or inconsistent state exposes no

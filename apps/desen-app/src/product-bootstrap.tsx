@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 
 import { DesenAppApplication } from "./application.js";
 import { createAuthoringPersistenceController } from "./authoring-persistence.js";
+import { useProjectAuthoringController } from "./project-authoring-context.js";
 import { navigateDesenApp, readDesenAppLocation } from "./project-navigation.js";
 import { readProjectWorkspaceProfileAuthority } from "./project-workspace-profile.js";
 import desenLogoUrl from "./assets/desen-logo.svg";
@@ -281,6 +282,7 @@ export function DesenAppProduct({
   integrationBinding = null,
   publicationPort = null,
 }: DesenAppProductProps) {
+  const projectAuthoringController = useProjectAuthoringController(workspaceProfile);
   const authority = readProjectWorkspaceProfileAuthority(workspaceProfile);
   const profile = authority.status === "read" ? authority.profile : null;
   const creation = useMemo(
@@ -295,8 +297,9 @@ export function DesenAppProduct({
             document: profile.initialDocument,
             profile: workspaceProfile,
             persistencePort,
+            ...(projectAuthoringController === null ? {} : { projectAuthoringController }),
           }),
-    [persistencePort, profile, workspaceProfile],
+    [persistencePort, profile, workspaceProfile, projectAuthoringController],
   );
   const controller = creation?.ok === true ? creation.controller : null;
   const state = useSyncExternalStore(

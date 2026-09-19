@@ -562,6 +562,7 @@ const PROOF_ENTRIES = Object.freeze(
     ["m10a-t12", "scripts/verify-m10a-t12.mjs", "tests/m10a-t12.test.mjs"],
     ["m10a-t13", "scripts/verify-m10a-t13.mjs", "tests/m10a-t13.test.mjs"],
     ["m10a-t14", "scripts/verify-m10a-t14.mjs", "tests/m10a-t14.test.mjs"],
+    ["m10a-t15", "scripts/verify-m10a-t15.mjs", "tests/m10a-t15.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -652,14 +653,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "f116b90cb6a3deb37dac7fa2bd48503af966d0f9507ed49af7a139e0b328f273";
+  "fa8203f1cd72b587bd3190032f46d54ec12f923945bf0b14d39d22f7452dcab7";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "448b472c80c78efbd41208f74a1b8c44e2edab0b2ad436da8f6e0095dd68d918";
+  "fb6837e14310e9066140f0046c4f1cf2946b557fd6091ec4b1fbdd4eaf9ae9ad";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "a0b983a1c9b24067601bfbc261b7e7d9aed4e6e6e0e50ba76d7ef774f22d67ef";
+  "a79fbe5fb18ceb11bfe989a9c34f0d168bf555fec366c36224e63f8d1cd75647";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "a844173107f2f20175ff242122127fe936a99fa536a35969e619bb087922685c";
+const QUALITY_GATE_PLAN_SHA256 = "256796ea63c1d192ae26d45ee415e38faf6b0900c95203f1f761cc3bcd81b465";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -686,10 +687,14 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = Object.freeze(
       "test:m10a-t12",
       "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t12-playwright.config.ts",
     ],
+    [
+      "test:m10a-t15",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t15-playwright.config.ts",
+    ],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts && playwright test --config t15-playwright.config.ts",
     ],
   ].map(([name, command]) => Object.freeze({ name, command })),
 );

@@ -4,6 +4,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
 
+import { M10A_T15_WORKLOADS } from "../../lib/m10a-t15-workloads.mjs";
 import {
   EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
   EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
@@ -85,23 +86,23 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 258-workload T14 successor projection", () => {
+test("the 260-workload T15 inventory preserves every prior command projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 258);
-  assert.equal(inventory.proofUnitCount, 122);
+  assert.equal(inventory.workloadCount, 260);
+  assert.equal(inventory.proofUnitCount, 123);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "ceb96714c978e92084d8c7a0ce8de7c4655e681c2d16be9b1f1b30c28289118a",
+    "27eb4790cdddf0e762f09b102d5a5de41ff55e3913270405bfded3e3fe65b761",
   );
   assert.equal(
     projectionSha256,
-    "a844173107f2f20175ff242122127fe936a99fa536a35969e619bb087922685c",
+    "256796ea63c1d192ae26d45ee415e38faf6b0900c95203f1f761cc3bcd81b465",
   );
   assert.deepEqual(
     inventory.nodes.slice(0, 12).map(({ id }) => id),
@@ -121,11 +122,11 @@ test("the neutral inventory preserves the exact 258-workload T14 successor proje
     ],
   );
   assert.equal(
-    inventory.nodes.slice(12, 134).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(12, 135).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(134, 256).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(135, 258).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -152,6 +153,7 @@ test("the neutral inventory preserves the exact 258-workload T14 successor proje
     "m10a-t12",
     "m10a-t13",
     "m10a-t14",
+    "m10a-t15",
   ];
   assert.deepEqual(
     inventory.proofUnits.slice(-exactTailProofIds.length).map(({ id }) => id),
@@ -163,7 +165,13 @@ test("the neutral inventory preserves the exact 258-workload T14 successor proje
       { id, verifierNodeId: `verify-${id}`, rootTestNodeId: `test-${id}` },
     );
   }
-  const t12SuccessorPredecessor = projection.filter(
+  const t15Predecessor = projection.filter(({ id }) => !id.endsWith("m10a-t15"));
+  assert.equal(t15Predecessor.length, 258);
+  assert.equal(
+    createHash("sha256").update(JSON.stringify(t15Predecessor)).digest("hex"),
+    "a844173107f2f20175ff242122127fe936a99fa536a35969e619bb087922685c",
+  );
+  const t12SuccessorPredecessor = t15Predecessor.filter(
     ({ id }) => !id.endsWith("m10a-t12") && !id.endsWith("m10a-t13") && !id.endsWith("m10a-t14"),
   );
   assert.equal(t12SuccessorPredecessor.length, 252);
@@ -286,17 +294,17 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 122,
-    verifierCount: 122,
-    rootTestCount: 122,
+    proofCount: 123,
+    verifierCount: 123,
+    rootTestCount: 123,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
-    legacyPrerequisiteCount: 789,
-    legacyPrerequisiteSha256: "f116b90cb6a3deb37dac7fa2bd48503af966d0f9507ed49af7a139e0b328f273",
-    legacyLeafInvocationCount: 4662,
-    legacyLeafInvocationSha256: "448b472c80c78efbd41208f74a1b8c44e2edab0b2ad436da8f6e0095dd68d918",
-    distinctLeafWorkloadCount: 383,
-    distinctLeafWorkloadSha256: "a0b983a1c9b24067601bfbc261b7e7d9aed4e6e6e0e50ba76d7ef774f22d67ef",
+    legacyPrerequisiteCount: 772,
+    legacyPrerequisiteSha256: "fa8203f1cd72b587bd3190032f46d54ec12f923945bf0b14d39d22f7452dcab7",
+    legacyLeafInvocationCount: 4619,
+    legacyLeafInvocationSha256: "fb6837e14310e9066140f0046c4f1cf2946b557fd6091ec4b1fbdd4eaf9ae9ad",
+    distinctLeafWorkloadCount: 377,
+    distinctLeafWorkloadSha256: "a79fbe5fb18ceb11bfe989a9c34f0d168bf555fec366c36224e63f8d1cd75647",
     testConfigurationFileCount: 7,
     workspaceTestScriptCount: 21,
     workspaceTestScriptSha256: "5d466fcb51b7715dd51dcb431709f7bab601816bad46d0713f1b0aabdfe65ae3",
@@ -304,6 +312,158 @@ test("repository manifests and discovered proof files retain the reviewed parity
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
   assertDeepFrozen(receipt);
+});
+
+test("T15 transfers only the reviewed T02/T03 prerequisites and retains exact fresh successor work", async () => {
+  const inputs = await currentRepositoryInputs();
+  validateRepositoryWorkloadInputs(inputs);
+  const scripts = inputs.packageJson.scripts;
+  const prior = structuredClone(scripts);
+  const predecessors = {
+    "m10a-t02": {
+      verify: [
+        "pnpm verify:m10a-t01",
+        "pnpm verify:desen-app-published-host-update",
+        "pnpm --filter @desen/design-system-core... build",
+        "pnpm --filter @desen/design-system-core test",
+        "pnpm --filter @desen/design-system-core test:public-package",
+      ],
+      test: [
+        "pnpm --filter @desen/design-system-core... build",
+        "pnpm --filter @desen/design-system-core test",
+        "pnpm --filter @desen/design-system-core test:public-package",
+      ],
+    },
+    "m10a-t03": {
+      verify: [
+        "pnpm verify:m10a-t02",
+        "pnpm --filter @desen/design-system-authoring build",
+        "pnpm --filter @desen/design-system-authoring test",
+        "pnpm --filter @desen/design-system-authoring test:public-package",
+        "pnpm --filter @desen/design-system-workbench-proof test:e2e",
+      ],
+      test: [
+        "pnpm --filter @desen/design-system-authoring... build",
+        "pnpm --filter @desen/design-system-authoring test",
+        "pnpm --filter @desen/design-system-authoring test:public-package",
+        "pnpm --filter @desen/design-system-workbench-proof test:e2e",
+      ],
+    },
+  };
+  for (const [id, commands] of Object.entries(predecessors)) {
+    for (const kind of ["verify", "test"]) {
+      const script = `${kind}:${id}`;
+      assert.equal(scripts[script].split(" && ").length, 1);
+      prior[script] = [...commands[kind], scripts[script]].join(" && ");
+    }
+  }
+  assert.equal(scripts["verify:m10a-t15"], "node scripts/verify-m10a-t15.mjs");
+  assert.equal(scripts["test:m10a-t15"], "node --test tests/m10a-t15.test.mjs");
+  for (const script of ["check", "test"]) {
+    prior[script] = prior[script]
+      .split(" && ")
+      .filter((command) => !/^pnpm (?:verify|test):m10a-t15$/u.test(command))
+      .join(" && ");
+  }
+  const hash = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  const priorPrerequisites = createExhaustiveWorkloadInventory()
+    .proofUnits.filter(({ id }) => id !== "m10a-t15")
+    .map(({ id }) => ({
+      id,
+      verify: prior[`verify:${id}`]?.split(" && ").slice(0, -1) ?? [],
+      test: prior[`test:${id}`]?.split(" && ").slice(0, -1) ?? [],
+    }));
+  assert.equal(
+    hash(priorPrerequisites),
+    "f116b90cb6a3deb37dac7fa2bd48503af966d0f9507ed49af7a139e0b328f273",
+  );
+  const expand = (name) =>
+    prior[name].split(" && ").flatMap((command) => {
+      const nested = /^pnpm ([a-z0-9:-]+)$/u.exec(command)?.[1];
+      return nested && Object.hasOwn(prior, nested) ? expand(nested) : [command];
+    });
+  const priorLeaves = expand("check");
+  assert.equal(priorLeaves.length, 4662);
+  assert.equal(
+    hash(priorLeaves),
+    "448b472c80c78efbd41208f74a1b8c44e2edab0b2ad436da8f6e0095dd68d918",
+  );
+  const distinct = [...new Set(priorLeaves)].sort();
+  assert.equal(distinct.length, 383);
+  assert.equal(hash(distinct), "a0b983a1c9b24067601bfbc261b7e7d9aed4e6e6e0e50ba76d7ef774f22d67ef");
+  // The successor executes these exact commands itself; empty historical prefixes are not coverage.
+  assert.equal(M10A_T15_WORKLOADS.length, 17);
+  assert.equal(
+    hash(M10A_T15_WORKLOADS),
+    "efce7aae1ed66844ac7b9297dc9128749b10bbdc4b94db95d7c80466a40fa71f",
+  );
+  for (const [id, commands] of Object.entries(predecessors)) {
+    for (const command of commands.verify) {
+      const candidate = structuredClone(inputs);
+      candidate.packageJson.scripts[`verify:${id}`] = `${command} && ${scripts[`verify:${id}`]}`;
+      assert.throws(
+        () => validateRepositoryWorkloadInputs(candidate),
+        ExhaustiveWorkloadInventoryError,
+      );
+    }
+  }
+});
+
+test("T15 extends the Browser E2E chain without allowing any prior journey to disappear", async () => {
+  const inputs = await currentRepositoryInputs();
+  const browser = inputs.workspacePackages.find(({ name }) => name === "@desen/app-browser-e2e");
+  assert.ok(browser);
+  const configs = [
+    "playwright.config.ts",
+    "product-playwright.config.ts",
+    "input-pending-playwright.config.ts",
+    "failure-playwright.config.ts",
+    "success-host-playwright.config.ts",
+    "published-host-playwright.config.ts",
+    "invalid-publication-playwright.config.ts",
+    "restart-recovery-playwright.config.ts",
+    "repeatable-demo-playwright.config.ts",
+    "t12-playwright.config.ts",
+    "t15-playwright.config.ts",
+  ];
+  const actualCommands = browser.scripts["test:e2e"].split(" && ");
+  assert.deepEqual(
+    actualCommands.filter((command) => command.startsWith("playwright ")),
+    configs.map((config) => `playwright test --config ${config}`),
+  );
+  for (const config of configs) {
+    const changed = structuredClone(inputs);
+    const changedBrowser = changed.workspacePackages.find(({ name }) => name === browser.name);
+    const prior = changedBrowser.scripts["test:e2e"];
+    changedBrowser.scripts["test:e2e"] = prior.replace(
+      ` && playwright test --config ${config}`,
+      "",
+    );
+    assert.notEqual(changedBrowser.scripts["test:e2e"], prior, config);
+    assert.throws(
+      () => validateRepositoryWorkloadInputs(changed),
+      (error) =>
+        error instanceof ExhaustiveWorkloadInventoryError &&
+        /The Browser E2E workspace package script drifted from review/u.test(error.message),
+      config,
+    );
+  }
+  const substituted = structuredClone(inputs);
+  const substitutedBrowser = substituted.workspacePackages.find(
+    ({ name }) => name === browser.name,
+  );
+  const prior = substitutedBrowser.scripts["test:m10a-t15"];
+  substitutedBrowser.scripts["test:m10a-t15"] = prior.replace(
+    "t15-playwright.config.ts",
+    "t12-playwright.config.ts",
+  );
+  assert.notEqual(substitutedBrowser.scripts["test:m10a-t15"], prior);
+  assert.throws(
+    () => validateRepositoryWorkloadInputs(substituted),
+    (error) =>
+      error instanceof ExhaustiveWorkloadInventoryError &&
+      /The Browser E2E workspace package script drifted from review/u.test(error.message),
+  );
 });
 
 test("repository input drift fails closed before it can authorize a workload", async () => {
@@ -412,10 +572,8 @@ test("repository input drift fails closed before it can authorize a workload", a
 
   const substitutedAuthoringPublicPackage = await currentRepositoryInputs();
   substitutedAuthoringPublicPackage.packageJson.scripts["verify:m10a-t03"] =
-    substitutedAuthoringPublicPackage.packageJson.scripts["verify:m10a-t03"].replace(
-      "pnpm --filter @desen/design-system-authoring test:public-package",
-      "pnpm --filter @desen/design-system-core test:public-package",
-    );
+    "pnpm --filter @desen/design-system-core test:public-package && " +
+    substitutedAuthoringPublicPackage.packageJson.scripts["verify:m10a-t03"];
   assert.throws(
     () => validateRepositoryWorkloadInputs(substitutedAuthoringPublicPackage),
     (error) =>
@@ -437,10 +595,8 @@ test("repository input drift fails closed before it can authorize a workload", a
 
   const substitutedWorkbench = await currentRepositoryInputs();
   substitutedWorkbench.packageJson.scripts["verify:m10a-t03"] =
-    substitutedWorkbench.packageJson.scripts["verify:m10a-t03"].replace(
-      "pnpm --filter @desen/design-system-workbench-proof test:e2e",
-      "pnpm --filter @desen/starter-catalog-web-proof test:e2e",
-    );
+    "pnpm --filter @desen/starter-catalog-web-proof test:e2e && " +
+    substitutedWorkbench.packageJson.scripts["verify:m10a-t03"];
   assert.throws(
     () => validateRepositoryWorkloadInputs(substitutedWorkbench),
     (error) =>
@@ -612,7 +768,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 122);
+  assert.equal(boundaries.dependencies.length, 123);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);
@@ -645,25 +801,40 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     assert.deepEqual(rootTest.dependencies, [verifier.id]);
     assert.equal(
       verifier.sharedState.buildOutputs,
-      [
-        "desen-app-published-host-update",
-        "desen-app-invalid-publication",
-        "desen-app-last-known-good-recovery",
-        "desen-app-repeatable-demo",
-        "runtime-core-baseline",
-        "m10a-t05",
-        "m10a-t06",
-        "m10a-t07",
-        "m10a-t08",
-        "m10a-t09",
-        "m10a-t12",
-      ].includes(unit.id)
-        ? "NONE"
-        : "SHARED_READ_AFTER_PREFIX",
+      unit.id === "m10a-t15"
+        ? "SHARED_WRITE_SERIALIZED"
+        : [
+              "desen-app-published-host-update",
+              "desen-app-invalid-publication",
+              "desen-app-last-known-good-recovery",
+              "desen-app-repeatable-demo",
+              "runtime-core-baseline",
+              "m10a-t02",
+              "m10a-t03",
+              "m10a-t05",
+              "m10a-t06",
+              "m10a-t07",
+              "m10a-t08",
+              "m10a-t09",
+              "m10a-t12",
+              "m10a-t13",
+              "m10a-t14",
+            ].includes(unit.id)
+          ? "NONE"
+          : "SHARED_READ_AFTER_PREFIX",
     );
     assert.equal(
       rootTest.sharedState.temporaryPaths,
-      ["desen-app-published-host-update", "m10a-t05", "m10a-t06"].includes(unit.id)
+      [
+        "desen-app-published-host-update",
+        "m10a-t02",
+        "m10a-t03",
+        "m10a-t05",
+        "m10a-t06",
+        "m10a-t12",
+        "m10a-t13",
+        "m10a-t14",
+      ].includes(unit.id)
         ? "NONE"
         : "PROCESS_ISOLATED",
     );

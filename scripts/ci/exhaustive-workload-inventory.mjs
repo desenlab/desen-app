@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "f116b90cb6a3deb37dac7fa2bd48503af966d0f9507ed49af7a139e0b328f273";
+  "fa8203f1cd72b587bd3190032f46d54ec12f923945bf0b14d39d22f7452dcab7";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "448b472c80c78efbd41208f74a1b8c44e2edab0b2ad436da8f6e0095dd68d918";
+  "fb6837e14310e9066140f0046c4f1cf2946b557fd6091ec4b1fbdd4eaf9ae9ad";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "a0b983a1c9b24067601bfbc261b7e7d9aed4e6e6e0e50ba76d7ef774f22d67ef";
+  "a79fbe5fb18ceb11bfe989a9c34f0d168bf555fec366c36224e63f8d1cd75647";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "5d466fcb51b7715dd51dcb431709f7bab601816bad46d0713f1b0aabdfe65ae3";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -169,10 +169,14 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
       "test:m10a-t12",
       "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t12-playwright.config.ts",
     ],
+    [
+      "test:m10a-t15",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t15-playwright.config.ts",
+    ],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts && playwright test --config t15-playwright.config.ts",
     ],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
@@ -818,6 +822,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10a-t12", "scripts/verify-m10a-t12.mjs", "tests/m10a-t12.test.mjs"],
   ["m10a-t13", "scripts/verify-m10a-t13.mjs", "tests/m10a-t13.test.mjs"],
   ["m10a-t14", "scripts/verify-m10a-t14.mjs", "tests/m10a-t14.test.mjs"],
+  ["m10a-t15", "scripts/verify-m10a-t15.mjs", "tests/m10a-t15.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -828,17 +833,26 @@ const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "m10a-t07",
   "m10a-t08",
   "m10a-t09",
-  "m10a-t12",
 ]);
 const READ_ONLY_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "runtime-core-baseline",
+  "m10a-t02",
+  "m10a-t03",
   "m10a-t05",
   "m10a-t06",
+  "m10a-t12",
+  "m10a-t13",
+  "m10a-t14",
 ]);
 const PASSIVE_ROOT_TEST_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-published-host-update",
+  "m10a-t02",
+  "m10a-t03",
   "m10a-t05",
   "m10a-t06",
+  "m10a-t12",
+  "m10a-t13",
+  "m10a-t14",
 ]);
 
 const NO_SHARED_MUTATION = SAFE_OBJECT_FREEZE({
@@ -1420,7 +1434,7 @@ function captureInventory(candidate) {
   if (
     !Number.isSafeInteger(root.workloadCount) ||
     root.workloadCount < 1 ||
-    root.workloadCount > 258
+    root.workloadCount > 260
   ) {
     fail("workloadCount is out of bounds.");
   }
@@ -1431,7 +1445,7 @@ function captureInventory(candidate) {
   ) {
     fail("proofUnitCount is out of bounds.");
   }
-  root.nodes = exactArray(root.nodes, "nodes", 258).map(validateNode);
+  root.nodes = exactArray(root.nodes, "nodes", 260).map(validateNode);
   root.proofUnits = exactArray(root.proofUnits, "proofUnits", 128).map(validateProofUnit);
   if (root.workloadCount !== root.nodes.length || root.proofUnitCount !== root.proofUnits.length) {
     fail("The declared workload or proof-unit count is inconsistent.", {
@@ -1632,11 +1646,13 @@ function buildCanonicalInventory() {
                     : "package-tests",
       ],
       "CONCURRENT_PROOF",
-      READ_ONLY_VERIFIER_PROOF_IDS.includes(id)
-        ? NO_SHARED_MUTATION
-        : PROCESS_ISOLATED_VERIFIER_PROOF_IDS.includes(id)
-          ? PROCESS_ISOLATED_NO_BUILD
-          : SHARED_BUILD_READER,
+      id === "m10a-t15"
+        ? SHARED_BUILD_WRITER
+        : READ_ONLY_VERIFIER_PROOF_IDS.includes(id)
+          ? NO_SHARED_MUTATION
+          : PROCESS_ISOLATED_VERIFIER_PROOF_IDS.includes(id)
+            ? PROCESS_ISOLATED_NO_BUILD
+            : SHARED_BUILD_READER,
     ),
   );
   const rootTests = PROOF_UNIT_TUPLES.map(([id, , rootTestFile]) =>
@@ -1647,7 +1663,7 @@ function buildCanonicalInventory() {
       ["--test", "--test-concurrency=1", rootTestFile],
       ["verify-" + id],
       "CONCURRENT_PROOF",
-      id === "runtime-core-baseline"
+      id === "runtime-core-baseline" || id === "m10a-t15"
         ? PROCESS_ISOLATED_NO_BUILD
         : PASSIVE_ROOT_TEST_PROOF_IDS.includes(id)
           ? NO_SHARED_MUTATION
@@ -1983,7 +1999,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "ceb96714c978e92084d8c7a0ce8de7c4655e681c2d16be9b1f1b30c28289118a";
+  "27eb4790cdddf0e762f09b102d5a5de41ff55e3913270405bfded3e3fe65b761";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

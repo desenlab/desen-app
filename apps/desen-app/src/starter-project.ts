@@ -1,4 +1,7 @@
-import { admitEditableProjectRecord } from "@desen/design-system-core";
+import {
+  admitEditableProjectRecord,
+  EDITABLE_PROJECT_SCHEMA_VERSION,
+} from "@desen/design-system-core";
 import { DESEN_NEUTRAL_THEME_DOCUMENT } from "@desen/design-system-authoring";
 import {
   createStarterNodeTemplate,
@@ -47,7 +50,7 @@ const STARTER_NEUTRAL_TOKEN_SOURCES = Object.freeze([
 
 /** An admitted blank project and the complete labels needed to place it in a T10 workspace. */
 export interface StarterProject {
-  /** Exact T02 envelope with one DESEN Neutral surface. */
+  /** Current editable-project envelope with one DESEN Neutral surface. */
   readonly record: EditableProjectRecord;
   /** Complete one-to-one human labels for its Source surfaces. */
   readonly surfaceNames: readonly ProjectWorkspaceSurfaceName[];
@@ -56,7 +59,7 @@ export interface StarterProject {
 /**
  * Creates one blank standalone DESEN Neutral project from the installed starter catalog.
  *
- * @remarks The returned T02 envelope contains ordinary Source data only: a Stack root, one
+ * @remarks The returned current envelope contains ordinary Source data: a Stack root, one
  * declared portrait frame, no state, resource, action, operation, connection or host binding.
  * The factory never reads or mutates an existing M10 workspace profile or stored Source bytes.
  */
@@ -66,7 +69,7 @@ export function createStarterProject(projectId: string): StarterProject {
   }
   const admission = admitEditableProjectRecord({
     kind: "desen.editable-project",
-    schemaVersion: 1,
+    schemaVersion: EDITABLE_PROJECT_SCHEMA_VERSION,
     id: projectId,
     source: {
       kind: "desen.source",
@@ -98,7 +101,12 @@ export function createStarterProject(projectId: string): StarterProject {
       },
       extensions: {},
     },
-    designSystem: { tokenSources: STARTER_NEUTRAL_TOKEN_SOURCES, recipes: [], assets: [] },
+    designSystem: {
+      tokenSources: STARTER_NEUTRAL_TOKEN_SOURCES,
+      recipes: [],
+      assets: [],
+      recipeGraph: { definitions: [], instances: [] },
+    },
     connectionIntents: [],
   });
   if (!admission.ok) {

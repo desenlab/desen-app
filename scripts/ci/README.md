@@ -1,6 +1,6 @@
 # Proof infrastructure
 
-Last reviewed: 2026-09-11
+Last reviewed: 2026-09-19
 
 ## Purpose
 
@@ -76,15 +76,18 @@ cancellation, hosted, and zero-reference checks pass.
 
 ## Current authority
 
-- 241 logical workloads, including separate Editor Core, Editor Web, Design System Core, Design System Authoring, and Design System Release public-package contracts
-- 114 proof pairs: 101 ordinary and 13 exclusive barriers
-- 264 hosted physical shard workloads
-- proof-reader checkpoint sequence 91 at
-  `sha256:21523a2f644fd8570909215f146c0ea1aac13d2080ce5b0b53846b8e6857922b`, authenticating 68 artifacts and 136 current readers
-- nine M10 Chromium journeys in the separate Browser E2E job; three T01 cases on port 4187 and four
-  T03 workbench cases on port 4188 in distinct fixed-port proof barriers; T03 covers SC-01's 3
-  supported / 13 preserved-unsupported / 7 invalid fixtures plus a closed 6 valid / 10 malformed
-  T02-recognized unsupported matrix
+- The T15 candidate has 260 logical workloads and 123 proof pairs: 108 ordinary and 15 barriers.
+- The fixed 81/30/12 partition executes 285 physical workloads, including replicated preparation
+  and the join's fresh build. No prior command is removed or reordered.
+- The live checkpoint authority is code-owned by `proof-reader-checkpoints.mjs` and authenticated
+  by `verify-proof-reader-checkpoints.mjs`; it must pass before any candidate is merged.
+- The Browser E2E chain retains all nine M10 journeys plus T12 and adds T15. The T15 proof barrier
+  serially owns the original workbench on 4188 and normal-product styling/master journeys on 4175.
+  T07/T08/T09 keep separate barriers. T02/T03/T12/T13/T14 readers authenticate historical bytes;
+  T15 executes their inherited current behavior freshly, including every original workbench/style
+  assertion and all seven T14 App reuse cases.
+
+These [candidate execution contracts](../../docs/proof/M10A-T15.md#shard-deadline-correction) do not claim T15 hosted closure.
 
 Exact counts are reviewed invariants, not targets to reduce. A performance change may redistribute
 fresh work but cannot omit a workload, cache proof success, increase the deadline silently, or

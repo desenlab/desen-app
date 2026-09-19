@@ -183,8 +183,12 @@ describe("createProjectWorkspaceAuthoringPersistencePort", () => {
         document: starter.record.source,
       }),
     ).resolves.toMatchObject({
-      status: "failed",
-      diagnostic: { code: "run.desen.editor/PERSISTENCE_STORAGE_UNAVAILABLE" },
+      status: "indeterminate",
+      diagnostic: { code: "run.desen.editor/PERSISTENCE_COMMIT_INDETERMINATE" },
     });
+    expect(lifecycle.read().generation).toBeNull();
+    expect(lifecycle.read().savedWorkspace).toBeNull();
+    expect(lifecycle.read().dirty).toBe(true);
+    expect(lifecycle.read().reopenRequired).toBe(true);
   });
 });
