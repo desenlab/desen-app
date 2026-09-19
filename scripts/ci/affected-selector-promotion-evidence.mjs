@@ -1110,6 +1110,12 @@ const M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/verify-m10a-t15.mjs",
   "tests/m10a-t15.test.mjs",
 ]);
+const M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "apps/desen-app/test/authoring-variants.test.ts",
+  "apps/desen-app/test/authoring-visual-styles.test.ts",
+  "docs/proof/M10A-T16.md",
+  "scripts/lib/m10a-t16-legacy-input-receipts.mjs",
+]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
   ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
@@ -1404,6 +1410,22 @@ const M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: "553b7498aa5862b92b7e7c7831261f64fb650d4bb0fd5b00cf24360e2fcca75f",
+});
+const M10A_T16_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: 1916,
+  trackedPathSetSha256: "15dc9ded69ada4e93eb1ff61bc73d3062f7dba01ec6b5f55f1f5e0dc6dfa9d9b",
+  proofOwnedPathCount: 246,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 246,
+    CI_POLICY: 50,
+    DEPENDENCY_POLICY: 39,
+    FROZEN_INPUT: 172,
+    PACKAGE_OR_APPLICATION: 803,
+    SHARED_PROOF_INFRASTRUCTURE: 419,
+    PROJECT_DOCUMENTATION: 176,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: "2d96aa919439750d4da20b037e7e539536782fb86e29640bbd14eff64889440f",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -2209,13 +2231,30 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorAuthority = createAffectedWorkloadOwnership(boundary.trackedPaths);
   const successorReview = ownershipReviewProjection(successorAuthority);
-  if (!isDeepStrictEqual(successorReview, M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW)) {
+  if (!isDeepStrictEqual(successorReview, M10A_T16_SUCCESSOR_OWNERSHIP_REVIEW)) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-      "The authenticated boundary does not reproduce the reviewed current ownership successor.",
+      "The authenticated boundary does not reproduce the reviewed M10A-T16 ownership successor.",
     );
   }
-  const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
+  const currentSuccessorPaths = successorAuthority.entries.map(
+    ({ path: trackedPath }) => trackedPath,
+  );
+  if (
+    M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 4 ||
+    new Set(M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 4 ||
+    M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.some(
+      (trackedPath) => !currentSuccessorPaths.includes(trackedPath),
+    )
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "The authenticated M10A-T16 successor must include exactly the reviewed four added paths.",
+    );
+  }
+  const successorPaths = currentSuccessorPaths.filter(
+    (trackedPath) => !M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  );
   if (
     M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 45 ||
     new Set(M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 45 ||

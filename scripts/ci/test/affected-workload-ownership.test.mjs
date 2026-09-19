@@ -13,7 +13,7 @@ import {
   EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   AffectedWorkloadOwnershipError,
   calculateAffectedTrackedPathSetSha256,
-  calculateAffectedWorkloadOwnershipReview as calculateAffectedWorkloadOwnershipReviewBase,
+  calculateAffectedWorkloadOwnershipReview as calculateAffectedWorkloadOwnershipReviewRaw,
   calculateAffectedWorkloadOwnershipSha256,
   createAffectedWorkloadOwnership,
   resolveAffectedWorkloadOwner,
@@ -39,10 +39,16 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   CI_POLICY: 50,
   DEPENDENCY_POLICY: 39,
   FROZEN_INPUT: 172,
-  PACKAGE_OR_APPLICATION: 801,
-  SHARED_PROOF_INFRASTRUCTURE: 418,
-  PROJECT_DOCUMENTATION: 175,
+  PACKAGE_OR_APPLICATION: 803,
+  SHARED_PROOF_INFRASTRUCTURE: 419,
+  PROJECT_DOCUMENTATION: 176,
 });
+const M10A_T16_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app/test/authoring-variants.test.ts",
+  "apps/desen-app/test/authoring-visual-styles.test.ts",
+  "docs/proof/M10A-T16.md",
+  "scripts/lib/m10a-t16-legacy-input-receipts.mjs",
+]);
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
   "docs/proof/SEC-01-DEPENDENCY-SECURITY.md",
@@ -582,19 +588,28 @@ async function currentTrackedPaths() {
 }
 
 function calculateAffectedWorkloadOwnershipReview(rawPaths) {
-  const withoutT15 = rawPaths.filter((candidate) => !M10A_T15_SUCCESSOR_PATHS.includes(candidate));
+  const current = rawPaths.filter((candidate) => !M10A_T16_SUCCESSOR_PATHS.includes(candidate));
+  const withoutT15 = current.filter((candidate) => !M10A_T15_SUCCESSOR_PATHS.includes(candidate));
   const paths =
     rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
       ? rawPaths
-      : withoutT15.length === 1867 || withoutT15.length === 1865
-        ? withoutT15
-        : withoutT15.filter(
-            (candidate) =>
-              !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
-              !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
-              !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
-          );
-  return calculateAffectedWorkloadOwnershipReviewBase(paths);
+      : current.length === 1912
+        ? current
+        : withoutT15.length === 1867 || withoutT15.length === 1865
+          ? withoutT15
+          : withoutT15.filter(
+              (candidate) =>
+                !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
+                !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
+                !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
+            );
+  return calculateAffectedWorkloadOwnershipReviewRaw(paths);
+}
+
+function calculateAffectedWorkloadOwnershipReviewBase(rawPaths) {
+  return calculateAffectedWorkloadOwnershipReviewRaw(
+    rawPaths.filter((candidate) => !M10A_T16_SUCCESSOR_PATHS.includes(candidate)),
+  );
 }
 
 async function currentAuthority() {
@@ -632,7 +647,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1912 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1916 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
