@@ -295,16 +295,14 @@ test(TEST_TITLE, async ({ page }, testInfo) => {
   expect(await saveProject(page)).toEqual(before);
   await page.getByRole("button", { name: "Redo authoring edit", exact: true }).click();
   expect(await saveProject(page)).toEqual(updated);
-  const reopen = page
-    .waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === WORKSPACE_PATH &&
-        response.request().method() === "GET" &&
-        response.ok(),
-    )
-    .then(async (response) => observedProject((await response.json()) as ObservedWorkspace));
+  const reopen = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === WORKSPACE_PATH &&
+      response.request().method() === "GET" &&
+      response.ok(),
+  );
   await page.reload();
-  const reopened = await reopen;
+  const reopened = observedProject((await (await reopen).json()) as ObservedWorkspace);
   expect(reopened).toEqual(updated);
   await expect(textLayers(page)).toHaveCount(3);
   await expectUpdatedPreview(page);
