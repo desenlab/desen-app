@@ -33,6 +33,7 @@ const M10A_T14_PACKAGE_SCRIPT_ADDITIONS = Object.freeze({
   "verify:m10a-t14": "node scripts/verify-m10a-t14.mjs",
   "test:m10a-t14": "node --test tests/m10a-t14.test.mjs",
 });
+const M10A_T13_ASSET_PACKAGE_SCRIPT_ADDITION = '    "test": "vitest run",\n';
 
 export class M10AT13ProofError extends Error {
   constructor(code, message) {
@@ -63,6 +64,20 @@ async function currentSource() {
 async function historicalSource() {
   const receipts = await Promise.all(
     SOURCE_FILES.map(async (relativePath) => {
+      if (relativePath === "packages/design-system-assets/package.json") {
+        const packageText = await readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");
+        const packageJson = JSON.parse(packageText);
+        if (packageJson.scripts?.test === undefined) return sourceReceipt(relativePath);
+        const additions = packageText.split(M10A_T13_ASSET_PACKAGE_SCRIPT_ADDITION).length - 1;
+        if (packageJson.scripts.test !== "vitest run" || additions !== 1) {
+          return sourceReceipt(relativePath);
+        }
+
+        const projectedText = packageText.replace(M10A_T13_ASSET_PACKAGE_SCRIPT_ADDITION, "");
+        const bytes = Buffer.from(projectedText, "utf8");
+        return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
+      }
+
       if (relativePath !== "package.json") return sourceReceipt(relativePath);
 
       const packageText = await readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");

@@ -298,8 +298,8 @@ test("repository manifests and discovered proof files retain the reviewed parity
     distinctLeafWorkloadCount: 383,
     distinctLeafWorkloadSha256: "a0b983a1c9b24067601bfbc261b7e7d9aed4e6e6e0e50ba76d7ef774f22d67ef",
     testConfigurationFileCount: 7,
-    workspaceTestScriptCount: 20,
-    workspaceTestScriptSha256: "7cc967537fd8b11e71c53f9d5542dfe33da25325cc2d7b8b60b7ae85eab1d312",
+    workspaceTestScriptCount: 21,
+    workspaceTestScriptSha256: "5d466fcb51b7715dd51dcb431709f7bab601816bad46d0713f1b0aabdfe65ae3",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });

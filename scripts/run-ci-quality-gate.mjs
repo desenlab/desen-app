@@ -667,7 +667,7 @@ const QUALITY_GATE_PLAN_SHA256 = "a844173107f2f20175ff242122127fe936a99fa536a359
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "7cc967537fd8b11e71c53f9d5542dfe33da25325cc2d7b8b60b7ae85eab1d312";
+  "5d466fcb51b7715dd51dcb431709f7bab601816bad46d0713f1b0aabdfe65ae3";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
