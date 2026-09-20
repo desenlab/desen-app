@@ -334,7 +334,7 @@ test("authenticates the exact 20/20 hosted campaign and live local-preflight suc
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "e9eefaf0aa529068e81f29d99a569dd64825faa8c5287b90f5fe7b6813b853bc",
+    selectorSha256: "bd84e5f57b68d8b189c26e59d20c202188f7610a646be45ae95818aa8ac2d993",
     ownershipSha256: "af36a406ca155dae6ce8be9bb102f1c9309a5bc6af3e4069c7da22f8ad370759",
     impactGraphSha256: "a1c70aa4d72cfb34de7c29c034964bb7a5f0a3268388604c85446c52d475e034",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
