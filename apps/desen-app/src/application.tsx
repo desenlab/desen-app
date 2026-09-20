@@ -133,6 +133,7 @@ import {
   ScenarioPreviewControl,
 } from "./preview-controls.js";
 import { StatePanel } from "./state-panel.js";
+import { ConnectionsWorkspace } from "./connections-workspace.js";
 import {
   prepareAuthoringPreviewBundle,
   prepareAuthoringSurfacePreviewBundle,
@@ -1262,7 +1263,7 @@ function DesignSystemArea({
   );
 }
 
-type SurfaceEditorMode = "design" | "run";
+type SurfaceEditorMode = "connections" | "design" | "run";
 
 interface TransientAuthoringDiagnostics {
   readonly ownerDocumentFingerprint: string;
@@ -3145,6 +3146,7 @@ function SurfaceEditor({
   }, []);
   const modeRef = useRef<SurfaceEditorMode>("design");
   const designModeButton = useRef<HTMLButtonElement>(null);
+  const connectionsModeButton = useRef<HTMLButtonElement>(null);
   const runModeButton = useRef<HTMLButtonElement>(null);
   const modeStatusId = useId();
   const { document, preview } = authoringSession;
@@ -4047,7 +4049,7 @@ function SurfaceEditor({
       publicationPending
     )
       return;
-    if (nextMode === "design") {
+    if (nextMode !== "run") {
       integrationController?.deactivate();
       setExecutionContext("synthetic");
       if (runDestination !== null || executionContext === "integration") {
@@ -4058,9 +4060,13 @@ function SurfaceEditor({
     }
     modeRef.current = nextMode;
     setMode(nextMode);
-    (nextMode === "design" ? designModeButton : runModeButton).current?.focus({
-      preventScroll: true,
-    });
+    const focusTarget =
+      nextMode === "design"
+        ? designModeButton
+        : nextMode === "connections"
+          ? connectionsModeButton
+          : runModeButton;
+    focusTarget.current?.focus({ preventScroll: true });
   }
 
   function openMasterDraft(masterId: string): void {
@@ -4812,11 +4818,13 @@ function SurfaceEditor({
 
         <div className={styles.workspaceCommands}>
           <span className={styles.workspacePreviewStatus} data-workspace-preview-status={mode}>
-            {mode === "design"
-              ? "Design preview · controls are disabled."
-              : executionContext === "integration"
-                ? "Run preview · connected host operations are enabled."
-                : "Run preview · real adapter controls use the selected synthetic fixture."}
+            {mode === "connections"
+              ? "Connections workspace · drafts are inert until a later wiring task."
+              : mode === "design"
+                ? "Design preview · controls are disabled."
+                : executionContext === "integration"
+                  ? "Run preview · connected host operations are enabled."
+                  : "Run preview · real adapter controls use the selected synthetic fixture."}
           </span>
           <span className={styles.workspaceSessionStatus}>
             <span>{project.navigationStatus}</span>
@@ -4850,6 +4858,21 @@ function SurfaceEditor({
               type="button"
             >
               Design
+            </button>
+            <button
+              aria-describedby={modeStatusId}
+              aria-pressed={mode === "connections"}
+              disabled={
+                masterController !== null ||
+                sourceDraft !== null ||
+                persistenceState?.pending === "opening" ||
+                publicationPending
+              }
+              onClick={() => chooseMode("connections")}
+              ref={connectionsModeButton}
+              type="button"
+            >
+              Connections
             </button>
             <button
               aria-describedby={modeStatusId}
@@ -4974,21 +4997,31 @@ function SurfaceEditor({
           </details>
           <details className={styles.workspaceBoundary}>
             <summary>
-              <strong>{mode === "design" ? "Preview boundary" : "Runtime boundary"}</strong>
+              <strong>
+                {mode === "connections"
+                  ? "Connections boundary"
+                  : mode === "design"
+                    ? "Preview boundary"
+                    : "Runtime boundary"}
+              </strong>
               <span>
-                {mode === "design"
-                  ? "Catalog fixture · no live calls"
-                  : executionContext === "integration"
-                    ? "Explicit host connection"
-                    : "Synthetic fixture only"}
+                {mode === "connections"
+                  ? "Inert intent metadata · no executable writes"
+                  : mode === "design"
+                    ? "Catalog fixture · no live calls"
+                    : executionContext === "integration"
+                      ? "Explicit host connection"
+                      : "Synthetic fixture only"}
               </span>
             </summary>
             <p>
-              {mode === "design"
-                ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
-                : executionContext === "integration"
-                  ? "Only explicitly connected host operations can execute. Navigation stays within this authored Source. Storage, resources, publication, activation and production remain blocked; Run never saves inputs or results."
-                  : "Controls use authenticated Catalog fixtures and local managed-surface navigation. Resources, storage, publication, activation, integration, and production calls remain blocked; Run never changes the authored Source."}
+              {mode === "connections"
+                ? "Connections forms are persisted as separate inert project metadata. Source, host calls, and behavior handlers remain unchanged."
+                : mode === "design"
+                  ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
+                  : executionContext === "integration"
+                    ? "Only explicitly connected host operations can execute. Navigation stays within this authored Source. Storage, resources, publication, activation and production remain blocked; Run never saves inputs or results."
+                    : "Controls use authenticated Catalog fixtures and local managed-surface navigation. Resources, storage, publication, activation, integration, and production calls remain blocked; Run never changes the authored Source."}
             </p>
           </details>
           <p
@@ -4999,11 +5032,13 @@ function SurfaceEditor({
             id={modeStatusId}
             role="status"
           >
-            {mode === "design"
-              ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
-              : executionContext === "integration"
-                ? "Run mode · explicitly connected host operations are enabled; production remains blocked."
-                : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
+            {mode === "connections"
+              ? "Connections workspace · incomplete intents are durable metadata; executable wiring is not available."
+              : mode === "design"
+                ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
+                : executionContext === "integration"
+                  ? "Run mode · explicitly connected host operations are enabled; production remains blocked."
+                  : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
           </p>
         </div>
       </header>
@@ -5033,7 +5068,7 @@ function SurfaceEditor({
             />
           )
         }
-        hidden={mode === "run"}
+        hidden={mode !== "design"}
         interactive={designEditsAvailable}
         model={model}
         onBatchSlotPlacement={placeSelectedLayers}
@@ -5047,11 +5082,21 @@ function SurfaceEditor({
         selectedSurface={selectedSurface}
       />
 
+      {mode === "connections" ? (
+        <ConnectionsWorkspace
+          controller={projectController}
+          record={projectState?.session.record ?? authoringProjectRecord}
+          surfaceId={selectedSurface.sourceId}
+          surfaceName={selectedSurface.name}
+        />
+      ) : null}
+
       <section
         aria-labelledby="workspace-title"
         className={styles.canvasWorkspace}
         data-canvas-workspace="true"
         data-mode={mode}
+        hidden={mode === "connections"}
       >
         <div
           className={styles.canvasStage}
@@ -5147,7 +5192,7 @@ function SurfaceEditor({
                   }
                   documentId={workspaceSnapshot.documentId}
                   hostPorts={runHostPorts}
-                  mode={mode}
+                  mode={mode === "run" ? "run" : "design"}
                   projectId={project.id}
                   registry={workspaceSnapshot.runtime.registry}
                   selection={mode === "design" ? selection : null}
@@ -5209,7 +5254,7 @@ function SurfaceEditor({
             surfaceName={selectedSurface.name}
           />
         }
-        hidden={mode === "run"}
+        hidden={mode !== "design"}
         inspector={inspector}
         onBindingEdit={editSelectedBinding}
         onEdit={editSelectedProperty}

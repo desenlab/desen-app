@@ -21,6 +21,10 @@ import {
   M10A_T18_LEGACY_INPUT_SUCCESSORS,
 } from "./m10a-t18-legacy-input-receipts.mjs";
 import {
+  M10A_T19_ADDED_APP_SOURCE_RECEIPTS,
+  M10A_T19_LEGACY_INPUT_SUCCESSORS,
+} from "./m10a-t19-legacy-input-receipts.mjs";
+import {
   M10A_T15_ADDED_APP_SOURCE_RECEIPTS,
   M10A_T15_LEGACY_INPUT_SUCCESSORS,
 } from "./m10a-t15-legacy-input-receipts.mjs";
@@ -276,6 +280,7 @@ const M10A_T15_APP_SOURCE_RECEIPT_PATHS = Object.freeze(
     ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
     ...M10A_T17_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
     ...M10A_T18_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
+    ...M10A_T19_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
   ].sort((left, right) => left.localeCompare(right, "en-US")),
 );
 const M10A_T15_APP_GRAPH_SOURCE_PATHS = Object.freeze(
@@ -286,6 +291,7 @@ const M10A_T15_APP_GRAPH_SOURCE_PATHS = Object.freeze(
     ).map(({ path: sourcePath }) => sourcePath),
     ...M10A_T17_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
     ...M10A_T18_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
+    ...M10A_T19_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
   ].sort((left, right) => left.localeCompare(right, "en-US")),
 );
 
@@ -1394,40 +1400,40 @@ const M10A_T14_APP_GRAPH_SUCCESSOR = Object.freeze({
 const M10A_T15_APP_GRAPH_SUCCESSOR = Object.freeze({
   app: Object.freeze({
     ...M10A_T14_APP_GRAPH_SUCCESSOR.app,
-    moduleCount: 710,
-    staticEdges: 3_049,
-    reachableProductionSourceFiles: 75,
-    graphSha256: "sha256:86dd8888dda8c3799b73ebb02ee02462c19a01f5cc2b5cc00edf662e133d0961",
+    moduleCount: 712,
+    staticEdges: 3_055,
+    reachableProductionSourceFiles: 77,
+    graphSha256: "sha256:8371b57ad8fddffe3ad1ef96e1d9c4441be2898aabdb983336dedb005f0005ad",
   }),
   appOutput: Object.freeze({
     files: 3,
     outputs: Object.freeze([
       Object.freeze({
-        fileName: "assets/index-BIYtAQOG.css",
-        type: "asset",
-        isEntry: null,
-        bytes: 155_544,
-        sha256: "sha256:9e9e01c2d7847444f731d880ea4003586134f4f87703292d2a78c9ba1610b5fd",
-      }),
-      Object.freeze({
-        fileName: "assets/index-BrDvYG2L.js",
+        fileName: "assets/index-B0mWo1Lc.js",
         type: "chunk",
         isEntry: true,
-        bytes: 3_707_567,
-        sha256: "sha256:9fac458500d99baf517859cf6d83509d845a050f72b09fcd04aebf7021b6cf46",
+        bytes: 3_718_560,
+        sha256: "sha256:150217af0808c11d8394a5bc4d02ee17b908de2cb8d0b84aac05ed2640209df8",
+      }),
+      Object.freeze({
+        fileName: "assets/index-CRCoOyS9.css",
+        type: "asset",
+        isEntry: null,
+        bytes: 157_832,
+        sha256: "sha256:6862654fab9917620a0fdc540068b163bd6a93a0a6d2bcc2e62d4433dc82c741",
       }),
       Object.freeze({
         fileName: "index.html",
         type: "asset",
         isEntry: null,
         bytes: 511,
-        sha256: "sha256:34a2521e416a62db37789c05708d62cc66661308f9b350545836df1fb5f412e4",
+        sha256: "sha256:5ce3d05ef84d98193df1dce1739f432d2188c42d8f9a52f42c8a04dabffe894e",
       }),
     ]),
-    identitySha256: "sha256:47f94500967b8b3793132186c70a2e6f576eab962f73e41bf4a463e05eaa2a7b",
+    identitySha256: "sha256:92571884c8136614a711653478dd65f85414e938ad9dc24f5c2c3831c6335104",
   }),
-  backingFiles: 727,
-  backingSnapshotSha256: "sha256:b9722b4f7880ae14687f229b0c1980cb38c442ad4507a2a12829af6fb0f4b5b8",
+  backingFiles: 729,
+  backingSnapshotSha256: "sha256:c91be6845aeb215b6e4e62f3b4004d5d96dbbee9785ab32a05895323ca8ff0f9",
 });
 
 const FOCUSED_TEST_COMMANDS = Object.freeze([
@@ -1962,6 +1968,7 @@ async function acquireFiles(options) {
     ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
     ...M10A_T17_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
     ...M10A_T18_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
+    ...M10A_T19_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
   ]) {
     files.set(
       relativePath,
@@ -2405,6 +2412,42 @@ const M10A_T12_BROWSER_PACKAGE_SUCCESSOR = Object.freeze({
  * Unrelated paths pass through unchanged; a stale or mutated successor cannot use the inverse.
  */
 export function projectM10AT15HistoricalInput(relativePath, bytes) {
+  const t19Successor = M10A_T19_LEGACY_INPUT_SUCCESSORS.find(
+    ({ path: owned }) => owned === relativePath,
+  );
+  if (t19Successor !== undefined) {
+    if (
+      !Buffer.isBuffer(bytes) ||
+      bytes.byteLength !== t19Successor.current.bytes ||
+      sha256(bytes) !== t19Successor.current.sha256
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The T19 input differs from its reviewed successor.", {
+        path: relativePath,
+      });
+    }
+    const lines = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION").split("\n");
+    for (const hunk of t19Successor.inverseHunks.toReversed()) {
+      const start = hunk.remove === 0 ? hunk.start : hunk.start - 1;
+      if (start < 0 || start + hunk.remove > lines.length) {
+        fail("SUCCESSOR_POLICY_VIOLATION", "The reviewed T19 inverse is out of bounds.", {
+          path: relativePath,
+        });
+      }
+      lines.splice(start, hunk.remove, ...hunk.restore);
+    }
+    const predecessor = Buffer.from(lines.join("\n"));
+    if (
+      predecessor.byteLength !== t19Successor.predecessor.bytes ||
+      sha256(predecessor) !== t19Successor.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The T19 inverse does not reconstruct its exact predecessor.",
+        { path: relativePath },
+      );
+    }
+    bytes = predecessor;
+  }
   const t18Successor = M10A_T18_LEGACY_INPUT_SUCCESSORS.find(
     ({ path: owned }) => owned === relativePath,
   );
@@ -3389,6 +3432,33 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
         "T18 cannot replace a predecessor through its additive inventory.",
+      );
+    t15SourceReceipts.set(added.path, { ...added, sha256: `sha256:${added.sha256}` });
+  }
+  for (const successor of M10A_T19_LEGACY_INPUT_SUCCESSORS) {
+    if (!successor.path.startsWith("apps/desen-app/src/")) continue;
+    const prior = t15SourceReceipts.get(successor.path);
+    if (
+      prior?.bytes !== successor.predecessor.bytes ||
+      prior.sha256 !== `sha256:${successor.predecessor.sha256}`
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "T19 must retain the exact reviewed T18 predecessor source receipt.",
+        { path: successor.path },
+      );
+    }
+    t15SourceReceipts.set(successor.path, {
+      path: successor.path,
+      bytes: successor.current.bytes,
+      sha256: `sha256:${successor.current.sha256}`,
+    });
+  }
+  for (const added of M10A_T19_ADDED_APP_SOURCE_RECEIPTS) {
+    if (t15SourceReceipts.has(added.path))
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "T19 cannot replace a predecessor through its additive inventory.",
       );
     t15SourceReceipts.set(added.path, { ...added, sha256: `sha256:${added.sha256}` });
   }

@@ -56,6 +56,7 @@ import {
 import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "../scripts/lib/m10a-t16-legacy-input-receipts.mjs";
 import { M10A_T17_LEGACY_INPUT_SUCCESSORS } from "../scripts/lib/m10a-t17-legacy-input-receipts.mjs";
 import { M10A_T18_LEGACY_INPUT_SUCCESSORS } from "../scripts/lib/m10a-t18-legacy-input-receipts.mjs";
+import { M10A_T19_LEGACY_INPUT_SUCCESSORS } from "../scripts/lib/m10a-t19-legacy-input-receipts.mjs";
 
 const M10A_T15_INPUT_RECEIPTS = Object.freeze([
   {
@@ -1112,16 +1113,16 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
       ({ id }) => id === "apps/desen-app/src/design-system-explorer.ts",
     ),
   );
-  assert.equal(current.appSourceAudit.completeSourceFiles, 80);
-  assert.equal(current.appSourceAudit.productionGraphSourceFiles, 75);
-  assert.equal(current.runtimeResolution.app.moduleCount, 710);
-  assert.equal(current.runtimeResolution.app.staticEdges, 3_049);
+  assert.equal(current.appSourceAudit.completeSourceFiles, 82);
+  assert.equal(current.appSourceAudit.productionGraphSourceFiles, 77);
+  assert.equal(current.runtimeResolution.app.moduleCount, 712);
+  assert.equal(current.runtimeResolution.app.staticEdges, 3_055);
   assert.equal(current.runtimeResolution.app.dynamicEdges, 0);
   const appEntryOutput = current.runtimeResolution.appOutput.outputs.find(
     ({ fileName, type, isEntry }) =>
       type === "chunk" && isEntry === true && fileName.endsWith(".js"),
   );
-  assert.equal(appEntryOutput?.bytes, 3_707_567);
+  assert.equal(appEntryOutput?.bytes, 3_718_560);
   const t08Artifact = JSON.parse(
     await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
   );
@@ -1784,6 +1785,9 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   for (const receipt of M10A_T15_INPUT_RECEIPTS) {
     const current = await readFile(path.join(ROOT, receipt.path));
+    const t19Successor = M10A_T19_LEGACY_INPUT_SUCCESSORS.find(
+      ({ path: sourcePath }) => sourcePath === receipt.path,
+    );
     const t18Successor = M10A_T18_LEGACY_INPUT_SUCCESSORS.find(
       ({ path: sourcePath }) => sourcePath === receipt.path,
     );
@@ -1794,7 +1798,11 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
       ({ path: sourcePath }) => sourcePath === receipt.path,
     );
     const expectedCurrent =
-      t18Successor?.current ?? t17Successor?.current ?? t16Successor?.current ?? receipt.current;
+      t19Successor?.current ??
+      t18Successor?.current ??
+      t17Successor?.current ??
+      t16Successor?.current ??
+      receipt.current;
     assert.equal(current.byteLength, expectedCurrent.bytes, receipt.path);
     assert.equal(
       createHash("sha256").update(current).digest("hex"),
