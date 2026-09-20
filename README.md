@@ -4,10 +4,7 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01 through T19 are complete. T13's assets, T14's history/reuse, T15's
-> masters/instances, T16's variants, T17's Design System explorer, T18's library impact boundary and
-> T19's Connections workspace have exact-head hosted and fresh-`main` closure; they add no Runtime,
-> Publisher, Core/protocol, G10A, or M11 authority.
+> M10/G10 and M10A-T01 through T19 are complete; T20 is next; M11 remains gated by G10A.
 
 ## Implementation progress
 

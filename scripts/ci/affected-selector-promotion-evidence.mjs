@@ -1132,6 +1132,7 @@ const M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "apps/desen-app/src/connections-workspace.tsx",
   "apps/desen-app/test/connection-intent-drafts.test.ts",
   "apps/desen-app/test/connections-workspace.test.tsx",
+  "docs/proof/M10A-T19.md",
   "scripts/lib/m10a-t19-legacy-input-receipts.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
@@ -1478,8 +1479,8 @@ const M10A_T18_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   ownershipSha256: "62d1d7505eed83ba980b29fbed5e91369539a14d78650701536790ffa212cdae",
 });
 const M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: 1928,
-  trackedPathSetSha256: "e1dfa256e749f7fe22445aafb8ff3806a583f570e7ed76452c395768316d16bf",
+  trackedPathCount: 1929,
+  trackedPathSetSha256: "150c8f3d3094c7048aa5085a1aee38417bf272449e5228bc8350d5761d59babf",
   proofOwnedPathCount: 246,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 246,
@@ -1488,10 +1489,10 @@ const M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     FROZEN_INPUT: 172,
     PACKAGE_OR_APPLICATION: 811,
     SHARED_PROOF_INFRASTRUCTURE: 422,
-    PROJECT_DOCUMENTATION: 177,
+    PROJECT_DOCUMENTATION: 178,
     REPOSITORY_POLICY: 11,
   }),
-  ownershipSha256: "af36a406ca155dae6ce8be9bb102f1c9309a5bc6af3e4069c7da22f8ad370759",
+  ownershipSha256: "209b7074f9a1a49ec49e06ee1ee1dfa30afcd6ee77d9ad30b41e3fba6185f576",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -2303,15 +2304,15 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   let t18SuccessorPaths = currentSuccessorPaths;
   if (isDeepStrictEqual(successorReview, M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW)) {
     if (
-      M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 5 ||
-      new Set(M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 5 ||
+      M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 6 ||
+      new Set(M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 6 ||
       M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.some(
         (trackedPath) => !currentSuccessorPaths.includes(trackedPath),
       )
     ) {
       fail(
         "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-        "The authenticated M10A-T19 successor must include exactly the reviewed five added paths.",
+        "The authenticated M10A-T19 successor must include exactly the reviewed six added paths.",
       );
     }
     t18SuccessorPaths = currentSuccessorPaths.filter(

@@ -285,7 +285,7 @@ const M11_TASK_IDS = Object.freeze(
 );
 const FIVE_COLUMN_TASK_BOARD_SECTIONS = Object.freeze(["M00", "M01", "operational"]);
 const TASK_BOARD_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
-const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 139;
+const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 140;
 const EXPECTED_COMPLETED_GATES = 11;
 const SC_02_COMPLETE_ADAPT_MARKER = "**Status:** Complete on 2026-09-10. Decision: **`adapt`**.";
 
@@ -468,7 +468,8 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T15" ||
       taskId === "M10A-T16" ||
       taskId === "M10A-T17" ||
-      taskId === "M10A-T18"
+      taskId === "M10A-T18" ||
+      taskId === "M10A-T19"
         ? "DONE"
         : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
@@ -1001,9 +1002,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   const m10aCompletionPercent = Math.round((completedM10ATasks / M10A_TASK_IDS.length) * 100);
   assert.equal(completedTasks, EXPECTED_COMPLETED_IMPLEMENTATION_TASKS);
   assert.equal(completedGates, EXPECTED_COMPLETED_GATES);
-  assert.equal(completedM10ATasks, 18);
-  assert.equal(completionPercent, 79);
-  assert.equal(m10aCompletionPercent, 64);
+  assert.equal(completedM10ATasks, 19);
+  assert.equal(completionPercent, 80);
+  assert.equal(m10aCompletionPercent, 68);
 
   const readme = await readFile(resolve(WORKSPACE_ROOT, "README.md"), "utf8");
   const projectStatus = await readFile(resolve(WORKSPACE_ROOT, "PROJECT-STATUS.md"), "utf8");
@@ -1079,21 +1080,18 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.equal(statuses.get("M10A-T16"), "DONE");
   assert.equal(statuses.get("M10A-T17"), "DONE");
   assert.equal(statuses.get("M10A-T18"), "DONE");
-  assert.equal(statuses.get("M10A-T19"), "NOT_STARTED");
+  assert.equal(statuses.get("M10A-T19"), "DONE");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
   assert.ok(
     normalizedReadme.includes(
-      "**Next task:** `M10A-T19` (`NOT_STARTED`; Connections workspace and safe drafts)",
+      "**Next task:** `M10A-T20` (`NOT_STARTED`; visual typed state, event, action and navigation wiring)",
     ),
   );
-  assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T18 are DONE"));
+  assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T19 are DONE"));
   assert.ok(
     normalizedFullProjectStatus.includes(
-      "M10A-T19 — Connections workspace and safe drafts — is the selected next task",
+      "M10A-T20 — visual typed state, event, action and navigation wiring — is the selected next task",
     ),
-  );
-  assert.ok(
-    normalizedFullProjectStatus.includes("M10A-T20 is also dependency-ready but unselected"),
   );
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(
@@ -1139,9 +1137,10 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.ok(
     normalizedStartHere.includes(
-      "T19 seçilmiş sıradaki görevdir; T20 de bağımlılık açısından hazırdır; ikisi de `NOT_STARTED`.",
+      "`M10A-T19` `DONE`: ayrı Connections çalışma alanı ve dayanıklı inert taslaklar için",
     ),
   );
+  assert.ok(normalizedStartHere.includes("`M10A-T20` seçilmiş sıradaki görevdir ve `NOT_STARTED`"));
   assert.equal(
     normalizedSc02.split(SC_02_COMPLETE_ADAPT_MARKER).length - 1,
     1,
