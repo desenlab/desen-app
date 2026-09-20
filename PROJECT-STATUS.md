@@ -12,8 +12,7 @@ SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and
 **M10A-T01 through M10A-T18 are DONE.** T12's 0.7.0 Catalog and responsive-authoring boundary,
 T13's safe local assets, T14's bounded history and identity-safe reuse operations, T15's
 masters/instances authoring boundary, T16's variants/visual-state authoring boundary, T17's
-Catalog-backed Design System explorer and T18's library management/impact boundary passed exact-head
-hosted and fresh-`main` closure. They add no
+Catalog-backed Design System explorer and T18 library impact are closed with hosted/fresh-`main` evidence. They add no
 Runtime, Publisher, Core/protocol, G10A, or M11 authority. T19 is selected next; T20 is also dependency-ready. M11 has not started. The frozen protocol, Runtime
 Core, SC-01 profile, and completed T02 authority are unchanged.
 
@@ -34,8 +33,7 @@ T08's 0.5.0 and T09's 0.6.0 artifacts are immutable historical receipts; T12 own
 Catalog capture. T10 adds only its application-owned project/surface registry and generation-fenced storage
 boundary. T11 adds bounded App-owned direct manipulation, T13 adds safe local assets, T14 adds
 bounded history/reuse operations, T15 adds bounded masters/instances authoring, T16 adds bounded
-variants and visual-state authoring, T17 adds the Catalog-backed Design System explorer, and T18 adds
-library version/usage/impact review; none adds
+variants and visual-state authoring, T17 adds the Catalog-backed Design System explorer, and T18 adds library impact review; none adds
 Publisher, Runtime, Core/protocol, G10A, or M11 authority.
 
 ## M10 closure
