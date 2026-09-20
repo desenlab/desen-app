@@ -2558,6 +2558,34 @@ describe("Desen App application shell", () => {
     ).toBe("Work email");
   });
 
+  it("keeps typed behavior wiring Source-backed in the separate Connections workspace", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    const modeControl = screen.getByRole("group", { name: "Design and Run mode" });
+    fireEvent.click(within(modeControl).getByRole("button", { name: "Connections" }));
+
+    expect(screen.getByRole("heading", { level: 2, name: "Connections" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 3, name: "Behavior" })).toBeTruthy();
+    expect(screen.getByText("Editing Text field through typed controls.")).toBeTruthy();
+    expect(screen.getByRole("status", { name: "Mode safety" }).textContent).toBe(
+      "Connections workspace · typed behavior edits are Source-backed; host execution remains unavailable.",
+    );
+
+    const panel = screen.getByRole("region", { name: "Events & Actions" });
+    const deleteHandler = within(panel).getByRole("button", {
+      name: "Delete change event handler",
+    });
+    fireEvent.click(deleteHandler);
+    expect(within(panel).getByText("No handler")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Undo last authoring edit" }));
+    expect(within(panel).getByText("Handler added")).toBeTruthy();
+  });
+
   it("rejects stale hidden authoring callbacks while Run interactions leave Source unchanged", async () => {
     const previewPreflight = vi.spyOn(authoringPreview, "prepareAuthoringPreviewBundle");
     renderApplication("/projects/account-app/surfaces/sign-in");

@@ -52,4 +52,29 @@ describe("Connections workspace", () => {
       "pending",
     );
   });
+
+  it("renders Source-backed visual behavior controls beside inert intent notes", () => {
+    const fixture = createProjectAuthoringFixture();
+    const surfaceId = Object.keys(fixture.project.read().session.record.source.surfaces)[0] ?? "";
+    const view = render(
+      <ConnectionsWorkspace
+        behaviorPanel={<button type="button">Apply typed state wiring</button>}
+        behaviorSubject="Email field"
+        controller={fixture.project}
+        record={fixture.project.read().session.record}
+        surfaceId={surfaceId}
+        surfaceName="Home"
+      />,
+    );
+    cleanup = () => {
+      view.unmount();
+      fixture.project.dispose();
+      fixture.lifecycle.dispose();
+    };
+
+    expect(screen.getByRole("heading", { name: "Behavior" })).toBeTruthy();
+    expect(screen.getByText("Editing Email field through typed controls.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Apply typed state wiring" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Saved intents" })).toBeTruthy();
+  });
 });

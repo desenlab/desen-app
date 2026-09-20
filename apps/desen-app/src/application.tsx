@@ -3831,8 +3831,10 @@ function SurfaceEditor({
     publicationController.replaceSnapshot(readCurrentPublicationSnapshot());
   }, [persistenceState, preview, publicationController, readCurrentPublicationSnapshot]);
 
-  function isDesignMode(allowSourceDraft = false): boolean {
-    if (modeRef.current !== "design") return false;
+  function isAuthoringMode(allowConnections: boolean, allowSourceDraft = false): boolean {
+    if (modeRef.current !== "design" && !(allowConnections && modeRef.current === "connections")) {
+      return false;
+    }
     if (!allowSourceDraft && sourceDraftRef.current !== null) return false;
     if (projectController !== null) {
       const persistence = persistenceController?.read();
@@ -3851,6 +3853,15 @@ function SurfaceEditor({
     if (publicationControllerLifetime.current !== publicationController) return false;
     const current = publicationController.read();
     return !current.disposed && current.pending === null;
+  }
+
+  function isDesignMode(allowSourceDraft = false): boolean {
+    return isAuthoringMode(false, allowSourceDraft);
+  }
+
+  /** Behavior wiring is authored in Design or the dedicated Connections workspace. */
+  function isBehaviorAuthoringMode(): boolean {
+    return isAuthoringMode(true);
   }
 
   function clearTransientDiagnostics(): void {
@@ -4322,7 +4333,7 @@ function SurfaceEditor({
   }
 
   function connectSelectedInput(stateName: string): AuthoringConnectionResult {
-    if (!isDesignMode() || selection === null) {
+    if (!isBehaviorAuthoringMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
     }
     const result = applyAuthoringInputConnection(
@@ -4347,7 +4358,7 @@ function SurfaceEditor({
   function connectSelectedOperation(
     recipe: AuthoringOperationTriggerConnectionRecipe,
   ): AuthoringConnectionResult {
-    if (!isDesignMode() || selection === null) {
+    if (!isBehaviorAuthoringMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
     }
     const result = applyAuthoringOperationTriggerConnection(
@@ -4370,7 +4381,7 @@ function SurfaceEditor({
   }
 
   function editSelectedCondition(edit: AuthoringConditionEdit): AuthoringConditionEditResult {
-    if (!isDesignMode() || selection === null) {
+    if (!isBehaviorAuthoringMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
     }
     const result = applyAuthoringConditionEdit(
@@ -4403,7 +4414,7 @@ function SurfaceEditor({
   }
 
   function editLocalState(edit: AuthoringStateEdit): AuthoringStateEditResult {
-    if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
+    if (!isBehaviorAuthoringMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     const result = applyAuthoringStateEdit(document, workspaceSnapshot.catalogs, route, edit);
     captureEditDiagnostics(result);
     if (!result.ok) return result;
@@ -4420,7 +4431,7 @@ function SurfaceEditor({
   }
 
   function editSelectedEventAction(edit: AuthoringEventActionEdit): AuthoringEventActionEditResult {
-    if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
+    if (!isBehaviorAuthoringMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     if (eventOwnerSelection === null) {
       return Object.freeze({ ok: false, reason: "owner-invalid" });
     }
@@ -4647,7 +4658,7 @@ function SurfaceEditor({
   }
 
   function transitionHistory(direction: "undo" | "redo"): void {
-    if (!isDesignMode()) return;
+    if (!isBehaviorAuthoringMode()) return;
     if (editorProjectController !== null && projectState !== null) {
       const result = editorProjectController[direction](projectState.session.digest);
       if (!result.ok) {
@@ -4655,7 +4666,7 @@ function SurfaceEditor({
         return;
       }
       clearTransientDiagnostics();
-      selectOne(null);
+      if (modeRef.current !== "connections") selectOne(null);
       setHistoryNotice(
         masterController === null
           ? direction === "undo"
@@ -4689,7 +4700,7 @@ function SurfaceEditor({
     inMemoryCurrentCanonical.current = canonicalizeJson(result.history.document);
     updateInMemoryDirtyProjection();
     clearTransientDiagnostics();
-    selectOne(null);
+    if (modeRef.current !== "connections") selectOne(null);
     setAuthoringSession(Object.freeze({ document: result.history.document, preview: nextPreview }));
     setHistoryNotice(direction === "undo" ? "Last edit undone." : "Edit restored.");
   }
@@ -4774,8 +4785,14 @@ function SurfaceEditor({
     !publicationPending &&
     publicationState?.disposed !== true &&
     !aggregateEditsBlocked;
-  const canUndo = designEditsAvailable && historyState !== null && historyState.past.length > 0;
-  const canRedo = designEditsAvailable && historyState !== null && historyState.future.length > 0;
+  const behaviorEditsAvailable =
+    (mode === "design" || mode === "connections") &&
+    sourceDraft === null &&
+    !publicationPending &&
+    publicationState?.disposed !== true &&
+    !aggregateEditsBlocked;
+  const canUndo = behaviorEditsAvailable && historyState !== null && historyState.past.length > 0;
+  const canRedo = behaviorEditsAvailable && historyState !== null && historyState.future.length > 0;
   const canReuseSelection = designEditsAvailable && selectedSourceNodeIds.length > 0;
   const canPaste = canReuseSelection && authoringClipboard.current !== null;
 
@@ -4819,7 +4836,7 @@ function SurfaceEditor({
         <div className={styles.workspaceCommands}>
           <span className={styles.workspacePreviewStatus} data-workspace-preview-status={mode}>
             {mode === "connections"
-              ? "Connections workspace · drafts are inert until a later wiring task."
+              ? "Connections workspace · visual behavior wiring is Source-backed."
               : mode === "design"
                 ? "Design preview · controls are disabled."
                 : executionContext === "integration"
@@ -5006,7 +5023,7 @@ function SurfaceEditor({
               </strong>
               <span>
                 {mode === "connections"
-                  ? "Inert intent metadata · no executable writes"
+                  ? "Typed behavior wiring · intent notes remain inert"
                   : mode === "design"
                     ? "Catalog fixture · no live calls"
                     : executionContext === "integration"
@@ -5016,7 +5033,7 @@ function SurfaceEditor({
             </summary>
             <p>
               {mode === "connections"
-                ? "Connections forms are persisted as separate inert project metadata. Source, host calls, and behavior handlers remain unchanged."
+                ? "Typed behavior controls update the managed Source through the same aggregate authority as Design. Intent notes remain inert metadata; host calls and runtime execution stay outside this task."
                 : mode === "design"
                   ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
                   : executionContext === "integration"
@@ -5033,7 +5050,7 @@ function SurfaceEditor({
             role="status"
           >
             {mode === "connections"
-              ? "Connections workspace · incomplete intents are durable metadata; executable wiring is not available."
+              ? "Connections workspace · typed behavior edits are Source-backed; host execution remains unavailable."
               : mode === "design"
                 ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
                 : executionContext === "integration"
@@ -5084,10 +5101,47 @@ function SurfaceEditor({
 
       {mode === "connections" ? (
         <ConnectionsWorkspace
+          behaviorPanel={
+            <div aria-label="Visual behavior controls" className={styles.behaviorControls}>
+              {inspector.status === "ready" && behaviorProjection.status === "ready" ? (
+                <>
+                  <InputConnectionControl
+                    connectedStateName={behaviorProjection.inputConnectionStateName}
+                    inspector={inspector}
+                    onConnect={connectSelectedInput}
+                  />
+                  <OperationConnectionControl
+                    inspector={inspector}
+                    model={eventActionModel}
+                    onConnect={connectSelectedOperation}
+                    operationAliases={behaviorProjection.operationAliases}
+                  />
+                  <VisibilityControl
+                    currentWhen={behaviorProjection.currentWhen}
+                    localStates={inspector.localStates}
+                    onEdit={editSelectedCondition}
+                    operationAliases={behaviorProjection.operationAliases}
+                    ownerId={inspector.selection.sourceNodeId}
+                  />
+                </>
+              ) : null}
+              <EventActionPanel
+                model={eventActionModel}
+                onEdit={editSelectedEventAction}
+                surfaceName={selectedSurface.name}
+              />
+              <StatePanel
+                model={stateModel}
+                onEdit={editLocalState}
+                surfaceName={selectedSurface.name}
+              />
+            </div>
+          }
           controller={projectController}
           record={projectState?.session.record ?? authoringProjectRecord}
           surfaceId={selectedSurface.sourceId}
           surfaceName={selectedSurface.name}
+          behaviorSubject={selection?.displayName ?? null}
         />
       ) : null}
 
