@@ -24,7 +24,7 @@ Each completed task retains its own exact-head, merge, and fresh-`main` receipt.
 [M10A-T05 proof](docs/proof/M10A-T05.md), [M10A-T06 proof](docs/proof/M10A-T06.md),
 [M10A-T07 proof](docs/proof/M10A-T07.md), [M10A-T08 proof](docs/proof/M10A-T08.md), [M10A-T09 proof](docs/proof/M10A-T09.md),
 [M10A-T10 proof](docs/proof/M10A-T10.md), [M10A-T11 proof](docs/proof/M10A-T11.md),
-[M10A-T12 proof](docs/proof/M10A-T12.md), [M10A-T13 proof](docs/proof/M10A-T13.md), [M10A-T14 proof](docs/proof/M10A-T14.md), [M10A-T15 proof](docs/proof/M10A-T15.md), [M10A-T16 proof](docs/proof/M10A-T16.md), [M10A-T17 proof](docs/proof/M10A-T17.md), and [M10A-T18 proof](docs/proof/M10A-T18.md) are canonical
+[M10A-T12 proof](docs/proof/M10A-T12.md), [M10A-T13 proof](docs/proof/M10A-T13.md), [M10A-T14 proof](docs/proof/M10A-T14.md), [M10A-T15 proof](docs/proof/M10A-T15.md), [M10A-T16 proof](docs/proof/M10A-T16.md), and the combined [M10A-T17/T18 proof](docs/proof/M10A-T17.md) are canonical
 closure authorities; earlier candidates remain failures. T12 through T14 remain bounded authoring/App boundaries, not Runtime, Publisher, Core/protocol, G10A, or M11
 authority. T05 proves only its private starter Catalog and isolated harness, not normal-App integration,
 persistence, Runtime, Publisher, or protocol authority. T06 proves only the private 0.3.0 form-control
@@ -87,7 +87,7 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 **M10A-T19 — Connections workspace and safe drafts — is the selected next task and `NOT_STARTED`; M10A-T20 is
 also dependency-ready but unselected and `NOT_STARTED`.** The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), [task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t19--connections-workspace-and-safe-drafts), and
-completed [T18 report](docs/proof/M10A-T18.md) define the next bounded boundary. T18 does not authorize
+completed [T18 report](docs/proof/M10A-T17.md#-m10a-t18--library-management-and-impact) define the next bounded boundary. T18 does not authorize
 Runtime activation, Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen

@@ -1,7 +1,7 @@
 # M10A — Design-first product foundation
 
 Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T18 are `DONE`, including
-T18's [exact-head hosted and fresh-`main` closure](../proof/M10A-T18.md). T19 is selected next and
+T18's [exact-head hosted and fresh-`main` closure](../proof/M10A-T17.md#-m10a-t18--library-management-and-impact). T19 is selected next and
 `NOT_STARTED`; T20 is also dependency-ready but unselected. Canonical statuses are in [TASKS.md](TASKS.md).
 
 ## Product promise

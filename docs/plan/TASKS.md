@@ -280,7 +280,7 @@ and fresh-`main` closures as immutable historical receipts while T12 owns the cu
 | M10A-T15 | DONE        | M10A-T09, M10A-T13, M10A-T14                     | [Hosted masters/instances, overrides, detach and isolated master editing closure](../proof/M10A-T15.md) |
 | M10A-T16 | DONE        | M10A-T12, M10A-T15                               | [Hosted variants and visual-state authoring closure](../proof/M10A-T16.md)                              |
 | M10A-T17 | DONE        | M10A-T03, M10A-T16                               | [Hosted design-system explorer and documentation closure](../proof/M10A-T17.md)                         |
-| M10A-T18 | DONE        | M10A-T04, M10A-T17                               | [Hosted library management and impact closure](../proof/M10A-T18.md)                                    |
+| M10A-T18 | DONE        | M10A-T04, M10A-T17                               | [Hosted library management and impact closure](../proof/M10A-T17.md#-m10a-t18--library-management-and-impact) |
 | M10A-T19 | NOT_STARTED | M10A-T10, M10A-T14                               | Separate Connections workspace and durable inert drafts                                                 |
 | M10A-T20 | NOT_STARTED | M10A-T16, M10A-T19                               | Visual typed state, event, action and navigation wiring                                                 |
 | M10A-T21 | NOT_STARTED | M10A-T20                                         | Resource/operation connections and explicit host readiness                                              |
