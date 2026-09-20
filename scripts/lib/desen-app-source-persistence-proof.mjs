@@ -401,7 +401,7 @@ const EXPECTED_FOCUSED_TEST_CASE_COUNTS = Object.freeze({
   [TEST_PATHS.persistence]: 30,
   [TEST_PATHS.controls]: 22,
   [TEST_PATHS.application]: 17,
-  [TEST_PATHS.navigation]: 32,
+  [TEST_PATHS.navigation]: 33,
   [TEST_PATHS.shell]: 44,
 });
 
@@ -1102,7 +1102,7 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(
 
 /** Exact reviewed App cases in the five-file M09-T12 focused suite. */
 export const DESEN_APP_SOURCE_PERSISTENCE_FOCUSED_TEST_CASES = 142;
-const CURRENT_DESEN_APP_SOURCE_PERSISTENCE_FOCUSED_TEST_CASES = 145;
+const CURRENT_DESEN_APP_SOURCE_PERSISTENCE_FOCUSED_TEST_CASES = 146;
 
 /** Exact immutable proof receipts bounding the M09-T12 App authority. */
 export const DESEN_APP_SOURCE_PERSISTENCE_PARENT_PINS = Object.freeze([

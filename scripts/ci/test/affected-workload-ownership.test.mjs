@@ -39,8 +39,8 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   CI_POLICY: 50,
   DEPENDENCY_POLICY: 39,
   FROZEN_INPUT: 172,
-  PACKAGE_OR_APPLICATION: 803,
-  SHARED_PROOF_INFRASTRUCTURE: 419,
+  PACKAGE_OR_APPLICATION: 805,
+  SHARED_PROOF_INFRASTRUCTURE: 420,
   PROJECT_DOCUMENTATION: 176,
 });
 const M10A_T16_SUCCESSOR_PATHS = Object.freeze([
@@ -48,6 +48,11 @@ const M10A_T16_SUCCESSOR_PATHS = Object.freeze([
   "apps/desen-app/test/authoring-visual-styles.test.ts",
   "docs/proof/M10A-T16.md",
   "scripts/lib/m10a-t16-legacy-input-receipts.mjs",
+]);
+const M10A_T17_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app/src/design-system-explorer.ts",
+  "apps/desen-app/test/design-system-explorer.test.ts",
+  "scripts/lib/m10a-t17-legacy-input-receipts.mjs",
 ]);
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -588,7 +593,8 @@ async function currentTrackedPaths() {
 }
 
 function calculateAffectedWorkloadOwnershipReview(rawPaths) {
-  const current = rawPaths.filter((candidate) => !M10A_T16_SUCCESSOR_PATHS.includes(candidate));
+  const withoutT17 = rawPaths.filter((candidate) => !M10A_T17_SUCCESSOR_PATHS.includes(candidate));
+  const current = withoutT17.filter((candidate) => !M10A_T16_SUCCESSOR_PATHS.includes(candidate));
   const withoutT15 = current.filter((candidate) => !M10A_T15_SUCCESSOR_PATHS.includes(candidate));
   const paths =
     rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
@@ -608,7 +614,11 @@ function calculateAffectedWorkloadOwnershipReview(rawPaths) {
 
 function calculateAffectedWorkloadOwnershipReviewBase(rawPaths) {
   return calculateAffectedWorkloadOwnershipReviewRaw(
-    rawPaths.filter((candidate) => !M10A_T16_SUCCESSOR_PATHS.includes(candidate)),
+    rawPaths.filter(
+      (candidate) =>
+        !M10A_T17_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T16_SUCCESSOR_PATHS.includes(candidate),
+    ),
   );
 }
 
@@ -647,7 +657,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1916 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1919 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 

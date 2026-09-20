@@ -12,6 +12,7 @@ import { authenticateM10AT13Artifact } from "./m10a-t13-proof.mjs";
 import { authenticateM10AT14Artifact } from "./m10a-t14-proof.mjs";
 import { executeM10AT15Workloads } from "./m10a-t15-execution.mjs";
 import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "./m10a-t16-legacy-input-receipts.mjs";
+import { M10A_T17_LEGACY_INPUT_SUCCESSORS } from "./m10a-t17-legacy-input-receipts.mjs";
 import { M10A_T15_APP_TEST_FILES, M10A_T15_WORKLOADS } from "./m10a-t15-workloads.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
@@ -119,28 +120,34 @@ function noOverrides(value) {
  * This is a historical byte projection; workload execution still runs against the live tree.
  */
 function projectM10AT15CurrentBytes(relative, bytes) {
-  const successor = M10A_T16_LEGACY_INPUT_SUCCESSORS.find(({ path: owned }) => owned === relative);
-  if (successor === undefined) return bytes;
-  if (
-    !Buffer.isBuffer(bytes) ||
-    bytes.byteLength !== successor.current.bytes ||
-    sha256(bytes) !== successor.current.sha256
-  )
-    fail("SOURCE_DRIFT", "The T16 successor differs from its reviewed current receipt.");
-  const lines = bytes.toString("utf8").split("\n");
-  for (const hunk of [...successor.inverseHunks].reverse()) {
-    const start = hunk.remove === 0 ? hunk.start : hunk.start - 1;
-    if (start < 0 || start + hunk.remove > lines.length)
-      fail("SOURCE_DRIFT", "The reviewed T16 inverse is out of bounds.");
-    lines.splice(start, hunk.remove, ...hunk.restore);
+  let projected = bytes;
+  for (const [label, successors] of [
+    ["T17", M10A_T17_LEGACY_INPUT_SUCCESSORS],
+    ["T16", M10A_T16_LEGACY_INPUT_SUCCESSORS],
+  ]) {
+    const successor = successors.find(({ path: owned }) => owned === relative);
+    if (successor === undefined) continue;
+    if (
+      !Buffer.isBuffer(projected) ||
+      projected.byteLength !== successor.current.bytes ||
+      sha256(projected) !== successor.current.sha256
+    )
+      fail("SOURCE_DRIFT", `The ${label} successor differs from its reviewed current receipt.`);
+    const lines = projected.toString("utf8").split("\n");
+    for (const hunk of [...successor.inverseHunks].reverse()) {
+      const start = hunk.remove === 0 ? hunk.start : hunk.start - 1;
+      if (start < 0 || start + hunk.remove > lines.length)
+        fail("SOURCE_DRIFT", `The reviewed ${label} inverse is out of bounds.`);
+      lines.splice(start, hunk.remove, ...hunk.restore);
+    }
+    projected = Buffer.from(lines.join("\n"));
+    if (
+      projected.byteLength !== successor.predecessor.bytes ||
+      sha256(projected) !== successor.predecessor.sha256
+    )
+      fail("SOURCE_DRIFT", `The reviewed ${label} inverse does not reproduce its predecessor.`);
   }
-  const predecessor = Buffer.from(lines.join("\n"));
-  if (
-    predecessor.byteLength !== successor.predecessor.bytes ||
-    sha256(predecessor) !== successor.predecessor.sha256
-  )
-    fail("SOURCE_DRIFT", "The reviewed T16 inverse does not reproduce its predecessor.");
-  return predecessor;
+  return projected;
 }
 
 async function canonical(value) {

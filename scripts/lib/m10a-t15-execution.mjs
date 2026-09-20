@@ -15,6 +15,7 @@ import {
   M10A_T15_THEME_BROWSER_TITLES,
   M10A_T15_WORKLOADS,
 } from "./m10a-t15-workloads.mjs";
+import { M10A_T17_SUCCESSOR_TESTS } from "./m10a-t17-legacy-input-receipts.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const MAX_REPORT_BYTES = 4 * 1024 * 1024;
@@ -225,6 +226,7 @@ export function parseM10AT15VitestReceipt(owner, input, workspaceRoot = ROOT) {
   const files = [];
   const observedNames = [];
   let assertionCount = 0;
+  let successorAssertionCount = 0;
   for (const suite of input.testResults) {
     if (
       suite.status !== "passed" ||
@@ -242,7 +244,11 @@ export function parseM10AT15VitestReceipt(owner, input, workspaceRoot = ROOT) {
       relative.split("/").includes("..")
     )
       fail("REPORT_INVALID", `${owner} contains a foreign test file.`);
+    const successorTests = M10A_T17_SUCCESSOR_TESTS.filter(
+      ({ path: successorPath }) => successorPath === `${packagePath}/${relative}`,
+    );
     const names = [];
+    const observedSuccessors = new Set();
     for (const assertion of suite.assertionResults) {
       if (
         assertion.status !== "passed" ||
@@ -250,14 +256,23 @@ export function parseM10AT15VitestReceipt(owner, input, workspaceRoot = ROOT) {
         assertion.fullName.length === 0
       )
         fail("REPORT_INVALID", `${owner} contains an unpassed assertion.`);
-      names.push(assertion.fullName);
-      observedNames.push(assertion.fullName);
-      assertionCount += 1;
+      const successor = successorTests.find(({ title }) => assertion.fullName.includes(title));
+      if (successor !== undefined) {
+        if (observedSuccessors.has(successor.title))
+          fail("REPORT_INVALID", `${owner} contains a duplicate successor assertion.`);
+        observedSuccessors.add(successor.title);
+        successorAssertionCount += 1;
+      } else {
+        names.push(assertion.fullName);
+        observedNames.push(assertion.fullName);
+        assertionCount += 1;
+      }
     }
+    if (names.length === 0) fail("REPORT_INVALID", `${owner} contains an empty historical suite.`);
     files.push({ path: `${packagePath}/${relative}`, tests: names.sort() });
   }
   if (
-    assertionCount !== input.numPassedTests ||
+    assertionCount + successorAssertionCount !== input.numPassedTests ||
     new Set(files.map(({ path: name }) => name)).size !== files.length
   )
     fail("REPORT_INVALID", `${owner} test counts or identities drifted.`);

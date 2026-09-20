@@ -22,6 +22,7 @@ import {
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 
 import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
+import { prepareDesignSystemExplorer } from "./design-system-explorer.js";
 import { useProjectAuthoringController } from "./project-authoring-context.js";
 import { MasterInstancePanel } from "./master-instance-panel.js";
 import { MasterDraftBanner } from "./master-draft-banner.js";
@@ -141,6 +142,7 @@ import {
 } from "./project-workspace-profile.js";
 import {
   createDesenAppProjectPath,
+  createDesenAppDesignSystemPath,
   installDesenAppNavigationGuard,
   navigateDesenApp,
   readDesenAppLocation,
@@ -237,6 +239,7 @@ import type {
   AuthoringSlotSelection,
   AuthoringSlotState,
 } from "./authoring-slots.js";
+import type { DesignSystemExplorerModel } from "./design-system-explorer.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
 import type { ProjectInventoryFixtureHandle } from "./project-inventory-fixture.js";
@@ -539,7 +542,9 @@ function AppHeader({
 }>) {
   const projectsActive = route.kind === "projects" || route.kind === "project";
   const project =
-    route.kind === "project" ? findDesenAppProject(route.projectId, projects) : undefined;
+    route.kind === "project" || route.kind === "design-system"
+      ? findDesenAppProject(route.projectId, projects)
+      : undefined;
   const surface =
     project === undefined || route.kind !== "project" || route.surfaceId === undefined
       ? undefined
@@ -592,7 +597,20 @@ function AppHeader({
               Projects
             </AppLink>
             <img alt="" height="12" src={breadcrumbSeparatorUrl} width="12" />
-            {surface === undefined ? (
+            {route.kind === "design-system" ? (
+              <>
+                <AppLink
+                  className={styles.pathMutedLink}
+                  href={createDesenAppProjectPath(project.id)}
+                >
+                  {project.name}
+                </AppLink>
+                <img alt="" height="12" src={breadcrumbSeparatorUrl} width="12" />
+                <span aria-current="page" className={styles.pathCurrent}>
+                  Design system
+                </span>
+              </>
+            ) : surface === undefined ? (
               <span aria-current="page" className={styles.pathCurrent}>
                 {project.name}
               </span>
@@ -625,6 +643,15 @@ function AppHeader({
           >
             <img alt="" height="24" src={settingsUrl} width="24" />
           </span>
+          {project === undefined ? null : (
+            <AppLink
+              ariaCurrent={route.kind === "design-system" ? "page" : undefined}
+              className={styles.utilityLink}
+              href={createDesenAppDesignSystemPath(project.id)}
+            >
+              Design system
+            </AppLink>
+          )}
           <span className={styles.profileAvatar} aria-label="Workspace profile">
             WS
           </span>
@@ -792,6 +819,339 @@ function ProjectsHome({
           </button>
         </div>
       )}
+    </section>
+  );
+}
+
+function DesignSystemFoundationGroup({
+  items,
+  title,
+}: Readonly<{
+  readonly items: DesignSystemExplorerModel["foundations"]["colors"];
+  readonly title: string;
+}>) {
+  return (
+    <section
+      aria-labelledby={`design-system-foundation-${title.toLocaleLowerCase()}`}
+      className={styles.designSystemFoundationGroup}
+    >
+      <h3 id={`design-system-foundation-${title.toLocaleLowerCase()}`}>{title}</h3>
+      <ul>
+        {items.map((item) => (
+          <li key={`${item.type}:${item.name}`}>
+            <span
+              aria-hidden="true"
+              className={styles.designSystemTokenSwatch}
+              data-token-type={item.type}
+              style={item.type === "color" ? { background: item.value } : undefined}
+            />
+            <span>
+              <strong>{item.name}</strong>
+              <code>{item.value}</code>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function DesignSystemComponentDetail({
+  component,
+}: Readonly<{
+  readonly component: DesignSystemExplorerModel["components"][number];
+}>) {
+  return (
+    <article
+      aria-labelledby="design-system-component-detail-title"
+      className={styles.designSystemDetail}
+      data-component-detail={component.id}
+    >
+      <div className={styles.designSystemDetailHeading}>
+        <div>
+          <p className={styles.eyebrow}>{component.category}</p>
+          <h2 id="design-system-component-detail-title">{component.displayName}</h2>
+          <p>{component.description ?? "Catalog component with no additional description."}</p>
+          <p className={styles.designSystemUsageGuidance}>{component.usageGuidance}</p>
+        </div>
+        <div className={styles.designSystemStatusStack}>
+          <span
+            className={
+              component.adapterStatus === "ready"
+                ? styles.designSystemReady
+                : styles.designSystemWarning
+            }
+          >
+            {component.adapterStatus === "ready" ? "Adapter ready" : "Adapter missing"}
+          </span>
+          <small>{component.usageCount} Source uses</small>
+        </div>
+      </div>
+
+      {component.contractStatus === "mismatch" ? (
+        <p className={styles.designSystemMismatch} role="alert">
+          The Catalog summary and documentation contract do not match. Editing and preview are
+          intentionally unavailable for this component until the contract is repaired.
+        </p>
+      ) : null}
+
+      <div className={styles.designSystemDetailGrid}>
+        <section aria-labelledby="design-system-props-title">
+          <h3 id="design-system-props-title">Props and controls</h3>
+          {component.props.length === 0 ? (
+            <p className={styles.designSystemEmpty}>No props declared.</p>
+          ) : (
+            <ul className={styles.designSystemDefinitionList}>
+              {component.props.map((prop) => (
+                <li key={prop.name}>
+                  <span>
+                    <strong>{prop.name}</strong>
+                    {prop.required ? <small>required</small> : null}
+                  </span>
+                  <code>
+                    {prop.enumValues.length > 0 ? prop.enumValues.join(" · ") : prop.type}
+                  </code>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section aria-labelledby="design-system-parts-title">
+          <h3 id="design-system-parts-title">Slots and parts</h3>
+          <ul className={styles.designSystemDefinitionList}>
+            {component.slots.map((slot) => (
+              <li key={`slot:${slot.name}`}>
+                <span>
+                  <strong>{slot.name}</strong>
+                  <small>slot</small>
+                </span>
+                <code>
+                  {slot.minimum}–{slot.maximum ?? "∞"} items
+                </code>
+              </li>
+            ))}
+            {component.parts.map((part) => (
+              <li key={`part:${part.name}`}>
+                <span>
+                  <strong>{part.name}</strong>
+                  <small>style part</small>
+                </span>
+                <code>declared schema</code>
+              </li>
+            ))}
+          </ul>
+          {component.slots.length === 0 && component.parts.length === 0 ? (
+            <p className={styles.designSystemEmpty}>No named slots or style parts declared.</p>
+          ) : null}
+        </section>
+        <section aria-labelledby="design-system-interactions-title">
+          <h3 id="design-system-interactions-title">Events and commands</h3>
+          <ul className={styles.designSystemDefinitionList}>
+            {[
+              ...component.events.map((item) => ({ ...item, kind: "event" })),
+              ...component.commands.map((item) => ({ ...item, kind: "command" })),
+            ].map((item) => (
+              <li key={`${item.kind}:${item.name}`}>
+                <span>
+                  <strong>{item.name}</strong>
+                  <small>{item.kind}</small>
+                </span>
+                <code>{item.payloadShape}</code>
+              </li>
+            ))}
+          </ul>
+          {component.events.length === 0 && component.commands.length === 0 ? (
+            <p className={styles.designSystemEmpty}>No events or commands declared.</p>
+          ) : null}
+        </section>
+        <section aria-labelledby="design-system-states-title">
+          <h3 id="design-system-states-title">Visual states</h3>
+          <div className={styles.designSystemStateList}>
+            {component.visualStates.map((state) => (
+              <span key={state}>{state}</span>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section
+        aria-labelledby="design-system-scenarios-title"
+        className={styles.designSystemScenarios}
+      >
+        <div className={styles.designSystemSectionHeading}>
+          <div>
+            <h3 id="design-system-scenarios-title">Documented scenarios</h3>
+            <p>
+              Inert Catalog examples. Props are shown as data; no story script or component code is
+              executed.
+            </p>
+          </div>
+          <span>{component.scenarios.length} examples</span>
+        </div>
+        {component.scenarios.length === 0 ? (
+          <p className={styles.designSystemEmpty}>
+            No scenarios declared by this Catalog contract.
+          </p>
+        ) : (
+          <ul className={styles.designSystemScenarioList}>
+            {component.scenarios.map((scenario) => (
+              <li key={scenario.id} data-scenario-id={scenario.id}>
+                <strong>{scenario.id}</strong>
+                <pre>{scenario.propsText}</pre>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </article>
+  );
+}
+
+function DesignSystemArea({
+  model,
+  project,
+}: Readonly<{
+  readonly model: DesignSystemExplorerModel;
+  readonly project: DesenAppProjectSummary;
+}>) {
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState(model.components[0]?.id ?? "");
+  const normalizedQuery = query.trim().toLocaleLowerCase("en-US");
+  const visibleComponents = model.components.filter((component) => {
+    if (normalizedQuery === "") return true;
+    return [component.displayName, component.id, component.category, component.description ?? ""]
+      .join(" ")
+      .toLocaleLowerCase("en-US")
+      .includes(normalizedQuery);
+  });
+  const selected = visibleComponents.find(({ id }) => id === selectedId) ?? visibleComponents[0];
+
+  useEffect(() => {
+    if (selected !== undefined && selected.id !== selectedId) setSelectedId(selected.id);
+  }, [selected, selectedId]);
+
+  return (
+    <section
+      aria-labelledby="design-system-title"
+      className={styles.designSystemArea}
+      data-design-system="true"
+    >
+      <h1
+        className={styles.visuallyHidden}
+        data-route-heading
+        id="design-system-title"
+        tabIndex={-1}
+      >
+        Design system
+      </h1>
+      <header className={styles.designSystemHero}>
+        <div>
+          <p className={styles.eyebrow}>Design system · {project.name}</p>
+          <h2>One Catalog, one source of truth.</h2>
+          <p>
+            Explore foundations, component contracts, documented states and safe scenarios generated
+            from the installed Catalog and the current Source.
+          </p>
+        </div>
+        <div className={styles.designSystemHeroMeta}>
+          <strong>{model.catalog.id}</strong>
+          <span>
+            v{model.catalog.version} · {model.catalog.target}
+          </span>
+          <small>
+            {model.components.length} components · {model.usageTotal} Source uses
+          </small>
+        </div>
+      </header>
+
+      {model.adapterMismatchCount > 0 ? (
+        <p className={styles.designSystemMismatch} role="alert" data-design-system-mismatch="true">
+          {model.adapterMismatchCount} component contract
+          {model.adapterMismatchCount === 1 ? " is" : "s are"} missing a matching runtime adapter.
+          Documentation remains visible, but those previews are blocked until the mismatch is
+          repaired.
+        </p>
+      ) : null}
+
+      <section
+        aria-labelledby="design-system-foundations-title"
+        className={styles.designSystemFoundations}
+      >
+        <div className={styles.designSystemSectionHeading}>
+          <div>
+            <h2 id="design-system-foundations-title">Foundations</h2>
+            <p>
+              DESEN Neutral defaults are editable through the existing token and style boundaries.
+            </p>
+          </div>
+          <code data-source-fingerprint={model.sourceFingerprint}>
+            {model.sourceFingerprint.slice(0, 12)}…
+          </code>
+        </div>
+        <div className={styles.designSystemFoundationGrid}>
+          <DesignSystemFoundationGroup items={model.foundations.colors} title="Colors" />
+          <DesignSystemFoundationGroup items={model.foundations.spacing} title="Spacing" />
+          <DesignSystemFoundationGroup items={model.foundations.typography} title="Type" />
+          <DesignSystemFoundationGroup items={model.foundations.radii} title="Radii" />
+        </div>
+      </section>
+
+      <div className={styles.designSystemExplorerLayout}>
+        <aside aria-label="Design system components" className={styles.designSystemGallery}>
+          <div className={styles.designSystemSectionHeading}>
+            <div>
+              <h2>Components</h2>
+              <p>
+                {visibleComponents.length} of {model.components.length} shown
+              </p>
+            </div>
+          </div>
+          <label className={styles.designSystemSearch}>
+            <span className={styles.visuallyHidden}>Search design system components</span>
+            <input
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              placeholder="Search components"
+              type="search"
+              value={query}
+            />
+          </label>
+          <ul className={styles.designSystemComponentList}>
+            {visibleComponents.map((component) => (
+              <li key={component.id}>
+                <button
+                  aria-current={component.id === selected?.id ? "true" : undefined}
+                  onClick={() => setSelectedId(component.id)}
+                  type="button"
+                >
+                  <span aria-hidden="true" className={styles.designSystemComponentGlyph}>
+                    {component.displayName.slice(0, 1)}
+                  </span>
+                  <span>
+                    <strong>{component.displayName}</strong>
+                    <small>
+                      {component.category} · {component.usageCount} used
+                    </small>
+                  </span>
+                  <span className={styles.designSystemComponentChevron} aria-hidden="true">
+                    ›
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {visibleComponents.length === 0 ? (
+            <p className={styles.designSystemEmpty}>No component matches this search.</p>
+          ) : null}
+        </aside>
+        {selected === undefined ? (
+          <div className={styles.designSystemDetailEmpty}>
+            <strong>Select a component.</strong>
+            <span>Its Catalog contract and scenarios will appear here.</span>
+          </div>
+        ) : (
+          <DesignSystemComponentDetail component={selected} />
+        )}
+      </div>
     </section>
   );
 }
@@ -4843,6 +5203,14 @@ function ProjectShell({
             </div>
             {fixtures ? <span className={styles.previewBadge}>Preview data</span> : null}
           </div>
+          {!fixtures ? (
+            <AppLink
+              className={styles.secondaryButton}
+              href={createDesenAppDesignSystemPath(project.id)}
+            >
+              Open Design System
+            </AppLink>
+          ) : null}
         </div>
 
         {project.surfaces.length > 0 ? (
@@ -4931,6 +5299,7 @@ function routeTitle(route: DesenAppRoute, projects: readonly DesenAppProjectSumm
   if (route.kind === "not-found") return "Not found · DESEN";
   const project = findDesenAppProject(route.projectId, projects);
   if (project === undefined) return "Project not found · DESEN";
+  if (route.kind === "design-system") return `Design system · ${project.name} · DESEN`;
   if (route.surfaceId === undefined) return `${project.name} · DESEN`;
   const surface = findDesenAppSurface(project, route.surfaceId);
   return surface === undefined
@@ -4995,6 +5364,62 @@ function RouteView({
         pathname={route.pathname}
       />
     );
+  }
+  if (route.kind === "design-system") {
+    const authoringResult = prepareCatalogAuthoringModel(
+      workspaceSnapshot.catalogs,
+      initialDocument,
+    );
+    if (!authoringResult.ok) {
+      return (
+        <section
+          className={styles.surfaceGallery}
+          aria-labelledby="design-system-unavailable-title"
+        >
+          <h1
+            className={styles.visuallyHidden}
+            data-route-heading
+            id="design-system-unavailable-title"
+            tabIndex={-1}
+          >
+            Design system unavailable
+          </h1>
+          <div className={styles.panelEmptyState} role="alert">
+            <strong>The Design System contract could not be prepared.</strong>
+            <p>
+              DESEN kept the project unchanged because the admitted Catalog/Source pair was not
+              complete.
+            </p>
+          </div>
+        </section>
+      );
+    }
+    const explorerResult = prepareDesignSystemExplorer(authoringResult.model, {
+      adapterCapabilityIds: workspaceSnapshot.runtime.registrySnapshot.componentCapabilityIds,
+      tokenCssProperties: workspaceSnapshot.runtime.tokenCssProperties,
+    });
+    if (!explorerResult.ok) {
+      return (
+        <section
+          className={styles.surfaceGallery}
+          aria-labelledby="design-system-unavailable-title"
+        >
+          <h1
+            className={styles.visuallyHidden}
+            data-route-heading
+            id="design-system-unavailable-title"
+            tabIndex={-1}
+          >
+            Design system unavailable
+          </h1>
+          <div className={styles.panelEmptyState} role="alert">
+            <strong>The Design System documentation is unavailable.</strong>
+            <p>DESEN refused to show partial documentation for this Catalog/Source contract.</p>
+          </div>
+        </section>
+      );
+    }
+    return <DesignSystemArea model={explorerResult.model} project={project} />;
   }
   if (route.surfaceId === undefined)
     return (

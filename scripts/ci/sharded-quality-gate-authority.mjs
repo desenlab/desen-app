@@ -11,7 +11,7 @@ import { classifyProofPairState } from "./shared-state-authority.mjs";
 export const SHARD_IDS = Object.freeze(["proof-a", "proof-b", "proof-c"]);
 /** Reviewed identity of the logical coverage, replicated prerequisites, and static assignment. */
 export const SHARDED_QUALITY_GATE_PLAN_SHA256 =
-  "2a687f1ecb748e6782d73396166aba4e28c1fde42e0f802f0f65354fa436cc0f";
+  "6bfac16d7cccb5c0935d5807aa77513f23a1654cb0e492b81ee72b416ea98ab1";
 /** Distinct distributed-plan profile; the historical monolithic authority remains unchanged. */
 export const SHARDED_QUALITY_GATE_PROFILE = "desen.ci.sharded-quality-gate-plan.v1";
 /** Public summary schema, which by itself grants neither hosted nor local-close authority. */
@@ -141,7 +141,7 @@ function assertIdsEqual(actual, expected, label) {
 }
 
 /**
- * Builds the fixed 81/30/12 proof-pair partition from the authenticated 260-node inventory.
+ * Builds the fixed 81/37/5 proof-pair partition from the authenticated 260-node inventory.
  * Its logical coverage remains 260; three prefixes and the join's fresh build execute 285
  * physical workloads. No duplicate preparation is represented as a skipped successful close.
  */
@@ -181,9 +181,9 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     }
     assertIdsEqual(rootTest.dependencies, [verifierNodeId], "The verifier/root dependency");
   }
-  // T15's fresh inherited behavior needs its own headroom. Move contiguous ordinary regions,
-  // not barriers or commands: every pair retains its order, prerequisites and one shard owner.
-  const ranges = [proofIds.slice(0, 81), proofIds.slice(81, 111), proofIds.slice(111)];
+  // T15's fresh inherited behavior needs its own headroom. Move contiguous complete pairs,
+  // never a pair's verifier/root boundary: every pair retains its order, prerequisites and one owner.
+  const ranges = [proofIds.slice(0, 81), proofIds.slice(81, 118), proofIds.slice(118)];
   const shardProjections = ranges.map((proofPairIds, index) => ({
     id: SHARD_IDS[index],
     proofPairIds,
@@ -197,7 +197,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
   if (
     new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 123 ||
     shardProjections.some(
-      ({ barrierPairIds }, index) => barrierPairIds.length !== [11, 0, 4][index],
+      ({ barrierPairIds }, index) => barrierPairIds.length !== [11, 2, 2][index],
     )
   ) {
     fail(
