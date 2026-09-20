@@ -1119,6 +1119,7 @@ const M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
 const M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "apps/desen-app/src/design-system-explorer.ts",
   "apps/desen-app/test/design-system-explorer.test.ts",
+  "docs/proof/M10A-T17.md",
   "scripts/lib/m10a-t17-legacy-input-receipts.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
@@ -1433,8 +1434,8 @@ const M10A_T16_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   ownershipSha256: "2d96aa919439750d4da20b037e7e539536782fb86e29640bbd14eff64889440f",
 });
 const M10A_T17_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: 1919,
-  trackedPathSetSha256: "9029ab9e926d29ce00d0d7f11a99d6e6ac689f74116b69a6acf08794ff7b2182",
+  trackedPathCount: 1920,
+  trackedPathSetSha256: "75b08744bace87b50328148a1dd03d708a12194313a7f1df388a4e3344762ad5",
   proofOwnedPathCount: 246,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 246,
@@ -1443,10 +1444,10 @@ const M10A_T17_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     FROZEN_INPUT: 172,
     PACKAGE_OR_APPLICATION: 805,
     SHARED_PROOF_INFRASTRUCTURE: 420,
-    PROJECT_DOCUMENTATION: 176,
+    PROJECT_DOCUMENTATION: 177,
     REPOSITORY_POLICY: 11,
   }),
-  ownershipSha256: "f10328addfc1c59f668f476e555904d037c37e4059188afb88a028126bfd2684",
+  ownershipSha256: "b6b3a018df7f89ebcc57e531f37a2cdbfb9d4dc356cf3380792da69fa635c356",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -2262,15 +2263,15 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     ({ path: trackedPath }) => trackedPath,
   );
   if (
-    M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 3 ||
-    new Set(M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 3 ||
+    M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 4 ||
+    new Set(M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 4 ||
     M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS.some(
       (trackedPath) => !currentSuccessorPaths.includes(trackedPath),
     )
   ) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-      "The authenticated M10A-T17 successor must include exactly the reviewed three added paths.",
+      "The authenticated M10A-T17 successor must include exactly the reviewed four added paths.",
     );
   }
   const t16SuccessorPaths = currentSuccessorPaths.filter(
