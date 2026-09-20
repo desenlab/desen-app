@@ -2,6 +2,61 @@
 // They are historical data only; every application is fenced by both current and predecessor receipts.
 export const M10A_T17_LEGACY_INPUT_SUCCESSORS = Object.freeze([
   {
+    path: "apps/desen-app/test/application.test.tsx",
+    current: {
+      bytes: 135154,
+      sha256: "a5ca47d41b9f402e8b02848040153d13be2cb03f122bb0a38897386c658d6aa9",
+    },
+    predecessor: {
+      bytes: 133879,
+      sha256: "9b8b412488b2eb5b0c1dd385e21ffa5c1857be5d32bfd94b3d9da1971d22392a",
+    },
+    inverseHunks: [{ start: 250, remove: 23, restore: [] }],
+  },
+  {
+    path: "scripts/lib/m10a-t15-proof.mjs",
+    current: {
+      bytes: 13958,
+      sha256: "c679bc117c899b6f67d136899898337ffd98561ea4d6b53868c0082dae20ee17",
+    },
+    predecessor: {
+      bytes: 13668,
+      sha256: "720c5f7d6ca95fd34f485d79d6b9295c177e3650d2fb9ad583c3c3429187c623",
+    },
+    inverseHunks: [
+      { start: 15, remove: 1, restore: [] },
+      {
+        start: 122,
+        remove: 29,
+        restore: [
+          "function projectM10AT15CurrentBytes(relative, bytes) {",
+          "  const successor = M10A_T16_LEGACY_INPUT_SUCCESSORS.find(({ path: owned }) => owned === relative);",
+          "  if (successor === undefined) return bytes;",
+          "  if (",
+          "    !Buffer.isBuffer(bytes) ||",
+          "    bytes.byteLength !== successor.current.bytes ||",
+          "    sha256(bytes) !== successor.current.sha256",
+          "  )",
+          '    fail("SOURCE_DRIFT", "The T16 successor differs from its reviewed current receipt.");',
+          '  const lines = bytes.toString("utf8").split("\\n");',
+          "  for (const hunk of [...successor.inverseHunks].reverse()) {",
+          "    const start = hunk.remove === 0 ? hunk.start : hunk.start - 1;",
+          "    if (start < 0 || start + hunk.remove > lines.length)",
+          '      fail("SOURCE_DRIFT", "The reviewed T16 inverse is out of bounds.");',
+          "    lines.splice(start, hunk.remove, ...hunk.restore);",
+          "  }",
+          '  const predecessor = Buffer.from(lines.join("\\n"));',
+          "  if (",
+          "    predecessor.byteLength !== successor.predecessor.bytes ||",
+          "    sha256(predecessor) !== successor.predecessor.sha256",
+          "  )",
+          '    fail("SOURCE_DRIFT", "The reviewed T16 inverse does not reproduce its predecessor.");',
+          "  return predecessor;",
+        ],
+      },
+    ],
+  },
+  {
     path: "apps/desen-app/src/application.module.css",
     current: {
       bytes: 144916,
