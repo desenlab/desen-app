@@ -5082,13 +5082,14 @@ function SurfaceEditor({
         selectedSurface={selectedSurface}
       />
 
-      <ConnectionsWorkspace
-        controller={projectController}
-        hidden={mode !== "connections"}
-        record={projectState?.session.record ?? authoringProjectRecord}
-        surfaceId={selectedSurface.sourceId}
-        surfaceName={selectedSurface.name}
-      />
+      {mode === "connections" ? (
+        <ConnectionsWorkspace
+          controller={projectController}
+          record={projectState?.session.record ?? authoringProjectRecord}
+          surfaceId={selectedSurface.sourceId}
+          surfaceName={selectedSurface.name}
+        />
+      ) : null}
 
       <section
         aria-labelledby="workspace-title"
