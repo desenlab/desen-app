@@ -285,7 +285,7 @@ const M11_TASK_IDS = Object.freeze(
 );
 const FIVE_COLUMN_TASK_BOARD_SECTIONS = Object.freeze(["M00", "M01", "operational"]);
 const TASK_BOARD_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
-const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 136;
+const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 137;
 const EXPECTED_COMPLETED_GATES = 11;
 const SC_02_COMPLETE_ADAPT_MARKER = "**Status:** Complete on 2026-09-10. Decision: **`adapt`**.";
 
@@ -465,7 +465,8 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T12" ||
       taskId === "M10A-T13" ||
       taskId === "M10A-T14" ||
-      taskId === "M10A-T15"
+      taskId === "M10A-T15" ||
+      taskId === "M10A-T16"
         ? "DONE"
         : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
@@ -998,9 +999,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   const m10aCompletionPercent = Math.round((completedM10ATasks / M10A_TASK_IDS.length) * 100);
   assert.equal(completedTasks, EXPECTED_COMPLETED_IMPLEMENTATION_TASKS);
   assert.equal(completedGates, EXPECTED_COMPLETED_GATES);
-  assert.equal(completedM10ATasks, 15);
-  assert.equal(completionPercent, 77);
-  assert.equal(m10aCompletionPercent, 54);
+  assert.equal(completedM10ATasks, 16);
+  assert.equal(completionPercent, 78);
+  assert.equal(m10aCompletionPercent, 57);
 
   const readme = await readFile(resolve(WORKSPACE_ROOT, "README.md"), "utf8");
   const projectStatus = await readFile(resolve(WORKSPACE_ROOT, "PROJECT-STATUS.md"), "utf8");
@@ -1073,17 +1074,19 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.equal(statuses.get("M10A-T13"), "DONE");
   assert.equal(statuses.get("M10A-T14"), "DONE");
   assert.equal(statuses.get("M10A-T15"), "DONE");
+  assert.equal(statuses.get("M10A-T16"), "DONE");
+  assert.equal(statuses.get("M10A-T17"), "NOT_STARTED");
   assert.equal(statuses.get("M10A-T19"), "NOT_STARTED");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
   assert.ok(
     normalizedReadme.includes(
-      "**Next task:** `M10A-T16` (`NOT_STARTED`; variants and visual states)",
+      "**Next task:** `M10A-T17` (`NOT_STARTED`; design-system explorer and controls)",
     ),
   );
-  assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T15 are DONE"));
+  assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T16 are DONE"));
   assert.ok(
     normalizedFullProjectStatus.includes(
-      "M10A-T16 — variants and visual states — is the selected next task",
+      "M10A-T17 — design-system explorer and controls — is the selected next task",
     ),
   );
   assert.ok(
@@ -1120,12 +1123,16 @@ test("task board retains its canonical inventory without narrative appendices", 
   );
   assert.match(
     normalizedStartHere,
+    /`M10A-T16` `DONE`: named variants ve declared visual-state authoring için .*?geçti\./u,
+  );
+  assert.match(
+    normalizedStartHere,
     /`M10A-T12` `DONE`: normal DESEN Neutral ürününde lazy typed Inspector, token\/literal\/reset görsel kontrolleri, desktop\/tablet\/mobile preview, sıralı responsive override ve aggregate persistence için .*?geçti\./u,
   );
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.ok(
     normalizedStartHere.includes(
-      "T16 seçilmiş sıradaki görevdir; T19 da bağımlılık açısından hazırdır; ikisi de `NOT_STARTED`.",
+      "T17 seçilmiş sıradaki görevdir; T19 da bağımlılık açısından hazırdır; ikisi de `NOT_STARTED`.",
     ),
   );
   assert.equal(
