@@ -405,8 +405,8 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "f7cc5be16342ed079dcc3fc8a82677d78c5f7a2260790e977ff5bc9f8ba0ab27",
-    checkpoints: 150,
+    headSha256: "4c81eb6b70bece3f5ebf97993ed5b1dca78b9feb90cf2038b231b35cf6b334df",
+    checkpoints: 152,
     frozenArtifacts: 77,
     currentReaders: 154,
   };
