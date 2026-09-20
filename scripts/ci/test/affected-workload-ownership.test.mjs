@@ -41,7 +41,7 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   FROZEN_INPUT: 172,
   PACKAGE_OR_APPLICATION: 811,
   SHARED_PROOF_INFRASTRUCTURE: 422,
-  PROJECT_DOCUMENTATION: 177,
+  PROJECT_DOCUMENTATION: 178,
 });
 const M10A_T16_SUCCESSOR_PATHS = Object.freeze([
   "apps/desen-app/test/authoring-variants.test.ts",
@@ -65,6 +65,7 @@ const M10A_T19_SUCCESSOR_PATHS = Object.freeze([
   "apps/desen-app/src/connections-workspace.tsx",
   "apps/desen-app/test/connection-intent-drafts.test.ts",
   "apps/desen-app/test/connections-workspace.test.tsx",
+  "docs/proof/M10A-T19.md",
   "scripts/lib/m10a-t19-legacy-input-receipts.mjs",
 ]);
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
@@ -683,7 +684,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1928 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1929 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
