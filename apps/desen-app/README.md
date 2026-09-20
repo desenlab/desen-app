@@ -29,15 +29,14 @@ complete-project save/reload equality. It uses the ordinary local control plane 
 Source or a hidden mutation API. The hosted T15 closure is recorded in
 [the task proof](../../docs/proof/M10A-T15.md).
 
-## M10A-T16: variants and visual states (in progress)
+## M10A-T16: variants and visual states (DONE)
 
 The Inspector now has a dedicated **Variants** tab for creating, renaming and deleting app-owned
 named variants from the declared state axes of the selected surface. The Style panel can target
 declared visual states and named variants, while the canvas previews the selected style layer
 without mutating the authored Source. Unmanaged protocol variants remain untouched, and invalid
-or undeclared state/variant targets fail closed. Local implementation evidence is recorded in
-[the T16 working proof](../../docs/proof/M10A-T16.md); hosted exact-head and fresh-`main` closure
-are still pending.
+or undeclared state/variant targets fail closed. Hosted exact-head and fresh-`main` closure are
+recorded in [the T16 proof](../../docs/proof/M10A-T16.md).
 
 The normal DESEN Neutral lifecycle now checks the complete migrated record, unused recipe masters,
 exact installed profile and Publisher before replacing an opened workspace. Invalid members,
