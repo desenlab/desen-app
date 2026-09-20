@@ -217,5 +217,5 @@ receipts; T12 owns the current 0.7.0 capture, normal-app lazy typed visual contr
 responsive frames/ordered overrides, and aggregate persistence only. T10 is `DONE` with that same
 closure for application-local project/surface lifecycle only. T11 is `DONE` with exact-head hosted
 and fresh-`main` closure. T12 is closed and adds no Runtime, Publisher, Core/protocol, G10A, or M11
-authority. T13 through T18 add no Runtime, Publisher, Core/protocol, G10A, or M11 authority; T16, T17 and T18 are `DONE` with hosted exact-head and fresh-`main` closure, T19 is selected next and `NOT_STARTED`, while T20 is also dependency-ready but unselected. G10A must pass before M11-T01 or M11-T08, and SC-02
+authority. T13 through T19 add no Runtime, Publisher, Core/protocol, G10A, or M11 authority; T16, T17, T18 and T19 are `DONE` with hosted exact-head and fresh-`main` closure, T20 is selected next and `NOT_STARTED`. G10A must pass before M11-T01 or M11-T08, and SC-02
 authorizes no external publication or deployment.

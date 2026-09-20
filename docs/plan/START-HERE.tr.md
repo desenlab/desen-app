@@ -5,16 +5,16 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 139/176 (%79), M10 12/12, M10A 18/28 (%64) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T18 exact-head PR kontrolleri,
-merge'leri ve taze `main` koşuları geçti; seçilmiş sıradaki görev `M10A-T19` ve `NOT_STARTED` durumundadır;
-`M10A-T20` de bağımlılık açısından hazır fakat seçilmemiş ve `NOT_STARTED` durumundadır.
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 140/176 (%80), M10 12/12, M10A 19/28 (%68) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T19 exact-head PR kontrolleri,
+merge'leri ve taze `main` koşuları geçti; T19'un kapanışı [kanıt belgesinde](../proof/M10A-T19.md) kayıtlıdır;
+seçilmiş sıradaki görev `M10A-T20` ve `NOT_STARTED` durumundadır.
 Ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md), [T07 kanıtı](../proof/M10A-T07.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 139 ve M10A sayacı 18/28'dir; seçilmiş sıradaki görev `M10A-T19`,
-ayrıca hazır fakat seçilmemiş görev `M10A-T20`dir; ikisi de `NOT_STARTED`. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 140 ve M10A sayacı 19/28'dir; seçilmiş sıradaki görev `M10A-T20`,
+`NOT_STARTED` durumundadır. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
@@ -39,7 +39,8 @@ override ve aggregate persistence için [hosted exact-head ve taze `main` kapan�
 geçti. `M10A-T13` `DONE`: güvenli yerel image/icon/font varlıkları için [hosted kapanış](../proof/M10A-T13.md) geçti. `M10A-T14` `DONE`: immutable undo/redo,
 atomik duplicate/copy/paste ve kimlik/referans eşlemesi için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T14.md) geçti.
 `M10A-T15` `DONE`: masters/instances, override/reset/detach ve izole master düzenleme için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T15.md) geçti. `M10A-T16` `DONE`: named variants ve declared visual-state authoring için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T16.md) geçti. `M10A-T17` `DONE`: Catalog-backed Design System explorer için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T17.md) geçti. `M10A-T18` `DONE`: library release/version identity, local usage index, impact comparison, explicit adoption/rejection and restore için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T17.md#-m10a-t18--library-management-and-impact) geçti.
-T19 seçilmiş sıradaki görevdir; T20 de bağımlılık açısından hazırdır; ikisi de `NOT_STARTED`.
+`M10A-T19` `DONE`: ayrı Connections çalışma alanı ve dayanıklı inert taslaklar için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T19.md) geçti.
+`M10A-T20` seçilmiş sıradaki görevdir ve `NOT_STARTED` durumundadır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
