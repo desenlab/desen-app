@@ -21,7 +21,9 @@ export const M10A_T18_LEGACY_INPUT_SUCCESSORS = Object.freeze([
       {
         start: 5528,
         remove: 37,
-        restore: ["    return <DesignSystemArea model={explorerResult.model} project={project} />;"],
+        restore: [
+          "    return <DesignSystemArea model={explorerResult.model} project={project} />;",
+        ],
       },
     ],
   },

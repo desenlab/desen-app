@@ -600,7 +600,9 @@ async function currentTrackedPaths() {
 
 function calculateAffectedWorkloadOwnershipReview(rawPaths) {
   const withoutT18 = rawPaths.filter((candidate) => !M10A_T18_SUCCESSOR_PATHS.includes(candidate));
-  const withoutT17 = withoutT18.filter((candidate) => !M10A_T17_SUCCESSOR_PATHS.includes(candidate));
+  const withoutT17 = withoutT18.filter(
+    (candidate) => !M10A_T17_SUCCESSOR_PATHS.includes(candidate),
+  );
   const current = withoutT17.filter((candidate) => !M10A_T16_SUCCESSOR_PATHS.includes(candidate));
   const withoutT15 = current.filter((candidate) => !M10A_T15_SUCCESSOR_PATHS.includes(candidate));
   const paths =
@@ -609,15 +611,15 @@ function calculateAffectedWorkloadOwnershipReview(rawPaths) {
       : withoutT18.length === 1920
         ? withoutT18
         : current.length === 1912
-        ? current
-        : withoutT15.length === 1867 || withoutT15.length === 1865
-          ? withoutT15
-          : withoutT15.filter(
-              (candidate) =>
-                !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
-                !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
-                !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
-            );
+          ? current
+          : withoutT15.length === 1867 || withoutT15.length === 1865
+            ? withoutT15
+            : withoutT15.filter(
+                (candidate) =>
+                  !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
+                  !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
+                  !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
+              );
   return calculateAffectedWorkloadOwnershipReviewRaw(paths);
 }
 
@@ -625,7 +627,7 @@ function calculateAffectedWorkloadOwnershipReviewBase(rawPaths) {
   return calculateAffectedWorkloadOwnershipReviewRaw(
     rawPaths.filter(
       (candidate) =>
-      !M10A_T18_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T18_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T17_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T16_SUCCESSOR_PATHS.includes(candidate),
     ),
