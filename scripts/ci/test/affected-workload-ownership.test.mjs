@@ -607,7 +607,9 @@ async function currentTrackedPaths() {
 
 function calculateAffectedWorkloadOwnershipReview(rawPaths) {
   const withoutT19 = rawPaths.filter((candidate) => !M10A_T19_SUCCESSOR_PATHS.includes(candidate));
-  const withoutT18 = withoutT19.filter((candidate) => !M10A_T18_SUCCESSOR_PATHS.includes(candidate));
+  const withoutT18 = withoutT19.filter(
+    (candidate) => !M10A_T18_SUCCESSOR_PATHS.includes(candidate),
+  );
   const withoutT17 = withoutT18.filter(
     (candidate) => !M10A_T17_SUCCESSOR_PATHS.includes(candidate),
   );
@@ -651,17 +653,17 @@ async function currentAuthority() {
 
 function calculateM10AT04AndEarlierOwnershipReview(paths) {
   return calculateAffectedWorkloadOwnershipReview(
-      paths.filter(
-        (candidate) =>
-          !M10A_T19_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T12_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T11_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T10_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T08_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T07_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T06_SUCCESSOR_PATHS.includes(candidate) &&
-          !M10A_T05_SUCCESSOR_PATHS.includes(candidate),
+    paths.filter(
+      (candidate) =>
+        !M10A_T19_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T12_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T11_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T10_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T08_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T07_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T06_SUCCESSOR_PATHS.includes(candidate) &&
+        !M10A_T05_SUCCESSOR_PATHS.includes(candidate),
     ),
   );
 }
