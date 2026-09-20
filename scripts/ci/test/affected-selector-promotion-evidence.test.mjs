@@ -334,13 +334,13 @@ test("authenticates the exact 20/20 hosted campaign and live local-preflight suc
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "fe3bbb4bd306f0e9514d49908e3cb898bfcb7b1e3794792485064b5cd0ef8d59",
+    selectorSha256: "f162e533e023ff345015cde868c0715b78c20bfe016e06e30190bbab9f597e1b",
     ownershipSha256: "2d96aa919439750d4da20b037e7e539536782fb86e29640bbd14eff64889440f",
     impactGraphSha256: "a1c70aa4d72cfb34de7c29c034964bb7a5f0a3268388604c85446c52d475e034",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "27eb4790cdddf0e762f09b102d5a5de41ff55e3913270405bfded3e3fe65b761",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "bad781b26d54d38e88b736621544a775b8a137954c0b0322fd75a6d7962b661e",
+    runnerAuthoritySha256: "008f130b0e1460ba53a37291e577376327b4a3035801517e9baa53c042e88dd8",
   });
 });
 
@@ -405,8 +405,8 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "d98027ed7dca3abff9eb7c37172a8a915e5eed5cd8334af26f914c10fc8dda97",
-    checkpoints: 145,
+    headSha256: "5d3bf53625876fb940cca33d02c4669ada8000c68726e86e51b8e674246c0c15",
+    checkpoints: 146,
     frozenArtifacts: 77,
     currentReaders: 154,
   };
