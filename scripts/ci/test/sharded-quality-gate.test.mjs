@@ -947,7 +947,7 @@ test("CI-04 cancelled or failed prefixes cannot start proof work", async () => {
 });
 
 test("CI-04 cancellation drains both active shard workers without launching their roots", async () => {
-  const plan = shadowPlan("proof-c");
+  const plan = shadowPlan("proof-b");
   const controller = new AbortController();
   const cancellation = new RequiredExhaustiveCancellationError("SIGINT");
   const started = [];
