@@ -256,6 +256,9 @@ describe("Desen App application shell", () => {
     ).toBeTruthy();
     expect(screen.getByRole("searchbox", { name: "Search design system components" })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "Foundations" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Libraries and impact" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 3, name: "Installed releases" })).toBeTruthy();
+    expect(screen.getByText(/Exact installed release/)).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "Components" })).toBeTruthy();
     expect(screen.getByText("Button")).toBeTruthy();
     expect(screen.getByText("Documented scenarios")).toBeTruthy();

@@ -23,6 +23,7 @@ import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 
 import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
 import { prepareDesignSystemExplorer } from "./design-system-explorer.js";
+import { prepareProjectDesignSystemLibrary } from "./design-system-library.js";
 import { useProjectAuthoringController } from "./project-authoring-context.js";
 import { MasterInstancePanel } from "./master-instance-panel.js";
 import { MasterDraftBanner } from "./master-draft-banner.js";
@@ -240,6 +241,7 @@ import type {
   AuthoringSlotState,
 } from "./authoring-slots.js";
 import type { DesignSystemExplorerModel } from "./design-system-explorer.js";
+import type { DesignSystemLibraryWorkspaceModel } from "./design-system-library.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
 import type { ProjectInventoryFixtureHandle } from "./project-inventory-fixture.js";
@@ -1007,11 +1009,113 @@ function DesignSystemComponentDetail({
   );
 }
 
+function DesignSystemLibraryPanel({
+  library,
+}: Readonly<{
+  readonly library: DesignSystemLibraryWorkspaceModel;
+}>) {
+  const deprecated = library.releases.flatMap((release) =>
+    release.components
+      .filter(({ lifecycle }) => lifecycle.status === "deprecated")
+      .map((component) => ({ release, component })),
+  );
+  return (
+    <section
+      aria-labelledby="design-system-libraries-title"
+      className={styles.designSystemLibraries}
+      data-design-system-libraries="true"
+    >
+      <div className={styles.designSystemSectionHeading}>
+        <div>
+          <h2 id="design-system-libraries-title">Libraries and impact</h2>
+          <p>
+            Installed releases are pinned to exact package identities. Usage is read from saved
+            Source references, not telemetry.
+          </p>
+        </div>
+        <span>{library.usageIndex.references.length} local references</span>
+      </div>
+      <div className={styles.designSystemLibraryGrid}>
+        <section aria-labelledby="design-system-installed-releases-title">
+          <h3 id="design-system-installed-releases-title">Installed releases</h3>
+          <ul className={styles.designSystemDefinitionList}>
+            {library.releases.map((release) => (
+              <li key={release.identity.packageDigest}>
+                <span>
+                  <strong>{release.identity.id}</strong>
+                  <small>{release.releaseLabel ?? "Exact installed release"}</small>
+                </span>
+                <code>
+                  v{release.identity.version} · {release.identity.target} ·{" "}
+                  {release.identity.packageDigest.slice(0, 16)}…
+                </code>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section aria-labelledby="design-system-usage-index-title">
+          <h3 id="design-system-usage-index-title">Usage index</h3>
+          {library.usageIndex.references.length === 0 ? (
+            <p className={styles.designSystemEmpty}>
+              No saved Source instances use these releases.
+            </p>
+          ) : (
+            <ul className={styles.designSystemDefinitionList}>
+              {library.usageIndex.references.slice(0, 8).map((reference) => (
+                <li key={`${reference.projectId}/${reference.surfaceId}/${reference.nodeId}`}>
+                  <span>
+                    <strong>{reference.capabilityId}</strong>
+                    <small>
+                      {reference.projectId} / {reference.surfaceId} / {reference.nodeId}
+                    </small>
+                  </span>
+                  <code>{reference.library.version}</code>
+                </li>
+              ))}
+            </ul>
+          )}
+          {library.usageIndex.references.length > 8 ? (
+            <p className={styles.designSystemLibraryNote}>
+              Showing 8 of {library.usageIndex.references.length} references.
+            </p>
+          ) : null}
+        </section>
+        <section aria-labelledby="design-system-lifecycle-title">
+          <h3 id="design-system-lifecycle-title">Deprecation and replacement</h3>
+          {deprecated.length === 0 ? (
+            <p className={styles.designSystemEmpty}>No deprecated components are declared.</p>
+          ) : (
+            <ul className={styles.designSystemDefinitionList}>
+              {deprecated.map(({ release, component }) => (
+                <li key={`${release.identity.packageDigest}:${component.id}`}>
+                  <span>
+                    <strong>{component.displayName}</strong>
+                    <small>
+                      {component.lifecycle.migration ?? "Migration guidance not provided."}
+                    </small>
+                  </span>
+                  <code>{component.lifecycle.replacement ?? "Review required"}</code>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+      <p className={styles.designSystemLibraryNote} role="note">
+        Release comparisons produce a review-required plan. Adoption is explicit and incompatible
+        candidates are rejected; no published design is rewritten automatically.
+      </p>
+    </section>
+  );
+}
+
 function DesignSystemArea({
   model,
+  library,
   project,
 }: Readonly<{
   readonly model: DesignSystemExplorerModel;
+  readonly library: DesignSystemLibraryWorkspaceModel;
   readonly project: DesenAppProjectSummary;
 }>) {
   const [query, setQuery] = useState("");
@@ -1063,6 +1167,8 @@ function DesignSystemArea({
           </small>
         </div>
       </header>
+
+      <DesignSystemLibraryPanel library={library} />
 
       {model.adapterMismatchCount > 0 ? (
         <p className={styles.designSystemMismatch} role="alert" data-design-system-mismatch="true">
@@ -5419,7 +5525,43 @@ function RouteView({
         </section>
       );
     }
-    return <DesignSystemArea model={explorerResult.model} project={project} />;
+    const libraryResult = prepareProjectDesignSystemLibrary({
+      projectId: project.id,
+      projectName: project.name,
+      model: authoringResult.model,
+      catalogPackages: workspaceSnapshot.catalogPackages,
+    });
+    if (!libraryResult.ok) {
+      return (
+        <section
+          className={styles.surfaceGallery}
+          aria-labelledby="design-system-unavailable-title"
+        >
+          <h1
+            className={styles.visuallyHidden}
+            data-route-heading
+            id="design-system-unavailable-title"
+            tabIndex={-1}
+          >
+            Design system library unavailable
+          </h1>
+          <div className={styles.panelEmptyState} role="alert">
+            <strong>The Design System library contract could not be prepared.</strong>
+            <p>
+              DESEN kept the project unchanged because an exact Catalog package identity or saved
+              Source reference was not verifiable ({libraryResult.reason}).
+            </p>
+          </div>
+        </section>
+      );
+    }
+    return (
+      <DesignSystemArea
+        library={libraryResult.model}
+        model={explorerResult.model}
+        project={project}
+      />
+    );
   }
   if (route.surfaceId === undefined)
     return (
