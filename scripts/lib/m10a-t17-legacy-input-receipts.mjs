@@ -14,6 +14,34 @@ export const M10A_T17_LEGACY_INPUT_SUCCESSORS = Object.freeze([
     inverseHunks: [{ start: 250, remove: 23, restore: [] }],
   },
   {
+    path: "scripts/lib/m10a-t15-execution.mjs",
+    current: {
+      bytes: 18207,
+      sha256: "3c5828f2531d301dd756418ec3dde697aa5431c98a069e7273b8f56d52d812ef",
+    },
+    predecessor: {
+      bytes: 17383,
+      sha256: "eb95a79f59bfb97b5cc1def4f3a275f55771afaf3b0a90dc364ab880f9bc7c49",
+    },
+    inverseHunks: [
+      { start: 18, remove: 1, restore: [] },
+      { start: 229, remove: 1, restore: [] },
+      { start: 247, remove: 3, restore: [] },
+      { start: 251, remove: 1, restore: [] },
+      {
+        start: 259,
+        remove: 13,
+        restore: [
+          "      names.push(assertion.fullName);",
+          "      observedNames.push(assertion.fullName);",
+          "      assertionCount += 1;",
+          "    }",
+        ],
+      },
+      { start: 275, remove: 1, restore: ["    assertionCount !== input.numPassedTests ||"] },
+    ],
+  },
+  {
     path: "scripts/lib/m10a-t15-proof.mjs",
     current: {
       bytes: 13958,
@@ -125,5 +153,18 @@ export const M10A_T17_ADDED_APP_SOURCE_RECEIPTS = Object.freeze([
     path: "apps/desen-app/src/design-system-explorer.ts",
     bytes: 17173,
     sha256: "94d4807a9b1c308fce575edf05e45c272315a7a15d2ba377389efbe3d47a0370",
+  },
+]);
+
+/**
+ * T17 successor assertions that execute as part of a historical T15 suite.
+ * They remain required green tests, but are excluded from the immutable T15
+ * assertion-count projection so a successor cannot rewrite its predecessor.
+ */
+export const M10A_T17_SUCCESSOR_TESTS = Object.freeze([
+  {
+    path: "apps/desen-app/test/application.test.tsx",
+    title:
+      "Desen App application shell opens the Catalog-backed Design System area without mounting a Source editor",
   },
 ]);
