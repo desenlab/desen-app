@@ -16,6 +16,7 @@ import {
 } from "./m10a-t15-legacy-input-receipts.mjs";
 import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "./m10a-t16-legacy-input-receipts.mjs";
 import { M10A_T17_ADDED_APP_SOURCE_RECEIPTS } from "./m10a-t17-legacy-input-receipts.mjs";
+import { M10A_T18_ADDED_APP_SOURCE_RECEIPTS } from "./m10a-t18-legacy-input-receipts.mjs";
 import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   materializeDesenAppHistoricalReaderFileOverrides,
@@ -1067,6 +1068,7 @@ const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
     ...M10A_T13_ADDED_APP_SOURCE_PATHS,
     ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
     ...M10A_T17_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
+    ...M10A_T18_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
   ].sort(),
 );
 // The live T12 product has a broader composition than the historical M09 reader. Keep the
@@ -3965,6 +3967,15 @@ const M10A_T17_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
   graphSha256: "sha256:4617a480deac32086d7a2cdc2e35573d9b8e6dddc4b87fe906d745937517327d",
 });
 
+// T18 adds the exact library-management route and source projection. Preserve the reviewed
+// T17 projection while admitting the exact current successor graph.
+const M10A_T18_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
+  ...M10A_T17_CURRENT_RUNTIME_RESOLUTION,
+  moduleCount: 710,
+  staticEdges: 3_049,
+  graphSha256: "sha256:86dd8888dda8c3799b73ebb02ee02462c19a01f5cc2b5cc00edf662e133d0961",
+});
+
 function projectM10AT15RuntimeToM10AT12(runtime) {
   const observed = {
     profile: runtime?.profile ?? M10A_T15_CURRENT_RUNTIME_RESOLUTION.profile,
@@ -3976,7 +3987,8 @@ function projectM10AT15RuntimeToM10AT12(runtime) {
   };
   if (
     !isDeepStrictEqual(observed, M10A_T15_CURRENT_RUNTIME_RESOLUTION) &&
-    !isDeepStrictEqual(observed, M10A_T17_CURRENT_RUNTIME_RESOLUTION)
+    !isDeepStrictEqual(observed, M10A_T17_CURRENT_RUNTIME_RESOLUTION) &&
+    !isDeepStrictEqual(observed, M10A_T18_CURRENT_RUNTIME_RESOLUTION)
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
