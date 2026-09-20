@@ -99,7 +99,7 @@ test("CI-04 three fixed shards preserve all 260 workloads and 123 complete proof
   assert.equal(inventory.proofUnitCount, 123);
   assert.deepEqual(
     shards.map(({ proofPairCount }) => proofPairCount),
-    [81, 30, 12],
+    [81, 37, 5],
   );
   const pairIds = shards.flatMap(({ proofPairs }) => proofPairs.map(({ id }) => id));
   assert.equal(pairIds.length, 123);
@@ -129,7 +129,7 @@ test("CI-04 three fixed shards preserve all 260 workloads and 123 complete proof
     shards.map(
       ({ proofPairs }) => proofPairs.filter(({ id }) => classifyProofPairState(id).barrier).length,
     ),
-    [11, 0, 4],
+    [11, 2, 2],
   );
   assert.deepEqual(
     shards[0].proofPairs.slice(-8).map(({ id }) => id),
@@ -160,19 +160,7 @@ test("CI-04 three fixed shards preserve all 260 workloads and 123 complete proof
   assert.deepEqual(
     shards[1].proofPairs.slice(-8).map(({ id }) => id),
     [
-      "historical-archive-redaction",
-      "desen-app-published-host-update",
-      "desen-app-invalid-publication",
-      "desen-app-last-known-good-recovery",
-      "desen-app-repeatable-demo",
-      "runtime-core-baseline",
-      "m10-gate",
       "m10a-t01",
-    ],
-  );
-  assert.deepEqual(
-    shards[2].proofPairs.slice(0, 8).map(({ id }) => id),
-    [
       "m10a-t02",
       "m10a-t03",
       "m10a-t04",
@@ -180,21 +168,11 @@ test("CI-04 three fixed shards preserve all 260 workloads and 123 complete proof
       "m10a-t06",
       "m10a-t07",
       "m10a-t08",
-      "m10a-t09",
     ],
   );
   assert.deepEqual(
-    shards[2].proofPairs.slice(-8).map(({ id }) => id),
-    [
-      "m10a-t06",
-      "m10a-t07",
-      "m10a-t08",
-      "m10a-t09",
-      "m10a-t12",
-      "m10a-t13",
-      "m10a-t14",
-      "m10a-t15",
-    ],
+    shards[2].proofPairs.map(({ id }) => id),
+    ["m10a-t09", "m10a-t12", "m10a-t13", "m10a-t14", "m10a-t15"],
   );
   assert.equal(classifyProofPairState("m10a-t01").barrier, false);
   assert.equal(classifyProofPairState("m10a-t03").barrier, false);
@@ -212,7 +190,7 @@ test("CI-04 static shard membership agrees with executable membership and stays 
   assert.equal(Object.isFrozen(partition), true);
   assert.equal(
     partition.planSha256,
-    "2a687f1ecb748e6782d73396166aba4e28c1fde42e0f802f0f65354fa436cc0f",
+    "6bfac16d7cccb5c0935d5807aa77513f23a1654cb0e492b81ee72b416ea98ab1",
   );
   assert.equal(
     partition.parentPlanSha256,

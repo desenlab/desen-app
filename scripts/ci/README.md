@@ -77,7 +77,7 @@ cancellation, hosted, and zero-reference checks pass.
 ## Current authority
 
 - The T15 candidate has 260 logical workloads and 123 proof pairs: 108 ordinary and 15 barriers.
-- The fixed 81/30/12 partition executes 285 physical workloads, including replicated preparation
+- The fixed 81/37/5 partition executes 285 physical workloads, including replicated preparation
   and the join's fresh build. No prior command is removed or reordered.
 - The live checkpoint authority is code-owned by `proof-reader-checkpoints.mjs` and authenticated
   by `verify-proof-reader-checkpoints.mjs`; it must pass before any candidate is merged.

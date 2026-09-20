@@ -86,10 +86,10 @@ ran its root test. It is not evidence of a failed product assertion or of succes
 The task-owned [correction record](../proof/M10A-T15.md#shard-deadline-correction) owns the exact
 run and timing observations.
 
-Redistribute the same 123 ordered proof pairs as contiguous ranges of 81/30/12 instead of
-53/32/38. A ends at Editor Core terminal integration; B owns the ordinary App/M10 region through
-T01; C begins at T02 and retains T07/T08/T09/T15's four exclusive barriers. The original eleven
-barriers remain on A. No executable command, dependency, canonical pair order, browser requirement,
+Redistribute the same 123 ordered proof pairs as contiguous ranges of 81/37/5 instead of
+81/30/12. A ends at Editor Core terminal integration; B owns the ordinary App/M10 region through
+T08; C begins at T09 and retains T09/T15's two exclusive barriers. T07/T08 move with B as complete
+pairs; the original eleven barriers remain on A. No executable command, dependency, canonical pair order, browser requirement,
 worker count, replicated prerequisite or closing workload changes. T01's ordinary root tests
 inject browser observations; its historical verifier does not execute Chromium. The real browser
 barriers remain on C, which already installs Chromium.
