@@ -251,8 +251,8 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T16 are `DONE`; T12's 0.7.0 Catalog, T13's safe local assets, T14's bounded history/reuse,
-T15's masters/instances boundary and T16's variants/visual-state authoring have hosted exact-head and fresh-`main` closure. Overall progress is 137/176 (78%), M10A is 16/28 (57%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
+M10A-T01 through M10A-T17 are `DONE`; T12's 0.7.0 Catalog, T13's safe local assets, T14's bounded history/reuse,
+T15's masters/instances boundary, T16's variants/visual-state authoring and T17's Catalog-backed Design System explorer have hosted exact-head and fresh-`main` closure. Overall progress is 138/176 (78%), M10A is 17/28 (61%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
@@ -279,7 +279,7 @@ and fresh-`main` closures as immutable historical receipts while T12 owns the cu
 | M10A-T14 | DONE        | M10A-T10, M10A-T11                               | [Hosted history and identity-safe reuse closure](../proof/M10A-T14.md)                                  |
 | M10A-T15 | DONE        | M10A-T09, M10A-T13, M10A-T14                     | [Hosted masters/instances, overrides, detach and isolated master editing closure](../proof/M10A-T15.md) |
 | M10A-T16 | DONE        | M10A-T12, M10A-T15                               | [Hosted variants and visual-state authoring closure](../proof/M10A-T16.md)                              |
-| M10A-T17 | NOT_STARTED | M10A-T03, M10A-T16                               | Built-in design-system explorer, documentation and controls                                             |
+| M10A-T17 | DONE        | M10A-T03, M10A-T16                               | [Hosted design-system explorer and documentation closure](../proof/M10A-T17.md)                         |
 | M10A-T18 | NOT_STARTED | M10A-T04, M10A-T17                               | Library versions, usage, deprecation and impact review                                                  |
 | M10A-T19 | NOT_STARTED | M10A-T10, M10A-T14                               | Separate Connections workspace and durable inert drafts                                                 |
 | M10A-T20 | NOT_STARTED | M10A-T16, M10A-T19                               | Visual typed state, event, action and navigation wiring                                                 |
