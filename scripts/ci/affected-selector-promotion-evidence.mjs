@@ -2942,7 +2942,7 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
   const repeatedWorkflowFragments = new Map([
     [
       "pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium",
-      3,
+      4,
     ],
     ["fetch-depth: 0", 5],
     ["DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}", 2],
