@@ -5488,6 +5488,134 @@
   outline-offset: 2px;
 }
 
+.connectionsWorkspace {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.75rem;
+}
+
+.connectionsWorkspaceHeader {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.connectionsWorkspaceHeader h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.connectionsWorkspaceHeader p:last-child {
+  max-width: 48rem;
+  margin: 0.35rem 0 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.connectionsWorkspaceGrid {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(14rem, 0.8fr);
+  gap: 1rem;
+}
+
+.connectionsIntentForm,
+.connectionsIntentList {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.connectionsIntentForm label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.62rem;
+}
+
+.connectionsIntentForm input,
+.connectionsIntentForm select,
+.connectionsIntentForm textarea {
+  min-height: 1.9rem;
+  padding: 0.35rem 0.5rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  font-size: 0.66rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.35rem;
+}
+
+.connectionsIntentForm textarea {
+  min-height: 4rem;
+  resize: vertical;
+}
+
+.connectionsIntentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.connectionsIntentActions button {
+  min-height: 1.9rem;
+}
+
+.connectionsIntentList h3 {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.connectionsIntentList ul {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.connectionsIntentList li button {
+  display: grid;
+  width: 100%;
+  gap: 0.2rem;
+  padding: 0.5rem;
+  color: var(--desen-app-text);
+  text-align: left;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.4rem;
+}
+
+.connectionsIntentList li button:hover {
+  border-color: var(--desen-app-border-strong);
+}
+
+.connectionsIntentList li small {
+  color: var(--desen-app-text-muted);
+  font-size: 0.56rem;
+}
+
+.connectionsWorkspaceNotice {
+  min-height: 1rem;
+  margin: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.62rem;
+}
+
+@media (max-width: 800px) {
+  .connectionsWorkspaceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .workspacePreviewStatus,
 .workspaceSessionStatus {
   min-width: 0;
