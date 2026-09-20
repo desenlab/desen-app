@@ -39,6 +39,564 @@
   background: var(--desen-app-canvas);
 }
 
+.utilityLink {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  padding: 0 0.625rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5625rem;
+  font-weight: 620;
+  text-decoration: none;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.4375rem;
+}
+
+.utilityLink:hover,
+.utilityLink[aria-current="page"] {
+  color: var(--desen-app-text);
+  border-color: var(--desen-app-border-strong);
+  background: var(--desen-app-surface-subtle);
+}
+
+.designSystemArea {
+  display: grid;
+  max-width: 90rem;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 3rem);
+  margin: 0 auto;
+}
+
+.designSystemHero,
+.designSystemFoundations,
+.designSystemDetail,
+.designSystemGallery {
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.designSystemHero {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      color-mix(in srgb, var(--desen-app-accent) 7%, transparent),
+      transparent 34%
+    ),
+    var(--desen-app-surface);
+}
+
+.designSystemHero h2,
+.designSystemHero p,
+.designSystemSectionHeading h2,
+.designSystemSectionHeading h3,
+.designSystemDetail h2,
+.designSystemDetail h3 {
+  margin: 0;
+}
+
+.designSystemHero h2 {
+  max-width: 34rem;
+  margin-top: 0.25rem;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  letter-spacing: -0.04em;
+}
+
+.designSystemHero p {
+  max-width: 42rem;
+  margin-top: 0.625rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.designSystemHeroMeta {
+  display: grid;
+  min-width: 12rem;
+  gap: 0.25rem;
+  padding: 0.875rem;
+  color: var(--desen-app-text-muted);
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.designSystemHeroMeta strong {
+  color: var(--desen-app-text);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.6875rem;
+}
+
+.designSystemHeroMeta span,
+.designSystemHeroMeta small {
+  font-size: 0.625rem;
+}
+
+.designSystemFoundations {
+  display: grid;
+  gap: 1rem;
+  padding: 1.125rem;
+}
+
+.designSystemSectionHeading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.designSystemSectionHeading p,
+.designSystemSectionHeading span {
+  margin: 0.25rem 0 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+
+.designSystemSectionHeading > code {
+  max-width: 10rem;
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemFoundationGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.designSystemFoundationGroup {
+  min-width: 0;
+  padding: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.designSystemFoundationGroup h3 {
+  margin: 0 0 0.625rem;
+  font-size: 0.6875rem;
+}
+
+.designSystemFoundationGroup ul,
+.designSystemComponentList,
+.designSystemDefinitionList,
+.designSystemScenarioList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.designSystemFoundationGroup ul {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.designSystemFoundationGroup li {
+  display: flex;
+  min-width: 0;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.designSystemFoundationGroup li > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+}
+
+.designSystemFoundationGroup strong {
+  overflow: hidden;
+  font-size: 0.5625rem;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemFoundationGroup code {
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemTokenSwatch {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.25rem;
+}
+
+.designSystemTokenSwatch[data-token-type="dimension"],
+.designSystemTokenSwatch[data-token-type="typography"],
+.designSystemTokenSwatch[data-token-type="number"] {
+  background: linear-gradient(
+    135deg,
+    var(--desen-app-accent) 0 20%,
+    transparent 20% 40%,
+    var(--desen-app-accent) 40% 60%,
+    transparent 60% 80%,
+    var(--desen-app-accent) 80%
+  );
+}
+
+.designSystemExplorerLayout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.designSystemGallery {
+  position: sticky;
+  top: 1rem;
+  min-height: 22rem;
+  padding: 1rem;
+}
+
+.designSystemSearch {
+  display: block;
+  margin: 0.875rem 0;
+}
+
+.designSystemSearch input {
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0 0.625rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  font-size: 0.6875rem;
+  background: var(--desen-app-canvas);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.designSystemComponentList {
+  display: grid;
+  gap: 0.25rem;
+  max-height: 38rem;
+  overflow: auto;
+}
+
+.designSystemComponentList button {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  color: var(--desen-app-text);
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+}
+
+.designSystemComponentList button:hover,
+.designSystemComponentList button[aria-current="true"] {
+  background: var(--desen-app-surface-subtle);
+  border-color: var(--desen-app-border);
+}
+
+.designSystemComponentList button > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.125rem;
+}
+
+.designSystemComponentList strong {
+  overflow: hidden;
+  font-size: 0.6875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemComponentList small {
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-size: 0.53125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemComponentGlyph {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--desen-app-text);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: var(--desen-app-canvas);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.designSystemComponentChevron {
+  color: var(--desen-app-text-soft);
+  font-size: 1rem;
+}
+
+.designSystemDetail {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.designSystemDetailHeading {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.designSystemDetailHeading h2 {
+  margin-top: 0.25rem;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.designSystemDetailHeading p:not(.eyebrow) {
+  max-width: 40rem;
+  margin: 0.375rem 0 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.designSystemUsageGuidance {
+  color: var(--desen-app-text-soft) !important;
+  font-size: 0.625rem !important;
+}
+
+.designSystemStatusStack {
+  display: grid;
+  align-content: start;
+  justify-items: end;
+  gap: 0.25rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5625rem;
+  white-space: nowrap;
+}
+
+.designSystemReady,
+.designSystemWarning {
+  padding: 0.25rem 0.4375rem;
+  border-radius: 999px;
+}
+
+.designSystemReady {
+  color: #1f6a45;
+  background: #e8f5ed;
+}
+
+.designSystemWarning {
+  color: #8b5a0a;
+  background: #fff4d6;
+}
+
+.designSystemDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.designSystemDetailGrid > section {
+  min-width: 0;
+  padding: 0.875rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.designSystemDetailGrid h3,
+.designSystemScenarios h3 {
+  margin-bottom: 0.625rem;
+  font-size: 0.6875rem;
+}
+
+.designSystemDefinitionList {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.designSystemDefinitionList li {
+  display: flex;
+  min-width: 0;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--desen-app-border);
+}
+
+.designSystemDefinitionList li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.designSystemDefinitionList li > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.designSystemDefinitionList strong {
+  overflow: hidden;
+  font-size: 0.5625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemDefinitionList small {
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+}
+
+.designSystemDefinitionList code {
+  max-width: 55%;
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.5rem;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designSystemStateList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.designSystemStateList span {
+  padding: 0.25rem 0.4rem;
+  color: var(--desen-app-text-muted);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.5rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 999px;
+}
+
+.designSystemScenarios {
+  padding: 0.875rem;
+  background: var(--desen-app-canvas);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.designSystemScenarioList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.5rem;
+}
+
+.designSystemScenarioList li {
+  min-width: 0;
+  padding: 0.625rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.designSystemScenarioList strong {
+  font-size: 0.5625rem;
+}
+
+.designSystemScenarioList pre {
+  max-height: 8rem;
+  overflow: auto;
+  padding: 0.5rem;
+  margin: 0.5rem 0 0;
+  color: var(--desen-app-text-soft);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.5rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--desen-app-canvas);
+  border-radius: 0.375rem;
+}
+
+.designSystemMismatch {
+  padding: 0.75rem;
+  margin: 0;
+  color: #8b5a0a;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  background: #fff8e7;
+  border: 1px solid #f1d58c;
+  border-radius: 0.5rem;
+}
+
+.designSystemEmpty,
+.designSystemDetailEmpty {
+  color: var(--desen-app-text-muted);
+  font-size: 0.6875rem;
+}
+
+.designSystemDetailEmpty {
+  display: grid;
+  min-height: 20rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.25rem;
+  padding: 2rem;
+  text-align: center;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.875rem;
+}
+
+@media (max-width: 58rem) {
+  .designSystemFoundationGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .designSystemExplorerLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .designSystemGallery {
+    position: static;
+  }
+}
+
+@media (max-width: 38rem) {
+  .designSystemHero,
+  .designSystemDetailHeading {
+    display: grid;
+  }
+
+  .designSystemHeroMeta {
+    min-width: 0;
+  }
+
+  .designSystemFoundationGrid,
+  .designSystemDetailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .diagnosticsPanel {
   display: flex;
   min-height: 0;

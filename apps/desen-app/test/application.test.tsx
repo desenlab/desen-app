@@ -247,6 +247,29 @@ describe("Desen App application shell", () => {
     expect(document.title).toBe("Recovery · Account app · DESEN");
   });
 
+  it("opens the Catalog-backed Design System area without mounting a Source editor", async () => {
+    renderApplication("/projects/account-app/design-system");
+
+    expect(screen.getByRole("heading", { level: 1, name: "Design system" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "One Catalog, one source of truth." }),
+    ).toBeTruthy();
+    expect(screen.getByRole("searchbox", { name: "Search design system components" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Foundations" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Components" })).toBeTruthy();
+    expect(screen.getByText("Button")).toBeTruthy();
+    expect(screen.getByText("Documented scenarios")).toBeTruthy();
+    expect(screen.getByRole("main").getAttribute("data-surface-editor")).toBeNull();
+    expect(document.title).toBe("Design system · Account app · DESEN");
+
+    const search = screen.getByRole("searchbox", { name: "Search design system components" });
+    fireEvent.change(search, { target: { value: "text field" } });
+    expect(screen.getByRole("button", { name: /Text field/ })).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByText("Text input.")).toBeTruthy();
+    });
+  });
+
   it("reacts to browser traversal and keeps route focus inside the content landmark", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
 

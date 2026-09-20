@@ -16,6 +16,11 @@ let installedNavigationGuard: InstalledNavigationGuard | null = null;
 export type DesenAppRoute =
   | Readonly<{ readonly kind: "projects"; readonly pathname: "/projects" }>
   | Readonly<{
+      readonly kind: "design-system";
+      readonly pathname: string;
+      readonly projectId: string;
+    }>
+  | Readonly<{
       readonly kind: "project";
       readonly pathname: string;
       readonly projectId: string;
@@ -68,6 +73,17 @@ export function readDesenAppRoute(pathname: string): DesenAppRoute {
     }
   }
 
+  if (segments.length === 4 && segments[3] === "design-system") {
+    const projectId = decodeRouteSegment(segments[2] ?? "");
+    if (projectId !== undefined) {
+      return Object.freeze({
+        kind: "design-system",
+        pathname: `/projects/${encodeURIComponent(projectId)}/design-system`,
+        projectId,
+      });
+    }
+  }
+
   if (segments.length === 5 && segments[3] === "surfaces") {
     const projectId = decodeRouteSegment(segments[2] ?? "");
     const surfaceId = decodeRouteSegment(segments[4] ?? "");
@@ -98,6 +114,11 @@ export function createDesenAppProjectPath(projectId: string, surfaceId?: string)
   const project = requireRouteSegment(projectId, "projectId");
   if (surfaceId === undefined) return `/projects/${project}`;
   return `/projects/${project}/surfaces/${requireRouteSegment(surfaceId, "surfaceId")}`;
+}
+
+/** Creates the canonical project-scoped Design System route. */
+export function createDesenAppDesignSystemPath(projectId: string): string {
+  return `/projects/${requireRouteSegment(projectId, "projectId")}/design-system`;
 }
 
 /** Reads the complete browser route location for React's external-store contract. */

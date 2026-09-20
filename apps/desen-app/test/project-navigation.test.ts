@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  createDesenAppDesignSystemPath,
   createDesenAppProjectPath,
   installDesenAppNavigationGuard,
   navigateDesenApp,
@@ -36,6 +37,11 @@ describe("Desen App project navigation", () => {
       pathname: "/projects/account-app",
       projectId: "account-app",
     });
+    expect(readDesenAppRoute("/projects/account-app/design-system")).toEqual({
+      kind: "design-system",
+      pathname: "/projects/account-app/design-system",
+      projectId: "account-app",
+    });
     expect(readDesenAppRoute("/projects/account-app/surfaces/sign-in")).toEqual({
       kind: "project",
       pathname: "/projects/account-app/surfaces/sign-in",
@@ -52,6 +58,7 @@ describe("Desen App project navigation", () => {
     "/projects//",
     "/projects/account-app/",
     "/projects/account-app/extra",
+    "/projects/account-app/design-system/extra",
     "/projects/account_app",
     "/projects/account-app/surface/sign-in",
     "/projects/account-app/surfaces/",
@@ -88,6 +95,9 @@ describe("Desen App project navigation", () => {
     expect(createDesenAppProjectPath("account-app")).toBe("/projects/account-app");
     expect(createDesenAppProjectPath("account-app", "sign-in")).toBe(
       "/projects/account-app/surfaces/sign-in",
+    );
+    expect(createDesenAppDesignSystemPath("account-app")).toBe(
+      "/projects/account-app/design-system",
     );
 
     for (const projectId of ["", "Account-app", "account_app", "account app", "account%2Dapp"]) {
