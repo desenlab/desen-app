@@ -10,6 +10,8 @@ import type { DesenEditorContentPredicate } from "@desen/editor-core";
 import type { AuthoringConditionEditResult } from "./authoring-conditions.js";
 import type {
   AuthoringConnectionResult,
+  AuthoringResourceConnectionModel,
+  AuthoringResourceConnectionRecipe,
   AuthoringOperationTriggerConnectionRecipe,
 } from "./authoring-connections.js";
 import type {
@@ -28,6 +30,213 @@ import type {
 export interface AuthoringOperationAliasOption {
   readonly alias: string;
   readonly operationId: string;
+}
+
+interface ResourceConnectionControlProps {
+  readonly model: AuthoringResourceConnectionModel;
+  readonly onConnect: (recipe: AuthoringResourceConnectionRecipe) => AuthoringConnectionResult;
+  readonly states: readonly AuthoringInspectorStateOption[];
+}
+
+function resourceSchemaType(schema: Readonly<Record<string, unknown>>): string {
+  return typeof schema.type === "string" ? schema.type : "structured";
+}
+
+function resourceStateCompatible(
+  schema: Readonly<Record<string, unknown>>,
+  state: AuthoringInspectorStateOption,
+): boolean {
+  const inputType = resourceSchemaType(schema);
+  return inputType === state.type || (inputType === "number" && state.type === "integer");
+}
+
+function resourceAlias(capabilityId: string): string {
+  const segment = capabilityId.split("/").at(-1) ?? "resource";
+  const normalized = segment.replace(/[^A-Za-z0-9_.:-]/gu, "-");
+  return /^[A-Za-z]/u.test(normalized) ? normalized : `resource-${normalized || "data"}`;
+}
+
+/** No-code Catalog resource browser with schema-filtered state bindings. */
+export function ResourceConnectionControl({
+  model,
+  onConnect,
+  states,
+}: Readonly<ResourceConnectionControlProps>) {
+  const resources = model.status === "ready" ? model.resources : [];
+  const [capabilityId, setCapabilityId] = useState(resources[0]?.capabilityId ?? "");
+  const selected = resources.find(({ capabilityId: id }) => id === capabilityId);
+  const existing =
+    model.status === "ready"
+      ? model.instances.find(({ capabilityId: id }) => id === capabilityId)
+      : undefined;
+  const [resourceId, setResourceId] = useState(existing?.id ?? resourceAlias(capabilityId));
+  const [policy, setPolicy] = useState<"mount" | "manual" | "once">(
+    existing?.policy ?? selected?.policies[0] ?? "manual",
+  );
+  const [mappings, setMappings] = useState<Readonly<Record<string, string>>>({});
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const next = resources.find(({ capabilityId: id }) => id === capabilityId);
+    const current =
+      model.status === "ready"
+        ? model.instances.find(({ capabilityId: id }) => id === capabilityId)
+        : undefined;
+    setResourceId(current?.id ?? resourceAlias(capabilityId));
+    setPolicy(current?.policy ?? next?.policies[0] ?? "manual");
+    setMappings({});
+    setNotice("");
+  }, [capabilityId, model, resources]);
+
+  const requiredMissing =
+    selected?.inputs.some(({ name, required }) => required && (mappings[name] ?? "") === "") ??
+    true;
+  if (model.status !== "ready") return null;
+  return (
+    <section aria-label="Resource connection" className={styles.behaviorCard}>
+      <div className={styles.behaviorCardHeading}>
+        <span>
+          <strong>Resource connection</strong>
+          <small>Catalog data · schema bound</small>
+        </span>
+        <span className={styles.behaviorStatus} data-connected={existing !== undefined}>
+          {existing === undefined ? "Not connected" : "Connected"}
+        </span>
+      </div>
+      <p>
+        Add a Catalog-declared resource with state-backed inputs. Endpoints and loaders are never
+        selected from Source.
+      </p>
+      {resources.length === 0 ? (
+        <div className={styles.behaviorEmpty}>
+          No resource capability is available in this Catalog.
+        </div>
+      ) : (
+        <div className={styles.operationConnectionForm}>
+          <label>
+            <span>Catalog resource</span>
+            <select
+              aria-label="Resource connection Catalog resource"
+              onChange={(event) => setCapabilityId(event.currentTarget.value)}
+              value={capabilityId}
+            >
+              {resources.map((resource) => (
+                <option key={resource.capabilityId} value={resource.capabilityId}>
+                  {resource.capabilityId}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Resource name</span>
+            <input
+              aria-label="Resource connection name"
+              onChange={(event) => setResourceId(event.currentTarget.value)}
+              value={resourceId}
+            />
+          </label>
+          <label>
+            <span>Load policy</span>
+            <select
+              aria-label="Resource connection policy"
+              onChange={(event) =>
+                setPolicy(event.currentTarget.value as "mount" | "manual" | "once")
+              }
+              value={policy}
+            >
+              {(selected?.policies ?? []).map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
+          {selected?.inputs.map((field) => {
+            const compatibleStates = states.filter((state) =>
+              resourceStateCompatible(field.schema, state),
+            );
+            return (
+              <label key={field.name}>
+                <span>
+                  {field.name} {field.required ? <small>Required</small> : <small>Optional</small>}
+                </span>
+                <select
+                  aria-label={`Resource connection ${field.name}`}
+                  onChange={(event) =>
+                    setMappings((current) =>
+                      Object.freeze({ ...current, [field.name]: event.currentTarget.value }),
+                    )
+                  }
+                  value={mappings[field.name] ?? ""}
+                >
+                  <option value="">Choose state…</option>
+                  {compatibleStates.map((state) => (
+                    <option key={state.name} value={state.name}>
+                      {state.name} · {state.type}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            );
+          })}
+          <button
+            disabled={
+              selected === undefined ||
+              resourceId.length === 0 ||
+              requiredMissing ||
+              selected.inputs.some(({ name }) => {
+                const stateName = mappings[name];
+                return (
+                  stateName !== undefined &&
+                  stateName !== "" &&
+                  !states.some(
+                    (state) =>
+                      state.name === stateName &&
+                      resourceStateCompatible(
+                        selected.inputs.find((field) => field.name === name)?.schema ?? {},
+                        state,
+                      ),
+                  )
+                );
+              })
+            }
+            onClick={() => {
+              if (selected === undefined) return;
+              const result = onConnect({
+                capabilityId: selected.capabilityId,
+                inputs: Object.freeze(
+                  Object.entries(mappings)
+                    .filter(([, stateName]) => stateName.length > 0)
+                    .map(([inputName, stateName]) => Object.freeze({ inputName, stateName })),
+                ),
+                policy,
+                resourceId,
+              });
+              setNotice(
+                result.ok
+                  ? `Connected ${resourceId} to ${selected.capabilityId}; host readiness remains explicit.`
+                  : result.reason === "resource-unavailable"
+                    ? "That resource is no longer declared by the current Catalog."
+                    : result.reason === "connection-incompatible"
+                      ? "Map every required input to a compatible local state."
+                      : result.reason === "connection-conflict"
+                        ? "That resource name belongs to another capability. Choose a new name."
+                        : "The resource connection was rejected atomically; Source is unchanged.",
+              );
+            }}
+            type="button"
+          >
+            {existing === undefined ? "Connect resource" : "Repair resource"}
+          </button>
+        </div>
+      )}
+      {notice.length === 0 ? null : (
+        <p aria-live="polite" className={styles.behaviorNotice} role="status">
+          {notice}
+        </p>
+      )}
+    </section>
+  );
 }
 
 interface InputConnectionControlProps {

@@ -30,7 +30,9 @@ export {
 export {
   deleteDesenEditorResourceInput,
   deleteDesenEditorStateDeclaration,
+  insertDesenEditorResourceDeclaration,
   insertDesenEditorStateDeclaration,
+  setDesenEditorResourceDeclaration,
   setDesenEditorNodeRepeatItems,
   setDesenEditorNodeRepeatKey,
   setDesenEditorResourceInput,
@@ -115,6 +117,9 @@ export type {
 
 export type {
   DesenEditorBindingValue,
+  DesenEditorResourceDeclaration,
+  DesenEditorResourceDeclarationInsertCommand,
+  DesenEditorResourceDeclarationSetCommand,
   DesenEditorNodeRepeatItemsSetCommand,
   DesenEditorNodeRepeatKeySetCommand,
   DesenEditorResourceInputDeleteCommand,

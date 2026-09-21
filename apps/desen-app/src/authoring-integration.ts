@@ -2,6 +2,7 @@ import { snapshotRuntimeJsonValue } from "@desen/runtime-core";
 
 import { prepareAuthoringOperationFixtureModel } from "./authoring-fixtures.js";
 import { prepareAuthoringSurfacePreviewBundle } from "./authoring-preview.js";
+import { prepareAuthoringResourceConnectionModel } from "./authoring-connections.js";
 import {
   admitProjectWorkspaceDocument,
   readProjectWorkspaceProfileAuthority,
@@ -14,6 +15,8 @@ import type {
   RuntimeOperationEffect,
   RuntimeOperationPort,
   RuntimeOperationRequest,
+  RuntimeResourcePort,
+  RuntimeResourceRequest,
 } from "@desen/runtime-core";
 import type { ProjectWorkspaceProfileHandle } from "./project-workspace-profile.js";
 
@@ -43,6 +46,17 @@ export interface AuthoringIntegrationOperationBinding {
   ) => RuntimeAwaitable<RuntimeHostCallResult>;
 }
 
+/** Exact Catalog resource and host implementation selected by trusted composition code. */
+export interface AuthoringIntegrationResourceBinding {
+  /** Exact resource capability identifier, never a URL or module name. */
+  readonly capabilityId: string;
+  /** Host-owned reader; Runtime retains output-schema and public-error authority. */
+  readonly load: (
+    request: RuntimeResourceRequest,
+    signal: AbortSignal,
+  ) => RuntimeAwaitable<RuntimeHostCallResult>;
+}
+
 /** Explicit integration input accepted only from the trusted App composition root. */
 export interface AuthoringIntegrationBindingInput {
   /** Exact factory-created workspace authority that owns this binding. */
@@ -55,6 +69,8 @@ export interface AuthoringIntegrationBindingInput {
   readonly description: string;
   /** Captured operations; this is never inherited from a workspace's ambient host ports. */
   readonly operations: readonly AuthoringIntegrationOperationBinding[];
+  /** Optional resource readers; omission preserves operation-only integrations. */
+  readonly resources?: readonly AuthoringIntegrationResourceBinding[];
 }
 
 /** Inert public disclosure with no executable callback or operation payload. */
@@ -69,7 +85,7 @@ export type AuthoringIntegrationBindingCreationResult =
   | Readonly<{ status: "created"; binding: AuthoringIntegrationBindingHandle }>
   | Readonly<{
       status: "rejected";
-      reason: "input-invalid" | "profile-invalid" | "operation-invalid";
+      reason: "input-invalid" | "profile-invalid" | "operation-invalid" | "resource-invalid";
     }>;
 
 /** Transport lifecycle only: a response is not a Runtime-validated success. */
@@ -84,12 +100,21 @@ export interface AuthoringIntegrationOperationSnapshot {
   readonly status: AuthoringIntegrationOperationStatus;
 }
 
+/** Input-free status of one authored resource instance. */
+export interface AuthoringIntegrationResourceSnapshot {
+  readonly capabilityId: string;
+  readonly instanceId: string;
+  readonly bound: boolean;
+  readonly status: AuthoringIntegrationOperationStatus;
+}
+
 /** Immutable UI disclosure containing neither request data nor host output or failure details. */
 export interface AuthoringIntegrationControllerSnapshot {
   readonly active: boolean;
   readonly disposed: boolean;
   readonly binding: AuthoringIntegrationDescriptor;
   readonly operations: readonly AuthoringIntegrationOperationSnapshot[];
+  readonly resources: readonly AuthoringIntegrationResourceSnapshot[];
 }
 
 /** Receives a public lifecycle snapshot and never receives an implementation error. */
@@ -100,6 +125,7 @@ export type AuthoringIntegrationControllerListener = (
 /** One initially inactive, exact-document Integration lifetime and its sole operation port. */
 export interface AuthoringIntegrationController {
   readonly operationPort: RuntimeOperationPort;
+  readonly resourcePort: RuntimeResourcePort;
   readonly read: () => AuthoringIntegrationControllerSnapshot;
   readonly subscribe: (listener: AuthoringIntegrationControllerListener) => () => void;
   /** Explicitly enables this Integration lifetime; terminal disposal cannot be reversed. */
@@ -129,13 +155,15 @@ export type AuthoringIntegrationControllerCreationResult =
         | "binding-invalid"
         | "document-invalid"
         | "preview-mismatch"
-        | "operation-model-invalid";
+        | "operation-model-invalid"
+        | "resource-model-invalid";
     }>;
 
 interface BindingAuthority {
   readonly profile: ProjectWorkspaceProfileHandle;
   readonly descriptor: AuthoringIntegrationDescriptor;
   readonly operations: ReadonlyMap<string, AuthoringIntegrationOperationBinding>;
+  readonly resources: ReadonlyMap<string, AuthoringIntegrationResourceBinding>;
 }
 
 interface PendingInvocation {
@@ -150,6 +178,14 @@ interface OperationState {
   readonly capabilityId: string;
   readonly effect: RuntimeOperationEffect;
   readonly binding: AuthoringIntegrationOperationBinding | undefined;
+  status: AuthoringIntegrationOperationStatus;
+  pending: PendingInvocation | undefined;
+}
+
+interface ResourceState {
+  readonly instanceId: string;
+  readonly capabilityId: string;
+  readonly binding: AuthoringIntegrationResourceBinding | undefined;
   status: AuthoringIntegrationOperationStatus;
   pending: PendingInvocation | undefined;
 }
@@ -173,6 +209,38 @@ function exactDataRecord(
     }
     const captured = Object.create(null) as Record<string, unknown>;
     for (const key of expectedKeys) {
+      const descriptor = Object.getOwnPropertyDescriptor(input, key);
+      if (descriptor?.enumerable !== true || !("value" in descriptor)) return undefined;
+      captured[key] = descriptor.value;
+    }
+    return Object.freeze(captured);
+  } catch {
+    return undefined;
+  }
+}
+
+function exactDataRecordWithOptional(
+  input: unknown,
+  requiredKeys: readonly string[],
+  optionalKeys: readonly string[],
+): Readonly<Record<string, unknown>> | undefined {
+  try {
+    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+    const prototype = Object.getPrototypeOf(input);
+    if (prototype !== null && prototype !== Object.prototype) return undefined;
+    const keys = Reflect.ownKeys(input);
+    if (
+      keys.some(
+        (key) =>
+          typeof key !== "string" || (!requiredKeys.includes(key) && !optionalKeys.includes(key)),
+      ) ||
+      requiredKeys.some((key) => !keys.includes(key))
+    ) {
+      return undefined;
+    }
+    const captured: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+    for (const key of [...requiredKeys, ...optionalKeys]) {
+      if (!keys.includes(key)) continue;
       const descriptor = Object.getOwnPropertyDescriptor(input, key);
       if (descriptor?.enumerable !== true || !("value" in descriptor)) return undefined;
       captured[key] = descriptor.value;
@@ -221,6 +289,32 @@ function captureOperations(input: unknown): readonly unknown[] | undefined {
   }
 }
 
+function captureResources(input: unknown): readonly unknown[] | undefined {
+  try {
+    if (!Array.isArray(input) || Object.getPrototypeOf(input) !== Array.prototype) return undefined;
+    const length = Object.getOwnPropertyDescriptor(input, "length");
+    if (
+      length === undefined ||
+      !("value" in length) ||
+      !Number.isSafeInteger(length.value) ||
+      length.value < 0 ||
+      length.value > MAX_OPERATIONS ||
+      Reflect.ownKeys(input).length !== (length.value as number) + 1
+    ) {
+      return undefined;
+    }
+    const captured: unknown[] = [];
+    for (let index = 0; index < (length.value as number); index += 1) {
+      const descriptor = Object.getOwnPropertyDescriptor(input, String(index));
+      if (descriptor?.enumerable !== true || !("value" in descriptor)) return undefined;
+      captured.push(descriptor.value);
+    }
+    return Object.freeze(captured);
+  } catch {
+    return undefined;
+  }
+}
+
 function bindingAuthority(input: unknown): BindingAuthority | undefined {
   return typeof input === "object" && input !== null ? BINDING_AUTHORITIES.get(input) : undefined;
 }
@@ -235,13 +329,11 @@ function bindingAuthority(input: unknown): BindingAuthority | undefined {
 export function createAuthoringIntegrationBinding(
   input: unknown,
 ): AuthoringIntegrationBindingCreationResult {
-  const captured = exactDataRecord(input, [
-    "profile",
-    "bindingId",
-    "label",
-    "description",
-    "operations",
-  ]);
+  const captured = exactDataRecordWithOptional(
+    input,
+    ["profile", "bindingId", "label", "description", "operations"],
+    ["resources"],
+  );
   if (captured === undefined) return Object.freeze({ status: "rejected", reason: "input-invalid" });
   const profileHandle = captured.profile as ProjectWorkspaceProfileHandle;
   const authority = readProjectWorkspaceProfileAuthority(profileHandle);
@@ -257,6 +349,11 @@ export function createAuthoringIntegrationBinding(
   }
   if (candidates === undefined) {
     return Object.freeze({ status: "rejected", reason: "operation-invalid" });
+  }
+  const resourceCandidates =
+    captured.resources === undefined ? [] : captureResources(captured.resources);
+  if (resourceCandidates === undefined) {
+    return Object.freeze({ status: "rejected", reason: "resource-invalid" });
   }
   const operations = new Map<string, AuthoringIntegrationOperationBinding>();
   for (const candidate of candidates) {
@@ -286,9 +383,35 @@ export function createAuthoringIntegrationBinding(
       }),
     );
   }
+  const resources = new Map<string, AuthoringIntegrationResourceBinding>();
+  for (const candidate of resourceCandidates) {
+    const resource = exactDataRecord(candidate, ["capabilityId", "load"]);
+    const capabilityId = boundedText(resource?.capabilityId);
+    if (
+      resource === undefined ||
+      capabilityId === undefined ||
+      resources.has(capabilityId) ||
+      typeof resource.load !== "function"
+    ) {
+      return Object.freeze({ status: "rejected", reason: "resource-invalid" });
+    }
+    const manifests = authority.profile.catalogs
+      .filter((catalog) => Object.hasOwn(catalog.resources, capabilityId))
+      .map((catalog) => catalog.resources[capabilityId]);
+    if (manifests.length !== 1 || manifests[0] === undefined) {
+      return Object.freeze({ status: "rejected", reason: "resource-invalid" });
+    }
+    resources.set(
+      capabilityId,
+      Object.freeze({
+        capabilityId,
+        load: resource.load as AuthoringIntegrationResourceBinding["load"],
+      }),
+    );
+  }
   const descriptor = Object.freeze({ bindingId, label, description });
   const binding = Object.freeze({}) as AuthoringIntegrationBindingHandle;
-  BINDING_AUTHORITIES.set(binding, { profile: profileHandle, descriptor, operations });
+  BINDING_AUTHORITIES.set(binding, { profile: profileHandle, descriptor, operations, resources });
   return Object.freeze({ status: "created", binding });
 }
 
@@ -342,6 +465,44 @@ function captureRequest(input: unknown): RuntimeOperationRequest | undefined {
     capabilityId,
     invocationAlias,
     effect: request.effect as RuntimeOperationEffect,
+    input: detached as RuntimeJsonObject,
+  });
+}
+
+function captureResourceRequest(input: unknown): RuntimeResourceRequest | undefined {
+  const request = exactDataRecord(input, ["context", "instanceId", "capabilityId", "input"]);
+  if (request === undefined) return undefined;
+  const context = exactDataRecord(request.context, [
+    "documentId",
+    "revision",
+    "surfaceId",
+    "requestId",
+  ]);
+  if (context === undefined) return undefined;
+  const documentId = boundedText(context.documentId);
+  const revision = boundedText(context.revision);
+  const surfaceId = boundedText(context.surfaceId);
+  const requestId = boundedText(context.requestId);
+  const instanceId = boundedText(request.instanceId);
+  const capabilityId = boundedText(request.capabilityId);
+  if (
+    documentId === undefined ||
+    revision === undefined ||
+    surfaceId === undefined ||
+    requestId === undefined ||
+    instanceId === undefined ||
+    capabilityId === undefined
+  ) {
+    return undefined;
+  }
+  const detached = snapshotRuntimeJsonValue(request.input);
+  if (detached === null || typeof detached !== "object" || Array.isArray(detached)) {
+    return undefined;
+  }
+  return Object.freeze({
+    context: Object.freeze({ documentId, revision, surfaceId, requestId }),
+    instanceId,
+    capabilityId,
     input: detached as RuntimeJsonObject,
   });
 }
@@ -400,6 +561,14 @@ export function createAuthoringIntegrationController(
   if (model.status !== "ready") {
     return Object.freeze({ status: "rejected", reason: "operation-model-invalid" });
   }
+  const resourceModel = prepareAuthoringResourceConnectionModel(
+    profile.profile.catalogs,
+    admitted.document,
+    surfaceId,
+  );
+  if (resourceModel.status !== "ready") {
+    return Object.freeze({ status: "rejected", reason: "resource-model-invalid" });
+  }
   const states = new Map<string, OperationState>();
   for (const operation of model.operations) {
     const candidate = authority.operations.get(operation.capabilityId);
@@ -408,6 +577,16 @@ export function createAuthoringIntegrationController(
       capabilityId: operation.capabilityId,
       effect: operation.effect,
       binding: candidate?.effect === operation.effect ? candidate : undefined,
+      status: "idle",
+      pending: undefined,
+    });
+  }
+  const resourceStates = new Map<string, ResourceState>();
+  for (const resource of resourceModel.instances) {
+    resourceStates.set(resource.id, {
+      instanceId: resource.id,
+      capabilityId: resource.capabilityId,
+      binding: authority.resources.get(resource.capabilityId),
       status: "idle",
       pending: undefined,
     });
@@ -434,6 +613,16 @@ export function createAuthoringIntegrationController(
           }),
         ),
       ),
+      resources: Object.freeze(
+        [...resourceStates.values()].map((state) =>
+          Object.freeze({
+            capabilityId: state.capabilityId,
+            instanceId: state.instanceId,
+            bound: state.binding !== undefined,
+            status: state.status,
+          }),
+        ),
+      ),
     });
   let snapshot = projectSnapshot();
   const notify = (): void => {
@@ -447,6 +636,8 @@ export function createAuthoringIntegrationController(
     }
   };
   const stillPending = (state: OperationState, pending: PendingInvocation): boolean =>
+    active && !disposed && epoch === pending.epoch && state.pending === pending;
+  const stillResourcePending = (state: ResourceState, pending: PendingInvocation): boolean =>
     active && !disposed && epoch === pending.epoch && state.pending === pending;
   const invoke = (
     inputRequest: RuntimeOperationRequest,
@@ -514,6 +705,69 @@ export function createAuthoringIntegrationController(
     }
     return result;
   };
+  const load = (inputRequest: RuntimeResourceRequest): RuntimeAwaitable<RuntimeHostCallResult> => {
+    if (!active || disposed) return DENIED;
+    const requestEpoch = epoch;
+    const request = captureResourceRequest(inputRequest);
+    if (
+      !active ||
+      disposed ||
+      epoch !== requestEpoch ||
+      request === undefined ||
+      request.context.documentId !== admitted.document.id ||
+      request.context.surfaceId !== surfaceId ||
+      request.context.revision !== revision
+    ) {
+      return DENIED;
+    }
+    const state = resourceStates.get(request.instanceId);
+    if (
+      state === undefined ||
+      state.capabilityId !== request.capabilityId ||
+      seenRequestIds.has(request.context.requestId) ||
+      seenRequestIds.size >= MAX_INVOCATIONS
+    ) {
+      return DENIED;
+    }
+    seenRequestIds.add(request.context.requestId);
+    if (state.pending !== undefined) return DENIED;
+    const callback = state.binding?.load;
+    if (callback === undefined) {
+      state.status = "denied";
+      notify();
+      return DENIED;
+    }
+    let resolve!: PendingInvocation["resolve"];
+    let reject!: PendingInvocation["reject"];
+    const result = new Promise<RuntimeHostCallResult>((resolveResult, rejectResult) => {
+      resolve = resolveResult;
+      reject = rejectResult;
+    });
+    const pending = Object.freeze({ epoch, abort: new AbortController(), resolve, reject });
+    state.pending = pending;
+    state.status = "pending";
+    notify();
+    if (!stillResourcePending(state, pending)) return result;
+    const failed = (): void => {
+      if (!stillResourcePending(state, pending)) return;
+      state.pending = undefined;
+      state.status = "denied";
+      pending.reject(new Error("Integration resource failed."));
+      notify();
+    };
+    try {
+      void Promise.resolve(callback(request, pending.abort.signal)).then((candidate) => {
+        if (!stillResourcePending(state, pending)) return;
+        state.pending = undefined;
+        state.status = "responded";
+        pending.resolve(candidate);
+        notify();
+      }, failed);
+    } catch {
+      failed();
+    }
+    return result;
+  };
   const revoke = (): void => {
     epoch += 1;
     active = false;
@@ -525,9 +779,18 @@ export function createAuthoringIntegrationController(
       pending.resolve(DENIED);
       pending.abort.abort();
     }
+    for (const state of resourceStates.values()) {
+      const pending = state.pending;
+      if (pending === undefined) continue;
+      state.pending = undefined;
+      state.status = "denied";
+      pending.resolve(DENIED);
+      pending.abort.abort();
+    }
   };
   const controller: AuthoringIntegrationController = Object.freeze({
     operationPort: Object.freeze({ invoke }),
+    resourcePort: Object.freeze({ load }),
     read: () => snapshot,
     subscribe: (listener: AuthoringIntegrationControllerListener) => {
       if (typeof listener !== "function" || disposed) return () => undefined;

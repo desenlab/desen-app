@@ -2572,7 +2572,7 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("heading", { level: 3, name: "Behavior" })).toBeTruthy();
     expect(screen.getByText("Editing Text field through typed controls.")).toBeTruthy();
     expect(screen.getByRole("status", { name: "Mode safety" }).textContent).toBe(
-      "Connections workspace · typed behavior edits are Source-backed; host execution remains unavailable.",
+      "Connections workspace · typed behavior and resource wiring are Source-backed; host execution remains explicitly gated.",
     );
 
     const panel = screen.getByRole("region", { name: "Events & Actions" });
