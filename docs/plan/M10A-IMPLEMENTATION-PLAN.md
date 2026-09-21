@@ -1,7 +1,7 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T19 are `DONE`, including
-T19's [exact-head hosted and fresh-`main` closure](../proof/M10A-T19.md). T20 is selected next and
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T20 are `DONE`, including
+T20's [exact-head hosted and fresh-`main` closure](../proof/M10A-T20.md). T21 is selected next and
 `NOT_STARTED`; canonical statuses are in [TASKS.md](TASKS.md).
 
 ## Product promise
@@ -19,9 +19,9 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 140 completed tasks and 11 completed
-gates remain completed. T01 through T19 are the nineteen completed M10A tasks; all 9 remaining
-tasks are `NOT_STARTED`. T20 is selected next. Nothing is renumbered, erased, or counted as implemented by this plan.
+and one gate; the total becomes 176 tasks and 14 gates. The 141 completed tasks and 11 completed
+gates remain completed. T01 through T20 are the twenty completed M10A tasks; all 8 remaining
+tasks are `NOT_STARTED`. T21 is selected next. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's

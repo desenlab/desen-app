@@ -251,8 +251,8 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T19 are `DONE`; T12's 0.7.0 Catalog, T13's safe local assets, T14's bounded history/reuse,
-T15's masters/instances boundary, T16's variants/visual-state authoring, T17's Catalog-backed Design System explorer, T18's library management/impact boundary and T19's Connections workspace have hosted exact-head and fresh-`main` closure. Overall progress is 140/176 (80%), M10A is 19/28 (68%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
+M10A-T01 through M10A-T20 are `DONE`; T12's 0.7.0 Catalog, T13's safe local assets, T14's bounded history/reuse,
+T15's masters/instances boundary, T16's variants/visual-state authoring, T17's Catalog-backed Design System explorer, T18's library management/impact boundary, T19's Connections workspace and T20's Source-backed visual behavior wiring have hosted exact-head and fresh-`main` closure. Overall progress is 141/176 (80%), M10A is 20/28 (71%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
@@ -282,7 +282,7 @@ and fresh-`main` closures as immutable historical receipts while T12 owns the cu
 | M10A-T17 | DONE        | M10A-T03, M10A-T16                               | [Hosted design-system explorer and documentation closure](../proof/M10A-T17.md)                               |
 | M10A-T18 | DONE        | M10A-T04, M10A-T17                               | [Hosted library management and impact closure](../proof/M10A-T17.md#-m10a-t18--library-management-and-impact) |
 | M10A-T19 | DONE        | M10A-T10, M10A-T14                               | [Hosted Connections workspace and durable inert drafts closure](../proof/M10A-T19.md)                         |
-| M10A-T20 | NOT_STARTED | M10A-T16, M10A-T19                               | Visual typed state, event, action and navigation wiring                                                       |
+| M10A-T20 | DONE        | M10A-T16, M10A-T19                               | [Hosted visual behavior wiring closure](../proof/M10A-T20.md)                                                 |
 | M10A-T21 | NOT_STARTED | M10A-T20                                         | Resource/operation connections and explicit host readiness                                                    |
 | M10A-T22 | NOT_STARTED | M10A-T04, M10A-T18, M10A-T21                     | Unified Run/release lifecycle with pinned design-system state                                                 |
 | M10A-T23 | NOT_STARTED | M10A-T08, M10A-T16, M10A-T17, M10A-T22           | Deterministic component/theme/state/viewport scenario matrix                                                  |

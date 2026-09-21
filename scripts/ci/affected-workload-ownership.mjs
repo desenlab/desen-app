@@ -83,15 +83,15 @@ const CI_POLICY_EXACT_PATHS = new Set([
 const PROJECT_DOCUMENTATION_ROOT_PATHS = new Set(["PROJECT-STATUS.md", "README.md"]);
 
 /** Reviewed count for the T20 visual-wiring successor, preserving the complete T19 predecessor. */
-export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1930;
+export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1931;
 
 /** Reviewed SHA-256 of the ordered complete tracked-path set. */
 export const EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256 =
-  "c96535ed5aeb0e778396533a9439c527f9c65d25617768b7228ec999a82792a9";
+  "16d00491f4c962864b6aacd9fdeb9d656c4efcfb25b90caa3cbe8cd7af3bd2c7";
 
 /** Reviewed SHA-256 of every exact path, category, disposition, and proof owner. */
 export const EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256 =
-  "57a469c7f26136849b83872b547c97cf9f89b9a6e7c1c17a7e1a0fd5ea8f065c";
+  "97e749a7c2b29a106a321ecf16961cb5c8f6695f15a3b104c0d387871ac6e2f8";
 
 /** Exact number of verifier/root-test inputs owned by the current 123 proof units. */
 export const EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT = 246;

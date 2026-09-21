@@ -4,14 +4,14 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01 through T19 are complete; T20 is next; M11 remains gated by G10A.
+> M10/G10 and M10A-T01 through T20 are complete; T21 is next; M11 remains gated by G10A.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **140 / 176 tasks complete (80%)**
+**Overall:** `███████████████████░░░░░░` **141 / 176 tasks complete (80%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -31,10 +31,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **19 / 28 tasks complete (68%)** · T19 is closed; no completed work removed.
+**M10A:** **20 / 28 tasks complete (71%)** · T20 is closed; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Next task:** `M10A-T20` (`NOT_STARTED`; visual typed state, event, action and navigation wiring) ·
+**Next task:** `M10A-T21` (`NOT_STARTED`; resource/operation connections and explicit host readiness) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -192,7 +192,7 @@ bounded private layout/content starter Catalog and isolated proof harness, not n
 selection/numeric Catalog [proof](docs/proof/M10A-T07.md). `M10A-T08` is `DONE` with its hosted
 0.5.0 overlay/disclosure [proof](docs/proof/M10A-T08.md); `M10A-T09` is `DONE` with its hosted
 0.6.0 data-display/feedback [proof](docs/proof/M10A-T09.md). Those 0.5.0/0.6.0 receipts are immutable; `M10A-T12`
-owns the current 0.7.0 Catalog and is `DONE` with [hosted closure](docs/proof/M10A-T12.md): lazy typed Inspector controls, token/literal/reset styles, responsive preview, and aggregate persistence. `M10A-T13` is `DONE` with [hosted closure](docs/proof/M10A-T13.md) for safe local assets; `M10A-T14` is `DONE` with [hosted closure](docs/proof/M10A-T14.md) for bounded history and identity-safe reuse; `M10A-T15` is `DONE` with [hosted closure](docs/proof/M10A-T15.md) for masters, linked instances, overrides, detach and isolated master editing; `M10A-T16` is `DONE` with [hosted closure](docs/proof/M10A-T16.md) for named variants and declared visual-state authoring; `M10A-T17` is `DONE` with [hosted closure](docs/proof/M10A-T17.md) for the Catalog-backed Design System explorer and documentation controls; `M10A-T18` is `DONE` in the same [hosted closure](docs/proof/M10A-T17.md#-m10a-t18--library-management-and-impact) for exact library version identity, local usage indexing, impact comparison, explicit adoption/rejection and restore; `M10A-T19` is `DONE` with [hosted closure](docs/proof/M10A-T19.md) for the separate Connections workspace and durable inert drafts. T20 is selected next; M11 remains gated by G10A.
+owns the current 0.7.0 Catalog and is `DONE` with [hosted closure](docs/proof/M10A-T12.md): lazy typed Inspector controls, token/literal/reset styles, responsive preview, and aggregate persistence. `M10A-T13` is `DONE` with [hosted closure](docs/proof/M10A-T13.md) for safe local assets; `M10A-T14` is `DONE` with [hosted closure](docs/proof/M10A-T14.md) for bounded history and identity-safe reuse; `M10A-T15` is `DONE` with [hosted closure](docs/proof/M10A-T15.md) for masters, linked instances, overrides, detach and isolated master editing; `M10A-T16` is `DONE` with [hosted closure](docs/proof/M10A-T16.md) for named variants and declared visual-state authoring; `M10A-T17` is `DONE` with [hosted closure](docs/proof/M10A-T17.md) for the Catalog-backed Design System explorer and documentation controls; `M10A-T18` is `DONE` in the same [hosted closure](docs/proof/M10A-T17.md#-m10a-t18--library-management-and-impact) for exact library version identity, local usage indexing, impact comparison, explicit adoption/rejection and restore; `M10A-T19` is `DONE` with [hosted closure](docs/proof/M10A-T19.md) for the separate Connections workspace and durable inert drafts; `M10A-T20` is `DONE` with [hosted closure](docs/proof/M10A-T20.md) for Source-backed visual behavior wiring. T21 is selected next; M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

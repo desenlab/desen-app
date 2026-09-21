@@ -93,7 +93,7 @@ M10A-T14 are `DONE`: T13 owns safe local image/icon/font admission and content-a
 T14 owns bounded immutable history plus atomic identity-safe duplicate/copy/paste across admitted
 surfaces. Their exact-head hosted/fresh-`main` closures add no Runtime, Publisher, Core/protocol,
 G10A, or M11 authority. T16 and T17 are `DONE` with hosted exact-head and fresh-`main` closure;
-T19 is complete with hosted exact-head and fresh-`main` closure; T20 is selected next and `NOT_STARTED`; M11 has not started.
+T19 and T20 are complete with hosted exact-head and fresh-`main` closure; T21 is selected next and `NOT_STARTED`; M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library
