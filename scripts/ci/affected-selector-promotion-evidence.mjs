@@ -1135,6 +1135,9 @@ const M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "docs/proof/M10A-T19.md",
   "scripts/lib/m10a-t19-legacy-input-receipts.mjs",
 ]);
+const M10A_T20_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "scripts/lib/m10a-t20-legacy-input-receipts.mjs",
+]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
   ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
@@ -1493,6 +1496,22 @@ const M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: "209b7074f9a1a49ec49e06ee1ee1dfa30afcd6ee77d9ad30b41e3fba6185f576",
+});
+const M10A_T20_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: 1930,
+  trackedPathSetSha256: "c96535ed5aeb0e778396533a9439c527f9c65d25617768b7228ec999a82792a9",
+  proofOwnedPathCount: 246,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 246,
+    CI_POLICY: 50,
+    DEPENDENCY_POLICY: 39,
+    FROZEN_INPUT: 172,
+    PACKAGE_OR_APPLICATION: 811,
+    SHARED_PROOF_INFRASTRUCTURE: 423,
+    PROJECT_DOCUMENTATION: 178,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: "57a469c7f26136849b83872b547c97cf9f89b9a6e7c1c17a7e1a0fd5ea8f065c",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -1896,8 +1915,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 153,
-  headSha256: "f36f9d3ac4c28af40526460323386015d805e431b36a9f6f761111902fbc555a",
+  sequence: 155,
+  headSha256: "b9a89a7239af14abd400e534fab6bd3d47feb4c912c0845a8a25baad99233710",
   frozenArtifactCount: 77,
   currentReaderCount: 154,
   liveVerification: "PASS",
@@ -2301,7 +2320,24 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   const currentSuccessorPaths = successorAuthority.entries.map(
     ({ path: trackedPath }) => trackedPath,
   );
-  let t18SuccessorPaths = currentSuccessorPaths;
+  let t19SuccessorPaths = currentSuccessorPaths;
+  if (isDeepStrictEqual(successorReview, M10A_T20_SUCCESSOR_OWNERSHIP_REVIEW)) {
+    if (
+      M10A_T20_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 1 ||
+      new Set(M10A_T20_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 1 ||
+      M10A_T20_SUCCESSOR_ADDED_TRACKED_PATHS.some(
+        (trackedPath) => !currentSuccessorPaths.includes(trackedPath),
+      )
+    ) {
+      fail(
+        "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+        "The authenticated M10A-T20 successor must include exactly the reviewed added path.",
+      );
+    }
+    t19SuccessorPaths = currentSuccessorPaths.filter(
+      (trackedPath) => !M10A_T20_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+    );
+  }
   if (isDeepStrictEqual(successorReview, M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW)) {
     if (
       M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 6 ||
@@ -2315,13 +2351,13 @@ function createBoundaryOwnershipDelta(rawBoundary) {
         "The authenticated M10A-T19 successor must include exactly the reviewed six added paths.",
       );
     }
-    t18SuccessorPaths = currentSuccessorPaths.filter(
+    t19SuccessorPaths = currentSuccessorPaths.filter(
       (trackedPath) => !M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
     );
   }
   if (
     !isDeepStrictEqual(
-      calculateAffectedWorkloadOwnershipReview(t18SuccessorPaths),
+      calculateAffectedWorkloadOwnershipReview(t19SuccessorPaths),
       M10A_T18_SUCCESSOR_OWNERSHIP_REVIEW,
     )
   ) {
@@ -2330,12 +2366,12 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       "The authenticated boundary does not reproduce the reviewed M10A-T18 ownership successor.",
     );
   }
-  let t17SuccessorPaths = t18SuccessorPaths;
+  let t18SuccessorPaths = t19SuccessorPaths;
   if (
     M10A_T18_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 3 ||
     new Set(M10A_T18_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 3 ||
     M10A_T18_SUCCESSOR_ADDED_TRACKED_PATHS.some(
-      (trackedPath) => !t18SuccessorPaths.includes(trackedPath),
+      (trackedPath) => !t19SuccessorPaths.includes(trackedPath),
     )
   ) {
     fail(
@@ -2343,12 +2379,12 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       "The authenticated M10A-T18 successor must include exactly the reviewed three added paths.",
     );
   }
-  t17SuccessorPaths = t18SuccessorPaths.filter(
+  t18SuccessorPaths = t19SuccessorPaths.filter(
     (trackedPath) => !M10A_T18_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   if (
     !isDeepStrictEqual(
-      calculateAffectedWorkloadOwnershipReview(t17SuccessorPaths),
+      calculateAffectedWorkloadOwnershipReview(t18SuccessorPaths),
       M10A_T17_SUCCESSOR_OWNERSHIP_REVIEW,
     )
   ) {
@@ -2361,7 +2397,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 4 ||
     new Set(M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 4 ||
     M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS.some(
-      (trackedPath) => !t17SuccessorPaths.includes(trackedPath),
+      (trackedPath) => !t18SuccessorPaths.includes(trackedPath),
     )
   ) {
     fail(
@@ -2369,12 +2405,12 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       "The authenticated M10A-T17 successor must include exactly the reviewed four added paths.",
     );
   }
-  const t16SuccessorPaths = t17SuccessorPaths.filter(
+  const t17SuccessorPaths = t18SuccessorPaths.filter(
     (trackedPath) => !M10A_T17_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   if (
     !isDeepStrictEqual(
-      calculateAffectedWorkloadOwnershipReview(t16SuccessorPaths),
+      calculateAffectedWorkloadOwnershipReview(t17SuccessorPaths),
       M10A_T16_SUCCESSOR_OWNERSHIP_REVIEW,
     )
   ) {
@@ -2387,7 +2423,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 4 ||
     new Set(M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 4 ||
     M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.some(
-      (trackedPath) => !t16SuccessorPaths.includes(trackedPath),
+      (trackedPath) => !t17SuccessorPaths.includes(trackedPath),
     )
   ) {
     fail(
@@ -2395,7 +2431,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       "The authenticated M10A-T16 successor must include exactly the reviewed four added paths.",
     );
   }
-  const successorPaths = t16SuccessorPaths.filter(
+  const successorPaths = t17SuccessorPaths.filter(
     (trackedPath) => !M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   if (
