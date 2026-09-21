@@ -199,8 +199,8 @@ export const M10A_T20_LEGACY_INPUT_SUCCESSORS = Object.freeze([
   {
     path: "scripts/lib/desen-app-published-host-update-proof.mjs",
     current: {
-      bytes: 287291,
-      sha256: "441398b639bdbd1ae5327bb9eee7e7844efc73f1f9c2b02b8a04cc03381eb4dd",
+      bytes: 287290,
+      sha256: "1f1b84c4f24f70769fe9681226a35f8fa50961864cc1c45a07424be99b519281",
     },
     predecessor: {
       bytes: 285186,
@@ -208,6 +208,7 @@ export const M10A_T20_LEGACY_INPUT_SUCCESSORS = Object.freeze([
     },
     inverseHunks: [
       { start: 27, remove: 1, restore: [] },
+      { start: 1405, remove: 1, restore: ["    staticEdges: 3_055,"] },
       {
         start: 1407,
         remove: 1,
