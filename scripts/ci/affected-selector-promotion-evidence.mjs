@@ -2338,12 +2338,13 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       (trackedPath) => !M10A_T20_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
     );
   }
-  if (isDeepStrictEqual(successorReview, M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW)) {
+  const t19SuccessorReview = calculateAffectedWorkloadOwnershipReview(t19SuccessorPaths);
+  if (isDeepStrictEqual(t19SuccessorReview, M10A_T19_SUCCESSOR_OWNERSHIP_REVIEW)) {
     if (
       M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 6 ||
       new Set(M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 6 ||
       M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.some(
-        (trackedPath) => !currentSuccessorPaths.includes(trackedPath),
+        (trackedPath) => !t19SuccessorPaths.includes(trackedPath),
       )
     ) {
       fail(
@@ -2351,7 +2352,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
         "The authenticated M10A-T19 successor must include exactly the reviewed six added paths.",
       );
     }
-    t19SuccessorPaths = currentSuccessorPaths.filter(
+    t19SuccessorPaths = t19SuccessorPaths.filter(
       (trackedPath) => !M10A_T19_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
     );
   }
