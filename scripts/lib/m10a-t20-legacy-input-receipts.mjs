@@ -2,6 +2,25 @@
 // They are historical data only; current execution always uses the live tree and its own checks.
 export const M10A_T20_LEGACY_INPUT_SUCCESSORS = Object.freeze([
   {
+    path: "scripts/lib/m10a-t15-execution.mjs",
+    current: {
+      bytes: 18322,
+      sha256: "a932a68411df616d9142ba4564cb429104ce6b6b8dc4183519685b56419b3bcd",
+    },
+    predecessor: {
+      bytes: 18207,
+      sha256: "3c5828f2531d301dd756418ec3dde697aa5431c98a069e7273b8f56d52d812ef",
+    },
+    inverseHunks: [
+      { start: 19, remove: 1, restore: [] },
+      {
+        start: 248,
+        remove: 1,
+        restore: ["    const successorTests = M10A_T17_SUCCESSOR_TESTS.filter("],
+      },
+    ],
+  },
+  {
     path: "apps/desen-app/src/application.tsx",
     current: {
       bytes: 225138,
@@ -227,4 +246,13 @@ export const M10A_T20_LEGACY_INPUT_SUCCESSORS = Object.freeze([
   },
 ]);
 
-export const M10A_T20_SUCCESSOR_TESTS = Object.freeze([]);
+export const M10A_T20_SUCCESSOR_TESTS = Object.freeze([
+  {
+    path: "apps/desen-app/test/application.test.tsx",
+    title: "keeps typed behavior wiring Source-backed in the separate Connections workspace",
+  },
+  {
+    path: "apps/desen-app/test/connections-workspace.test.tsx",
+    title: "renders Source-backed visual behavior controls beside inert intent notes",
+  },
+]);
