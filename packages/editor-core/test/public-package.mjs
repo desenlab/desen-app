@@ -488,7 +488,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
   );
   assert.match(
     emittedModules[0].source,
-    /export\s*\{\s*deleteDesenEditorResourceInput,\s*deleteDesenEditorStateDeclaration,\s*insertDesenEditorStateDeclaration,\s*setDesenEditorNodeRepeatItems,\s*setDesenEditorNodeRepeatKey,\s*setDesenEditorResourceInput,\s*setDesenEditorStateInitial,\s*setDesenEditorStateSchema\s*,?\s*\}\s*from\s*["']\.\/state-binding-edits\.js["']/,
+    /export\s*\{\s*deleteDesenEditorResourceInput,\s*deleteDesenEditorStateDeclaration,\s*insertDesenEditorResourceDeclaration,\s*insertDesenEditorStateDeclaration,\s*setDesenEditorResourceDeclaration,\s*setDesenEditorNodeRepeatItems,\s*setDesenEditorNodeRepeatKey,\s*setDesenEditorResourceInput,\s*setDesenEditorStateInitial,\s*setDesenEditorStateSchema\s*,?\s*\}\s*from\s*["']\.\/state-binding-edits\.js["']/,
   );
   assert.match(
     emittedModules[0].source,
@@ -544,6 +544,7 @@ test("the built public package resolves through its export map and exposes the r
     "insertDesenEditorAction",
     "insertDesenEditorEventHandler",
     "insertDesenEditorNode",
+    "insertDesenEditorResourceDeclaration",
     "insertDesenEditorStateDeclaration",
     "insertDesenEditorSubtree",
     "insertDesenEditorVariant",
@@ -561,6 +562,7 @@ test("the built public package resolves through its export map and exposes the r
     "setDesenEditorNodeRepeatKey",
     "setDesenEditorOwnerProp",
     "setDesenEditorOwnerStyleProperty",
+    "setDesenEditorResourceDeclaration",
     "setDesenEditorResourceInput",
     "setDesenEditorStateInitial",
     "setDesenEditorStateSchema",
