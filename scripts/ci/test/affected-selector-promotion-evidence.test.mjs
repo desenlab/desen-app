@@ -334,13 +334,13 @@ test("authenticates the exact 20/20 hosted campaign and live local-preflight suc
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "0a52661e58ce6861b256c3d4223c988e006ed29ee46ba6177b2007c33fdb3d18",
+    selectorSha256: "a924b65d7dc236d0e90fd0a867857f8e2632740a818a03f9106578e58f7fd50f",
     ownershipSha256: "57a469c7f26136849b83872b547c97cf9f89b9a6e7c1c17a7e1a0fd5ea8f065c",
     impactGraphSha256: "a1c70aa4d72cfb34de7c29c034964bb7a5f0a3268388604c85446c52d475e034",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "27eb4790cdddf0e762f09b102d5a5de41ff55e3913270405bfded3e3fe65b761",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "43fe97ce7c801be5f6d31601a6ee9b47252ecc5e892d8a4dfff9c02acdfa1854",
+    runnerAuthoritySha256: "f108e7015e359014f30bfba5b3abb16fa1e0fe8b751c5565cd9d4355c701868d",
   });
 });
 
