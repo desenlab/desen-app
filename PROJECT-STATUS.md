@@ -1,19 +1,19 @@
 # Project Status
 
-Last updated: 2026-09-20
+Last updated: 2026-09-21
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **140/176 tasks (80%)**:
-M10 is **12/12**, M10A is **19/28 (68%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **141/176 tasks (80%)**:
+M10 is **12/12**, M10A is **20/28 (71%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 through M10A-T19 are DONE.** T12's 0.7.0 Catalog and responsive-authoring boundary,
+**M10A-T01 through M10A-T20 are DONE.** T12's 0.7.0 Catalog and responsive-authoring boundary,
 T13's safe local assets, T14's bounded history and identity-safe reuse operations, T15's
 masters/instances authoring boundary, T16's variants/visual-state authoring boundary, T17's
-Catalog-backed Design System explorer, T18 library impact and T19 Connections workspace are closed with hosted/fresh-`main` evidence. They add no
-Runtime, Publisher, Core/protocol, G10A, or M11 authority. T20 is selected next. M11 has not started. The frozen protocol, Runtime
+Catalog-backed Design System explorer, T18 library impact, T19 Connections workspace and T20 Source-backed visual behavior wiring are closed with hosted/fresh-`main` evidence. They add no
+Runtime, Publisher, Core/protocol, G10A, or M11 authority. T21 is selected next. M11 has not started. The frozen protocol, Runtime
 Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
@@ -24,7 +24,7 @@ Each completed task retains its own exact-head, merge, and fresh-`main` receipt.
 [M10A-T05 proof](docs/proof/M10A-T05.md), [M10A-T06 proof](docs/proof/M10A-T06.md),
 [M10A-T07 proof](docs/proof/M10A-T07.md), [M10A-T08 proof](docs/proof/M10A-T08.md), [M10A-T09 proof](docs/proof/M10A-T09.md),
 [M10A-T10 proof](docs/proof/M10A-T10.md), [M10A-T11 proof](docs/proof/M10A-T11.md),
-[M10A-T12 proof](docs/proof/M10A-T12.md), [M10A-T13 proof](docs/proof/M10A-T13.md), [M10A-T14 proof](docs/proof/M10A-T14.md), [M10A-T15 proof](docs/proof/M10A-T15.md), [M10A-T16 proof](docs/proof/M10A-T16.md), the combined [M10A-T17/T18 proof](docs/proof/M10A-T17.md), and [M10A-T19 proof](docs/proof/M10A-T19.md) are canonical
+[M10A-T12 proof](docs/proof/M10A-T12.md), [M10A-T13 proof](docs/proof/M10A-T13.md), [M10A-T14 proof](docs/proof/M10A-T14.md), [M10A-T15 proof](docs/proof/M10A-T15.md), [M10A-T16 proof](docs/proof/M10A-T16.md), the combined [M10A-T17/T18 proof](docs/proof/M10A-T17.md), [M10A-T19 proof](docs/proof/M10A-T19.md), and [M10A-T20 proof](docs/proof/M10A-T20.md) are canonical
 closure authorities; earlier candidates remain failures. T12 through T14 remain bounded authoring/App boundaries, not Runtime, Publisher, Core/protocol, G10A, or M11
 authority. T05 proves only its private starter Catalog and isolated harness, not normal-App integration,
 persistence, Runtime, Publisher, or protocol authority. T06 proves only the private 0.3.0 form-control
@@ -33,7 +33,7 @@ T08's 0.5.0 and T09's 0.6.0 artifacts are immutable historical receipts; T12 own
 Catalog capture. T10 adds only its application-owned project/surface registry and generation-fenced storage
 boundary. T11 adds bounded App-owned direct manipulation, T13 adds safe local assets, T14 adds
 bounded history/reuse operations, T15 adds bounded masters/instances authoring, T16 adds bounded
-variants and visual-state authoring, T17 adds the Catalog-backed Design System explorer, T18 adds library impact review, and T19 adds the Connections workspace with inert drafts; none adds
+variants and visual-state authoring, T17 adds the Catalog-backed Design System explorer, T18 adds library impact review, T19 adds the Connections workspace with inert drafts, and T20 adds Source-backed visual behavior wiring; none adds
 Publisher, Runtime, Core/protocol, G10A, or M11 authority.
 
 ## M10 closure
@@ -85,8 +85,8 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T20 — visual typed state, event, action and navigation wiring — is the selected next task and `NOT_STARTED`.** The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), [task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t20--visual-typed-state-event-action-and-navigation-wiring), and
-completed [T19 report](docs/proof/M10A-T19.md) define the next bounded boundary. T19 does not authorize
+**M10A-T21 — resource/operation connections and explicit host readiness — is the selected next task and `NOT_STARTED`.** The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), [task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t21--data-and-integration-wiring), and
+completed [T20 report](docs/proof/M10A-T20.md) define the next bounded boundary. T20 does not authorize
 Runtime activation, Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
