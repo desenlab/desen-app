@@ -23,45 +23,52 @@ export const M10A_T20_LEGACY_INPUT_SUCCESSORS = Object.freeze([
   {
     path: "apps/desen-app/src/application.tsx",
     current: {
-      bytes: 225138,
-      sha256: "723a12c0a4c158abf6a2b4febdba527e54eefa393f07f7d6da56e42f7b0b9108",
+      bytes: 229067,
+      sha256: "6ed4be212ee9df71988a5993d1272561e8b16625de07b69ac25e01fca531d3ac",
     },
     predecessor: {
       bytes: 222701,
       sha256: "0adf3f30fc94f8b38781112187f0a09803482634385fed730f8b4f33f3f478cf",
     },
     inverseHunks: [
+      { start: 40, remove: 2, restore: [] },
+      { start: 121, remove: 1, restore: [] },
+      { start: 236, remove: 1, restore: [] },
+      { start: 3393, remove: 9, restore: [] },
+      { start: 3594, remove: 5, restore: [] },
+      { start: 3611, remove: 5, restore: [] },
       {
-        start: 3834,
+        start: 3857,
         remove: 4,
         restore: [
           "  function isDesignMode(allowSourceDraft = false): boolean {",
           '    if (modeRef.current !== "design") return false;',
         ],
       },
-      { start: 3858, remove: 9, restore: [] },
-      { start: 4336, remove: 1, restore: ["    if (!isDesignMode() || selection === null) {"] },
-      { start: 4361, remove: 1, restore: ["    if (!isDesignMode() || selection === null) {"] },
+      { start: 3879, remove: 9, restore: [] },
+      { start: 4359, remove: 1, restore: ["    if (!isDesignMode() || selection === null) {"] },
       { start: 4384, remove: 1, restore: ["    if (!isDesignMode() || selection === null) {"] },
+      { start: 4406, remove: 24, restore: [] },
+      { start: 4431, remove: 1, restore: ["    if (!isDesignMode() || selection === null) {"] },
       {
-        start: 4417,
+        start: 4464,
         remove: 1,
         restore: [
           '    if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });',
         ],
       },
       {
-        start: 4434,
+        start: 4481,
         remove: 1,
         restore: [
           '    if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });',
         ],
       },
-      { start: 4661, remove: 1, restore: ["    if (!isDesignMode()) return;"] },
-      { start: 4669, remove: 1, restore: ["      selectOne(null);"] },
-      { start: 4703, remove: 1, restore: ["    selectOne(null);"] },
+      { start: 4708, remove: 1, restore: ["    if (!isDesignMode()) return;"] },
+      { start: 4716, remove: 1, restore: ["      selectOne(null);"] },
+      { start: 4750, remove: 1, restore: ["    selectOne(null);"] },
       {
-        start: 4788,
+        start: 4835,
         remove: 8,
         restore: [
           "  const canUndo = designEditsAvailable && historyState !== null && historyState.past.length > 0;",
@@ -69,33 +76,40 @@ export const M10A_T20_LEGACY_INPUT_SUCCESSORS = Object.freeze([
         ],
       },
       {
-        start: 4839,
+        start: 4886,
         remove: 1,
         restore: [
           '              ? "Connections workspace · drafts are inert until a later wiring task."',
         ],
       },
       {
-        start: 5026,
+        start: 5073,
         remove: 1,
         restore: ['                  ? "Inert intent metadata · no executable writes"'],
       },
       {
-        start: 5036,
+        start: 5083,
         remove: 1,
         restore: [
           '                ? "Connections forms are persisted as separate inert project metadata. Source, host calls, and behavior handlers remain unchanged."',
         ],
       },
       {
-        start: 5053,
+        start: 5087,
+        remove: 1,
+        restore: [
+          '                    ? "Only explicitly connected host operations can execute. Navigation stays within this authored Source. Storage, resources, publication, activation and production remain blocked; Run never saves inputs or results."',
+        ],
+      },
+      {
+        start: 5100,
         remove: 1,
         restore: [
           '              ? "Connections workspace · incomplete intents are durable metadata; executable wiring is not available."',
         ],
       },
-      { start: 5104, remove: 36, restore: [] },
-      { start: 5144, remove: 1, restore: [] },
+      { start: 5151, remove: 80, restore: [] },
+      { start: 5235, remove: 1, restore: [] },
     ],
   },
   {
