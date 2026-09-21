@@ -39,6 +39,9 @@ type MutableEditorNode = MutableEditorSurface["root"];
 /** One complete structurally representable surface-local DESEN state declaration. */
 export type DesenEditorStateDeclaration = EditorSurface["state"][string];
 
+/** One complete structurally representable surface-local DESEN resource declaration. */
+export type DesenEditorResourceDeclaration = EditorSurface["resources"][string];
+
 /** One complete structurally representable DESEN value at a repeat or resource-input root. */
 export type DesenEditorBindingValue = EditorSurface["root"]["repeat"] extends infer Repeat
   ? Repeat extends { readonly items: infer Value }
@@ -68,6 +71,26 @@ export interface DesenEditorStateDeclarationInsertCommand {
   readonly name: string;
   /** Complete state declaration to insert without reference rewriting. */
   readonly declaration: DesenEditorStateDeclaration;
+}
+
+/** Exact command for inserting one complete resource declaration under an absent name. */
+export interface DesenEditorResourceDeclarationInsertCommand {
+  /** Selected Source surface map key. */
+  readonly surfaceId: string;
+  /** Exact absent surface-local resource instance identifier. */
+  readonly name: string;
+  /** Complete resource declaration to insert without reference rewriting. */
+  readonly declaration: DesenEditorResourceDeclaration;
+}
+
+/** Exact command for replacing one complete existing resource declaration. */
+export interface DesenEditorResourceDeclarationSetCommand {
+  /** Selected Source surface map key. */
+  readonly surfaceId: string;
+  /** Existing surface-local resource instance identifier. */
+  readonly name: string;
+  /** Complete replacement resource declaration. */
+  readonly declaration: DesenEditorResourceDeclaration;
 }
 
 /** Exact command for deleting one existing state declaration without cascading references. */
@@ -276,6 +299,32 @@ function captureStateInsert(
     return undefined;
   }
   const declaration = captureJson<DesenEditorStateDeclaration>(fields.declaration);
+  return declaration === undefined
+    ? undefined
+    : Object.freeze({ declaration, name: fields.name, surfaceId: fields.surfaceId });
+}
+
+function captureResourceInsert(
+  input: DesenEditorResourceDeclarationInsertCommand,
+): DesenEditorResourceDeclarationInsertCommand | undefined {
+  const fields = exactOwnData(input, ["declaration", "name", "surfaceId"]);
+  if (fields === undefined || !localIdentifier(fields.name) || !localIdentifier(fields.surfaceId)) {
+    return undefined;
+  }
+  const declaration = captureJson<DesenEditorResourceDeclaration>(fields.declaration);
+  return declaration === undefined
+    ? undefined
+    : Object.freeze({ declaration, name: fields.name, surfaceId: fields.surfaceId });
+}
+
+function captureResourceSet(
+  input: DesenEditorResourceDeclarationSetCommand,
+): DesenEditorResourceDeclarationSetCommand | undefined {
+  const fields = exactOwnData(input, ["declaration", "name", "surfaceId"]);
+  if (fields === undefined || !localIdentifier(fields.name) || !localIdentifier(fields.surfaceId)) {
+    return undefined;
+  }
+  const declaration = captureJson<DesenEditorResourceDeclaration>(fields.declaration);
   return declaration === undefined
     ? undefined
     : Object.freeze({ declaration, name: fields.name, surfaceId: fields.surfaceId });
@@ -820,6 +869,64 @@ export function insertDesenEditorStateDeclaration(
       );
     }
     defineOwn(state, captured.name, captured.declaration);
+    return mutationSuccess();
+  });
+}
+
+/**
+ * Inserts one complete resource declaration under an absent surface-local identifier.
+ *
+ * @remarks The declaration is inert Source data; Catalog capability admission and host readiness
+ * remain separate boundaries. Duplicate names, malformed declarations, and structural or finite
+ * profile failures are atomic and expose no partial document.
+ */
+export function insertDesenEditorResourceDeclaration(
+  editorDocument: DesenEditorDocument,
+  command: DesenEditorResourceDeclarationInsertCommand,
+): DesenEditorStateBindingEditResult {
+  const captured = captureResourceInsert(command);
+  if (captured === undefined)
+    return commandFailure("Resource-insert command must be exact inert own data.");
+  return applySurfaceMutation(editorDocument, captured.surfaceId, (surface) => {
+    const resources = surface.resources as Record<string, unknown>;
+    const pointer = resourcePointer(captured.surfaceId, captured.name);
+    if (Object.hasOwn(resources, captured.name)) {
+      return mutationIssue(
+        "run.desen.editor/STATE_BINDING_EDIT_TARGET_EXISTS",
+        "The resource declaration already exists.",
+        pointer,
+      );
+    }
+    defineOwn(resources, captured.name, captured.declaration);
+    return mutationSuccess();
+  });
+}
+
+/**
+ * Replaces one complete existing resource declaration atomically.
+ *
+ * @remarks The operation changes only inert Source data. It never resolves a Catalog capability
+ * or obtains host authority; continuous validation and the explicit host readiness boundary remain
+ * responsible for those checks.
+ */
+export function setDesenEditorResourceDeclaration(
+  editorDocument: DesenEditorDocument,
+  command: DesenEditorResourceDeclarationSetCommand,
+): DesenEditorStateBindingEditResult {
+  const captured = captureResourceSet(command);
+  if (captured === undefined)
+    return commandFailure("Resource-set command must be exact inert own data.");
+  return applySurfaceMutation(editorDocument, captured.surfaceId, (surface) => {
+    const resources = surface.resources as Record<string, unknown>;
+    const pointer = resourcePointer(captured.surfaceId, captured.name);
+    if (!Object.hasOwn(resources, captured.name)) {
+      return mutationIssue(
+        "run.desen.editor/STATE_BINDING_EDIT_TARGET_NOT_FOUND",
+        "The resource declaration does not exist.",
+        pointer,
+      );
+    }
+    defineOwn(resources, captured.name, captured.declaration);
     return mutationSuccess();
   });
 }

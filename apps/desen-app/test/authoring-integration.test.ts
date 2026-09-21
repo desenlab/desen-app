@@ -15,17 +15,23 @@ import {
 } from "../src/project-workspace-profile.js";
 import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "../src/reference-sign-in-workspace-profile.js";
 
-import type { RuntimeHostCallResult, RuntimeOperationRequest } from "@desen/runtime-core";
+import type {
+  RuntimeHostCallResult,
+  RuntimeOperationRequest,
+  RuntimeResourceRequest,
+} from "@desen/runtime-core";
 import type {
   AuthoringIntegrationBindingHandle,
   AuthoringIntegrationBindingInput,
   AuthoringIntegrationControllerInput,
   AuthoringIntegrationOperationBinding,
+  AuthoringIntegrationResourceBinding,
 } from "../src/authoring-integration.js";
 import type { ProjectWorkspaceProfileHandle } from "../src/project-workspace-profile.js";
 
 const OPERATION_ID = "com.example.deliveries/dispatch";
 const EXTRA_OPERATION_ID = "com.example.deliveries/cancel";
+const RESOURCE_ID = "com.example.deliveries/records";
 const DENIED = Object.freeze({ status: "denied" } as const);
 const OUTPUT = Object.freeze({ status: "succeeded", value: { trackingId: "parcel-7" } } as const);
 
@@ -62,13 +68,30 @@ function deliveryCatalog(withFixtures = false) {
     components: {},
     behaviors: {},
     operations: { [OPERATION_ID]: operation, [EXTRA_OPERATION_ID]: { ...operation } },
-    resources: {},
+    resources: {
+      [RESOURCE_ID]: {
+        description: "Host-owned delivery records.",
+        inputSchema: {
+          type: "object",
+          additionalProperties: false,
+          properties: { query: { type: "string" } },
+          required: ["query"],
+        },
+        outputSchema: {
+          type: "array",
+          items: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
+        },
+        errors: [{ code: "UNAVAILABLE", description: "Records are unavailable." }],
+        policies: ["mount", "manual"],
+        authoring: { fixtures: { populated: [{ id: "synthetic" }] } },
+      },
+    },
     authoring: {},
     extensions: {},
   };
 }
 
-function deliveryDocument(catalog = deliveryCatalog()) {
+function deliveryDocument(catalog = deliveryCatalog(), withResource = false) {
   const requirements = [referenceCatalog, catalog].map(({ id, version, target }) => ({
     id,
     version,
@@ -84,7 +107,9 @@ function deliveryDocument(catalog = deliveryCatalog()) {
       "dispatch-form": {
         id: "dispatch-form",
         state: {},
-        resources: {},
+        resources: withResource
+          ? { records: { use: RESOURCE_ID, input: { query: "active" }, policy: "manual" } }
+          : {},
         root: {
           id: "dispatch.layout",
           use: "com.example.ui/Stack",
@@ -132,12 +157,12 @@ function deliveryDocument(catalog = deliveryCatalog()) {
   return admitted.document;
 }
 
-function createDomain(withFixtures = false) {
+function createDomain(withFixtures = false, withResource = false) {
   const reference = readProjectWorkspaceProfileAuthority(REFERENCE_SIGN_IN_WORKSPACE_PROFILE);
   if (reference.status !== "read") throw new TypeError("The fixture registry must be admitted.");
   const catalog = deliveryCatalog(withFixtures);
   const catalogs = [referenceCatalog, catalog];
-  const document = deliveryDocument(catalog);
+  const document = deliveryDocument(catalog, withResource);
   const ambientInvoke = vi.fn(() => OUTPUT);
   const created = createProjectWorkspaceProfile({
     profileId: "parcel-project-web",
@@ -210,6 +235,12 @@ function bindingInput(
   };
 }
 
+function resourceBinding(
+  load: AuthoringIntegrationResourceBinding["load"] = () => OUTPUT,
+): AuthoringIntegrationResourceBinding {
+  return { capabilityId: RESOURCE_ID, load };
+}
+
 function createBinding(input: AuthoringIntegrationBindingInput) {
   const result = createAuthoringIntegrationBinding(input);
   if (result.status !== "created")
@@ -246,6 +277,23 @@ function request(revision: string, requestId = "operation:dispatch:1"): RuntimeO
     invocationAlias: "dispatch",
     input: { address: "Private customer address" },
     effect: "external",
+  };
+}
+
+function resourceRequest(
+  revision: string,
+  requestId = "resource:records:1",
+): RuntimeResourceRequest {
+  return {
+    context: {
+      documentId: "com.example.parcel-project",
+      surfaceId: "dispatch-form",
+      revision,
+      requestId,
+    },
+    instanceId: "records",
+    capabilityId: RESOURCE_ID,
+    input: { query: "private query" },
   };
 }
 
@@ -612,6 +660,43 @@ describe("exact-document Integration operation lifetime", () => {
       DENIED,
     );
     expect(invoke).toHaveBeenCalledOnce();
+  });
+
+  it("serves an explicitly bound resource instance without exposing fixture or ambient data", async () => {
+    const domain = createDomain(false, true);
+    const load = vi.fn<AuthoringIntegrationResourceBinding["load"]>(() => OUTPUT);
+    const controller = createController(
+      domain,
+      createBinding({ ...bindingInput(domain.profile), resources: [resourceBinding(load)] }),
+    );
+    expect(controller.read().resources).toEqual([
+      { capabilityId: RESOURCE_ID, instanceId: "records", bound: true, status: "idle" },
+    ]);
+    controller.activate();
+    const input = resourceRequest(domain.revision);
+    const result = await controller.resourcePort.load(input);
+    expect(result).toEqual(OUTPUT);
+    expect(load).toHaveBeenCalledOnce();
+    expect(load.mock.calls[0]?.[0].input).toEqual({ query: "private query" });
+    expect(load.mock.calls[0]?.[0]).not.toBe(input);
+    expect(controller.read().resources[0]?.status).toBe("responded");
+    expect(JSON.stringify(controller.read())).not.toContain("private query");
+  });
+
+  it("denies an unbound resource or a mismatched resource request before host I/O", async () => {
+    const domain = createDomain(false, true);
+    const load = vi.fn<AuthoringIntegrationResourceBinding["load"]>(() => OUTPUT);
+    const controller = createController(domain, createBinding(bindingInput(domain.profile)));
+    controller.activate();
+    expect(await controller.resourcePort.load(resourceRequest(domain.revision))).toEqual(DENIED);
+    expect(controller.read().resources[0]?.status).toBe("denied");
+    expect(
+      await controller.resourcePort.load({
+        ...resourceRequest(domain.revision, "resource:records:wrong"),
+        capabilityId: "com.example.deliveries/other",
+      }),
+    ).toEqual(DENIED);
+    expect(load).not.toHaveBeenCalled();
   });
 
   it("keeps aliases independently pending but never allows request-id reuse across them", async () => {

@@ -7,6 +7,7 @@ import type {
   RuntimeJsonObject,
   RuntimeNavigationPort,
   RuntimeOperationPort,
+  RuntimeResourcePort,
 } from "@desen/runtime-core";
 
 const EMPTY_CONTEXT: RuntimeJsonObject = Object.freeze({});
@@ -165,6 +166,7 @@ export function createAuthoringRunHostPorts(
   operations: RuntimeOperationPort,
   navigation: RuntimeNavigationPort,
   params: RuntimeJsonObject = EMPTY_CONTEXT,
+  resources: RuntimeResourcePort = { load: () => DENIED },
 ): RuntimeHostPorts {
   const captured = snapshotRuntimeJsonValue(params);
   if (
@@ -186,7 +188,7 @@ export function createAuthoringRunHostPorts(
       commitActivation: () => Object.freeze({ status: "conflict", generation: null }),
     },
     operations,
-    resources: { load: () => DENIED },
+    resources,
     tokens: { resolve: () => Object.freeze({ status: "missing" }) },
     context: { getSnapshot: () => context, subscribe: () => () => undefined },
     environment: { getSnapshot: () => EMPTY_CONTEXT, subscribe: () => () => undefined },

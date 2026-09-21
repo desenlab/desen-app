@@ -37,6 +37,8 @@ import { applyAuthoringConditionEdit } from "./authoring-conditions.js";
 import {
   applyAuthoringInputConnection,
   applyAuthoringOperationTriggerConnection,
+  applyAuthoringResourceConnection,
+  prepareAuthoringResourceConnectionModel,
 } from "./authoring-connections.js";
 import {
   createAuthoringOperationFixtureController,
@@ -116,6 +118,7 @@ import { InspectorPanel } from "./inspector-panel.js";
 import {
   InputConnectionControl,
   OperationConnectionControl,
+  ResourceConnectionControl,
   VisibilityControl,
 } from "./behavior-controls.js";
 import { EventActionPanel } from "./event-action-panel.js";
@@ -230,6 +233,7 @@ import type {
 import type {
   AuthoringConnectionResult,
   AuthoringOperationTriggerConnectionRecipe,
+  AuthoringResourceConnectionRecipe,
 } from "./authoring-connections.js";
 import type { AuthoringScenarioValue } from "./authoring-scenarios.js";
 import type {
@@ -3386,6 +3390,15 @@ function SurfaceEditor({
           ),
     [document, selectedSurface.sourceId, selection],
   );
+  const resourceConnectionModel = useMemo(
+    () =>
+      prepareAuthoringResourceConnectionModel(
+        workspaceSnapshot.catalogs,
+        document,
+        selectedSurface.sourceId,
+      ),
+    [document, selectedSurface.sourceId, workspaceSnapshot.catalogs],
+  );
   const stateModel = useMemo<AuthoringStateModelResult>(
     () =>
       preparedModel.ok
@@ -3578,6 +3591,11 @@ function SurfaceEditor({
               : fixtureController.operationPort,
             navigationController.navigationPort,
             runDestination?.params,
+            executionContext === "integration"
+              ? (integrationController?.resourcePort ?? {
+                  load: () => Object.freeze({ status: "denied" }),
+                })
+              : undefined,
           )
         : createAuthoringStylePreviewHostPorts(
             executionContext === "integration"
@@ -3590,6 +3608,11 @@ function SurfaceEditor({
             resolveStyleToken,
             stylePreviewViewportId,
             styleTarget.kind === "breakpoint" ? undefined : (effectiveCanvasFrame ?? undefined),
+            executionContext === "integration"
+              ? (integrationController?.resourcePort ?? {
+                  load: () => Object.freeze({ status: "denied" }),
+                })
+              : undefined,
           ),
     [
       authoringProjectRecord,
@@ -4380,6 +4403,30 @@ function SurfaceEditor({
     return result;
   }
 
+  function connectSelectedResource(
+    recipe: AuthoringResourceConnectionRecipe,
+  ): AuthoringConnectionResult {
+    if (!isBehaviorAuthoringMode()) {
+      return Object.freeze({ ok: false, reason: "selection-invalid" });
+    }
+    const result = applyAuthoringResourceConnection(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      recipe,
+    );
+    captureEditDiagnostics(result);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
+    if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
+    if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
+    return result;
+  }
+
   function editSelectedCondition(edit: AuthoringConditionEdit): AuthoringConditionEditResult {
     if (!isBehaviorAuthoringMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
@@ -5037,7 +5084,7 @@ function SurfaceEditor({
                 : mode === "design"
                   ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
                   : executionContext === "integration"
-                    ? "Only explicitly connected host operations can execute. Navigation stays within this authored Source. Storage, resources, publication, activation and production remain blocked; Run never saves inputs or results."
+                    ? "Only explicitly connected host operations and resources can execute. Navigation stays within this authored Source. Storage, publication, activation and production remain blocked; Run never saves inputs or results."
                     : "Controls use authenticated Catalog fixtures and local managed-surface navigation. Resources, storage, publication, activation, integration, and production calls remain blocked; Run never changes the authored Source."}
             </p>
           </details>
@@ -5050,7 +5097,7 @@ function SurfaceEditor({
             role="status"
           >
             {mode === "connections"
-              ? "Connections workspace · typed behavior edits are Source-backed; host execution remains unavailable."
+              ? "Connections workspace · typed behavior and resource wiring are Source-backed; host execution remains explicitly gated."
               : mode === "design"
                 ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
                 : executionContext === "integration"
@@ -5103,6 +5150,50 @@ function SurfaceEditor({
         <ConnectionsWorkspace
           behaviorPanel={
             <div aria-label="Visual behavior controls" className={styles.behaviorControls}>
+              <section aria-label="Host readiness" className={styles.behaviorCard}>
+                <div className={styles.behaviorCardHeading}>
+                  <span>
+                    <strong>Host readiness</strong>
+                    <small>Explicit trusted integration</small>
+                  </span>
+                  <span
+                    className={styles.behaviorStatus}
+                    data-connected={integrationDescriptor !== null}
+                  >
+                    {integrationDescriptor === null ? "Not connected" : "Installed"}
+                  </span>
+                </div>
+                <p>
+                  {integrationDescriptor === null
+                    ? "No host implementation is authorized for this workspace. Source and Catalog data cannot create one."
+                    : `${integrationDescriptor.label} is installed explicitly; choose Integration in Run to activate it.`}
+                </p>
+                {integrationSnapshot === null || integrationDescriptor === null ? null : (
+                  <ul className={styles.behaviorList}>
+                    {integrationSnapshot.operations.map((operation) => (
+                      <li key={operation.alias}>
+                        <span>{operation.alias}</span>
+                        <small>
+                          {operation.bound ? "bound" : "missing binding"} · {operation.status}
+                        </small>
+                      </li>
+                    ))}
+                    {integrationSnapshot.resources.map((resource) => (
+                      <li key={resource.instanceId}>
+                        <span>{resource.instanceId}</span>
+                        <small>
+                          {resource.bound ? "bound" : "missing binding"} · {resource.status}
+                        </small>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+              <ResourceConnectionControl
+                model={resourceConnectionModel}
+                onConnect={connectSelectedResource}
+                states={inspector.status === "ready" ? inspector.localStates : []}
+              />
               {inspector.status === "ready" && behaviorProjection.status === "ready" ? (
                 <>
                   <InputConnectionControl

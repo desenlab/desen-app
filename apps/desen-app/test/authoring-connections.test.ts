@@ -7,6 +7,8 @@ import officialSignInSource from "../../../examples/sign-in/official-derived.sou
 import {
   applyAuthoringInputConnection,
   applyAuthoringOperationTriggerConnection,
+  applyAuthoringResourceConnection,
+  prepareAuthoringResourceConnectionModel,
 } from "../src/authoring-connections.js";
 import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
@@ -574,6 +576,60 @@ describe("Desen App atomic connection recipes", () => {
         selectionFor(document, "sign-in.submit"),
         recipe,
       ),
+    ).toEqual({ ok: false, reason: "connection-incompatible" });
+  });
+
+  it("browses Catalog resources and atomically binds a resource instance to compatible state", () => {
+    const catalog = copyJson(referenceCatalog) as MutableJsonObject;
+    record(catalog, "catalog").resources = {
+      "com.example.data/list": {
+        description: "Read-only delivery data.",
+        inputSchema: {
+          additionalProperties: false,
+          properties: { query: { type: "string" } },
+          required: ["query"],
+          type: "object",
+        },
+        outputSchema: { type: "object" },
+        errors: [],
+        policies: ["manual"],
+      },
+    };
+    const source = copyJson(officialSignInSource) as MutableJsonObject;
+    const surface = record(record(source.surfaces, "surfaces")[ROUTE.surfaceId], "surface");
+    record(surface.state, "state").query = { schema: { type: "string" }, initial: "inbox" };
+    const document = documentFrom(source);
+    const model = prepareAuthoringResourceConnectionModel(catalog, document, ROUTE.surfaceId);
+    expect(model.status).toBe("ready");
+    if (model.status !== "ready") throw new Error("Expected resource model.");
+    expect(model.resources).toEqual([
+      expect.objectContaining({
+        capabilityId: "com.example.data/list",
+        inputs: [expect.objectContaining({ name: "query", required: true })],
+        policies: ["manual"],
+      }),
+    ]);
+    const result = applyAuthoringResourceConnection(document, catalog, ROUTE, {
+      capabilityId: "com.example.data/list",
+      inputs: [{ inputName: "query", stateName: "query" }],
+      policy: "manual",
+      resourceId: "deliveries",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected resource connection, received ${result.reason}.`);
+    expect(result.operation).toBe("connect-resource");
+    expect(result.document.surfaces[ROUTE.surfaceId]?.resources.deliveries).toEqual({
+      use: "com.example.data/list",
+      input: { query: { $ref: "state.query" } },
+      policy: "manual",
+    });
+    expect(
+      applyAuthoringResourceConnection(document, catalog, ROUTE, {
+        capabilityId: "com.example.data/list",
+        inputs: [],
+        policy: "manual",
+        resourceId: "deliveries",
+      }),
     ).toEqual({ ok: false, reason: "connection-incompatible" });
   });
 });

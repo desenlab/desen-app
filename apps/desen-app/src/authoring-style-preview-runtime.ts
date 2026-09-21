@@ -5,6 +5,7 @@ import type {
   RuntimeJsonObject,
   RuntimeNavigationPort,
   RuntimeOperationPort,
+  RuntimeResourcePort,
   RuntimeTokenPort,
 } from "@desen/runtime-core";
 
@@ -109,6 +110,7 @@ export function createAuthoringStylePreviewHostPorts(
   resolveToken: RuntimeTokenPort["resolve"],
   viewportId: AuthoringStylePreviewViewportId,
   desktopPreviewFrame?: AuthoringStyleDesktopPreviewFrame,
+  resources: RuntimeResourcePort = { load: () => DENIED },
 ): RuntimeHostPorts {
   if (typeof resolveToken !== "function") {
     throw new TypeError("Style preview requires a resolved project token lookup.");
@@ -125,7 +127,7 @@ export function createAuthoringStylePreviewHostPorts(
       commitActivation: () => Object.freeze({ status: "conflict", generation: null }),
     },
     operations,
-    resources: { load: () => DENIED },
+    resources,
     tokens: Object.freeze({ resolve: resolveToken }),
     context: { getSnapshot: () => context, subscribe: () => () => undefined },
     environment: { getSnapshot: () => environment, subscribe: () => () => undefined },

@@ -1,9 +1,11 @@
 import {
   createDesenEditorContinuousValidator,
   deleteDesenEditorAction,
+  insertDesenEditorResourceDeclaration,
   insertDesenEditorAction,
   insertDesenEditorEventHandler,
   replaceDesenEditorAction,
+  setDesenEditorResourceDeclaration,
   setDesenEditorOwnerProp,
 } from "@desen/editor-core";
 import { canonicalizeJson } from "@desen/protocol";
@@ -59,11 +61,25 @@ export interface AuthoringOperationTriggerConnectionRecipe {
   readonly operationId: string;
 }
 
+/** One resource input member mapped to a surface-local state declaration. */
+export interface AuthoringResourceInputConnection {
+  readonly inputName: string;
+  readonly stateName: string;
+}
+
+/** One schema-driven resource instance connection recipe. */
+export interface AuthoringResourceConnectionRecipe {
+  readonly capabilityId: string;
+  readonly inputs: readonly AuthoringResourceInputConnection[];
+  readonly policy: "mount" | "manual" | "once";
+  readonly resourceId: string;
+}
+
 /** Atomic connection success containing only the completely validated Source endpoint. */
 export interface AuthoringConnectionSuccess {
   readonly ok: true;
   readonly document: DesenEditorDocument;
-  readonly operation: "connect-input" | "connect-operation-trigger";
+  readonly operation: "connect-input" | "connect-operation-trigger" | "connect-resource";
 }
 
 /** Stable reason why a recipe produced no Source endpoint. */
@@ -73,6 +89,7 @@ export type AuthoringConnectionFailureReason =
   | "connection-incompatible"
   | "edit-rejected"
   | "operation-unavailable"
+  | "resource-unavailable"
   | "recipe-invalid"
   | "selection-invalid"
   | "source-invalid"
@@ -94,6 +111,12 @@ interface PreparedConnectionAuthority {
   readonly route: AuthoringConnectionRoute;
   readonly selection: AuthoringComponentSelection;
   readonly target: EditorNode;
+}
+
+interface PreparedResourceConnectionAuthority {
+  readonly document: DesenEditorDocument;
+  readonly model: CatalogAuthoringModel;
+  readonly route: AuthoringConnectionRoute;
 }
 
 function failure(
@@ -284,6 +307,48 @@ function captureOperationRecipe(
   });
 }
 
+function captureResourceRecipe(
+  recipe: AuthoringResourceConnectionRecipe,
+): AuthoringResourceConnectionRecipe | undefined {
+  const fields = exactOwnData(recipe, ["capabilityId", "inputs", "policy", "resourceId"]);
+  const capturedInputs = exactOwnArray(fields?.inputs, MAX_INPUT_BINDINGS);
+  if (
+    fields === undefined ||
+    typeof fields.capabilityId !== "string" ||
+    !CAPABILITY_ID_PATTERN.test(fields.capabilityId) ||
+    typeof fields.resourceId !== "string" ||
+    !RUNTIME_REFERENCE_SEGMENT_PATTERN.test(fields.resourceId) ||
+    (fields.policy !== "mount" && fields.policy !== "manual" && fields.policy !== "once") ||
+    capturedInputs === undefined
+  ) {
+    return undefined;
+  }
+  const inputs: AuthoringResourceInputConnection[] = [];
+  const inputNames = new Set<string>();
+  for (const input of capturedInputs) {
+    const mapping = exactOwnData(input, ["inputName", "stateName"]);
+    if (
+      mapping === undefined ||
+      typeof mapping.inputName !== "string" ||
+      mapping.inputName.length === 0 ||
+      mapping.inputName.length > MAX_INPUT_NAME_CODE_UNITS ||
+      inputNames.has(mapping.inputName) ||
+      typeof mapping.stateName !== "string" ||
+      !STATE_NAME_PATTERN.test(mapping.stateName)
+    ) {
+      return undefined;
+    }
+    inputNames.add(mapping.inputName);
+    inputs.push(Object.freeze({ inputName: mapping.inputName, stateName: mapping.stateName }));
+  }
+  return Object.freeze({
+    capabilityId: fields.capabilityId,
+    inputs: Object.freeze(inputs),
+    policy: fields.policy,
+    resourceId: fields.resourceId,
+  });
+}
+
 function scheduleChildren(pending: EditorNode[], node: EditorNode): void {
   for (const children of Object.values(node.slots ?? {})) pending.push(...children);
   for (const behavior of node.behaviors ?? []) {
@@ -348,8 +413,153 @@ function prepareAuthority(
   });
 }
 
+function prepareResourceAuthority(
+  document: DesenEditorDocument,
+  catalogValue: unknown,
+  route: AuthoringConnectionRoute,
+): AuthoringConnectionFailure | PreparedResourceConnectionAuthority {
+  const capturedRoute = captureRoute(route);
+  if (capturedRoute === undefined) return failure("selection-invalid");
+  const prepared = prepareCatalogAuthoringModel(catalogValue, document);
+  if (!prepared.ok) {
+    return failure(prepared.reason === "catalog-invalid" ? "catalog-invalid" : "source-invalid");
+  }
+  if (prepared.model.surfaces.every(({ id }) => id !== capturedRoute.surfaceId)) {
+    return failure("selection-invalid");
+  }
+  return Object.freeze({
+    document: prepared.model.validationDocument,
+    model: prepared.model,
+    route: capturedRoute,
+  });
+}
+
+/** One Catalog input exposed by the resource browser. */
+export interface AuthoringResourceInputOption {
+  readonly name: string;
+  readonly required: boolean;
+  readonly schema: JsonObject;
+}
+
+/** One inert Catalog resource available to the Connections workspace. */
+export interface AuthoringResourceOption {
+  readonly capabilityId: string;
+  readonly description: string | undefined;
+  readonly inputs: readonly AuthoringResourceInputOption[];
+  readonly policies: readonly ("mount" | "manual" | "once")[];
+}
+
+/** One existing Source resource instance projected without host authority. */
+export interface AuthoringResourceInstanceOption {
+  readonly capabilityId: string;
+  readonly id: string;
+  readonly inputNames: readonly string[];
+  readonly policy: "mount" | "manual" | "once";
+}
+
+export type AuthoringResourceConnectionModel =
+  | Readonly<{
+      readonly status: "ready";
+      readonly instances: readonly AuthoringResourceInstanceOption[];
+      readonly resources: readonly AuthoringResourceOption[];
+      readonly states: readonly string[];
+      readonly surfaceId: string;
+    }>
+  | Readonly<{ readonly status: "rejected" }>;
+
+/**
+ * Projects the authenticated Catalog's resource contracts and current Source instances for the
+ * no-code Connections browser. The projection contains schemas and names only; it never exposes
+ * a loader, endpoint, fixture payload, secret or host callback.
+ */
+export function prepareAuthoringResourceConnectionModel(
+  catalogValue: unknown,
+  document: DesenEditorDocument,
+  surfaceId: string,
+): AuthoringResourceConnectionModel {
+  const prepared = prepareCatalogAuthoringModel(catalogValue, document);
+  if (!prepared.ok) return Object.freeze({ status: "rejected" });
+  const surface = prepared.model.validationDocument.surfaces[surfaceId];
+  if (surface === undefined) return Object.freeze({ status: "rejected" });
+  const resources: AuthoringResourceOption[] = [];
+  try {
+    const seen = new Set<string>();
+    for (const catalogValueItem of prepared.model.validationCatalogs) {
+      const catalog = jsonObject(catalogValueItem);
+      const resourceMap = jsonObject(catalog?.resources);
+      if (resourceMap === undefined) return Object.freeze({ status: "rejected" });
+      for (const [capabilityId, manifestValue] of Object.entries(resourceMap)) {
+        if (seen.has(capabilityId)) return Object.freeze({ status: "rejected" });
+        seen.add(capabilityId);
+        const manifest = jsonObject(manifestValue);
+        const inputSchema = jsonObject(manifest?.inputSchema);
+        const properties = jsonObject(inputSchema?.properties) ?? Object.freeze({});
+        const requiredValue = inputSchema?.required;
+        if (
+          manifest === undefined ||
+          inputSchema?.type !== "object" ||
+          !Array.isArray(manifest.policies) ||
+          !manifest.policies.every(
+            (policy) => policy === "mount" || policy === "manual" || policy === "once",
+          ) ||
+          (requiredValue !== undefined &&
+            (!Array.isArray(requiredValue) ||
+              !requiredValue.every((name) => typeof name === "string")))
+        ) {
+          return Object.freeze({ status: "rejected" });
+        }
+        const required = new Set(
+          (requiredValue === undefined ? [] : requiredValue) as readonly string[],
+        );
+        const inputs: AuthoringResourceInputOption[] = [];
+        for (const [name, schemaValue] of Object.entries(properties)) {
+          const schema = jsonObject(schemaValue);
+          if (schema === undefined) return Object.freeze({ status: "rejected" });
+          inputs.push(Object.freeze({ name, required: required.has(name), schema }));
+        }
+        resources.push(
+          Object.freeze({
+            capabilityId,
+            description:
+              typeof manifest.description === "string" ? manifest.description : undefined,
+            inputs: Object.freeze(
+              inputs.sort(({ name: left }, { name: right }) =>
+                left < right ? -1 : left > right ? 1 : 0,
+              ),
+            ),
+            policies: Object.freeze([...manifest.policies] as ("mount" | "manual" | "once")[]),
+          }),
+        );
+      }
+    }
+    const instances = Object.entries(surface.resources)
+      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+      .map(([id, resource]) =>
+        Object.freeze({
+          capabilityId: resource.use,
+          id,
+          inputNames: Object.freeze(Object.keys(resource.input).sort()),
+          policy: resource.policy,
+        }),
+      );
+    return Object.freeze({
+      status: "ready" as const,
+      instances: Object.freeze(instances),
+      resources: Object.freeze(
+        resources.sort(({ capabilityId: left }, { capabilityId: right }) =>
+          left < right ? -1 : left > right ? 1 : 0,
+        ),
+      ),
+      states: Object.freeze(Object.keys(surface.state).sort()),
+      surfaceId,
+    });
+  } catch {
+    return Object.freeze({ status: "rejected" });
+  }
+}
+
 function completeValidation(
-  authority: PreparedConnectionAuthority,
+  authority: PreparedConnectionAuthority | PreparedResourceConnectionAuthority,
   candidate: DesenEditorDocument,
   operation: AuthoringConnectionSuccess["operation"],
 ): AuthoringConnectionResult {
@@ -361,7 +571,10 @@ function completeValidation(
     : failure("source-invalid", report);
 }
 
-function surfaceHasState(authority: PreparedConnectionAuthority, stateName: string): boolean {
+function surfaceHasState(
+  authority: PreparedConnectionAuthority | PreparedResourceConnectionAuthority,
+  stateName: string,
+): boolean {
   const state = authority.document.surfaces[authority.route.surfaceId]?.state;
   return state !== undefined && Object.hasOwn(state, stateName);
 }
@@ -525,8 +738,8 @@ function jsonObject(value: unknown): JsonObject | undefined {
 }
 
 function catalogCapability(
-  authority: PreparedConnectionAuthority,
-  category: "components" | "operations",
+  authority: PreparedConnectionAuthority | PreparedResourceConnectionAuthority,
+  category: "components" | "operations" | "resources",
   capabilityId: string,
 ): JsonObject | undefined {
   const matches = authority.model.validationCatalogs.flatMap((catalogValue) => {
@@ -638,8 +851,55 @@ function operationInputsAreCompatible(
   }
 }
 
+function resourceInputsAreCompatible(
+  authority: PreparedResourceConnectionAuthority,
+  recipe: AuthoringResourceConnectionRecipe,
+): boolean {
+  try {
+    const resource = catalogCapability(authority, "resources", recipe.capabilityId);
+    const inputSchema = jsonObject(resource?.inputSchema);
+    if (inputSchema === undefined || inputSchema.type !== "object") return false;
+    const propertiesValue = inputSchema.properties;
+    const properties: JsonObject | undefined =
+      propertiesValue === undefined
+        ? (Object.freeze({}) as JsonObject)
+        : jsonObject(propertiesValue);
+    if (properties === undefined) return false;
+    const requiredValue = inputSchema.required;
+    const required = requiredValue === undefined ? [] : requiredValue;
+    if (!Array.isArray(required) || !required.every((name) => typeof name === "string")) {
+      return false;
+    }
+    const mappings = new Map(recipe.inputs.map((mapping) => [mapping.inputName, mapping]));
+    if (required.some((inputName) => !mappings.has(inputName))) return false;
+    const states = authority.document.surfaces[authority.route.surfaceId]?.state;
+    if (states === undefined) return false;
+    for (const mapping of recipe.inputs) {
+      const inputFieldSchema = jsonObject(properties[mapping.inputName]);
+      const stateSchema = jsonObject(states[mapping.stateName]?.schema);
+      if (
+        inputFieldSchema === undefined ||
+        stateSchema === undefined ||
+        !schemasAreCompatible(inputFieldSchema, stateSchema)
+      ) {
+        return false;
+      }
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function catalogHasOperation(authority: PreparedConnectionAuthority, operationId: string): boolean {
   return catalogCapability(authority, "operations", operationId) !== undefined;
+}
+
+function catalogHasResource(
+  authority: PreparedResourceConnectionAuthority,
+  resourceId: string,
+): boolean {
+  return catalogCapability(authority, "resources", resourceId) !== undefined;
 }
 
 /**
@@ -747,4 +1007,69 @@ export function applyAuthoringOperationTriggerConnection(
     candidate = connected;
   }
   return completeValidation(prepared, candidate, "connect-operation-trigger");
+}
+
+/**
+ * Atomically creates or repairs one surface-local resource instance from a Catalog contract.
+ *
+ * @remarks Every input is represented as a state reference selected against the exact Catalog
+ * input schema. The resource declaration is inert Source data; no endpoint, loader, credential or
+ * host callback can cross this editor boundary. A mismatched existing instance fails closed.
+ */
+export function applyAuthoringResourceConnection(
+  document: DesenEditorDocument,
+  catalogValue: unknown,
+  route: AuthoringConnectionRoute,
+  recipe: AuthoringResourceConnectionRecipe,
+): AuthoringConnectionResult {
+  const capturedRecipe = captureResourceRecipe(recipe);
+  if (capturedRecipe === undefined) return failure("recipe-invalid");
+  const prepared = prepareResourceAuthority(document, catalogValue, route);
+  if ("ok" in prepared) return prepared;
+  if (!catalogHasResource(prepared, capturedRecipe.capabilityId)) {
+    return failure("resource-unavailable");
+  }
+  const resourceManifest = catalogCapability(prepared, "resources", capturedRecipe.capabilityId);
+  const policies = resourceManifest?.policies;
+  if (
+    !Array.isArray(policies) ||
+    !policies.includes(capturedRecipe.policy) ||
+    capturedRecipe.inputs.some(({ stateName }) => !surfaceHasState(prepared, stateName)) ||
+    !resourceInputsAreCompatible(prepared, capturedRecipe)
+  ) {
+    return failure("connection-incompatible");
+  }
+
+  const surface = prepared.document.surfaces[prepared.route.surfaceId];
+  const existing = surface?.resources[capturedRecipe.resourceId];
+  if (existing !== undefined && existing.use !== capturedRecipe.capabilityId) {
+    return failure("connection-conflict");
+  }
+  const input: Record<string, Readonly<{ readonly $ref: string }>> = Object.create(null) as Record<
+    string,
+    Readonly<{ readonly $ref: string }>
+  >;
+  for (const mapping of capturedRecipe.inputs) {
+    input[mapping.inputName] = Object.freeze({ $ref: `state.${mapping.stateName}` });
+  }
+  const declaration = Object.freeze({
+    use: capturedRecipe.capabilityId,
+    input: Object.freeze(input),
+    policy: capturedRecipe.policy,
+    ...(existing?.extensions === undefined ? {} : { extensions: existing.extensions }),
+  });
+  const edited =
+    existing === undefined
+      ? insertDesenEditorResourceDeclaration(prepared.document, {
+          surfaceId: prepared.route.surfaceId,
+          name: capturedRecipe.resourceId,
+          declaration,
+        })
+      : setDesenEditorResourceDeclaration(prepared.document, {
+          surfaceId: prepared.route.surfaceId,
+          name: capturedRecipe.resourceId,
+          declaration,
+        });
+  if (!edited.ok) return failure("edit-rejected");
+  return completeValidation(prepared, edited.document, "connect-resource");
 }

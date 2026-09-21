@@ -6,6 +6,7 @@ import validSource from "../../protocol/upstream/0.1.0/snapshot/conformance/vali
 import {
   deleteDesenEditorResourceInput,
   deleteDesenEditorStateDeclaration,
+  insertDesenEditorResourceDeclaration,
   insertDesenEditorStateDeclaration,
   setDesenEditorNodeRepeatItems,
   setDesenEditorNodeRepeatKey,
@@ -318,6 +319,40 @@ describe("M08-T05 state declaration and binding edits", () => {
       $ref: "state.email",
       fallback: "",
     });
+  });
+
+  it("inserts a complete resource declaration atomically and preserves the caller boundary", () => {
+    const document = createDocument();
+    const declaration = {
+      use: "com.example.data/List",
+      input: { query: { $ref: "state.email", fallback: "" } },
+      policy: "manual" as const,
+    };
+    const inserted = successful(
+      insertDesenEditorResourceDeclaration(document, {
+        surfaceId: "sign-in",
+        name: "results",
+        declaration,
+      }),
+    );
+    declaration.input.query = { $ref: "state.changed", fallback: "" };
+    expect(inserted.surfaces["sign-in"]?.resources.results).toEqual({
+      use: "com.example.data/List",
+      input: { query: { $ref: "state.email", fallback: "" } },
+      policy: "manual",
+    });
+    expectFailure(
+      insertDesenEditorResourceDeclaration(inserted, {
+        surfaceId: "sign-in",
+        name: "results",
+        declaration: {
+          use: "com.example.data/List",
+          input: {},
+          policy: "manual",
+        },
+      }),
+      "run.desen.editor/STATE_BINDING_EDIT_TARGET_EXISTS",
+    );
   });
 
   it("reports duplicate, missing target, and missing path failures without partial authority", () => {
