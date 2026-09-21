@@ -14,6 +14,7 @@ import type {
 } from "./connection-intent-drafts.js";
 import type { ProjectAuthoringController } from "./project-authoring-controller.js";
 import type { EditableProjectRecord } from "@desen/design-system-core";
+import type { ReactNode } from "react";
 
 import styles from "./application.module.css";
 
@@ -22,6 +23,9 @@ const subscribeUnavailable = () => () => undefined;
 
 interface ConnectionsWorkspaceProps {
   readonly controller: ProjectAuthoringController | null;
+  /** Visual behavior controls edit the same managed Source as the Design workspace. */
+  readonly behaviorPanel?: ReactNode;
+  readonly behaviorSubject?: string | null;
   readonly hidden?: boolean;
   readonly record: EditableProjectRecord | null;
   readonly surfaceId: string;
@@ -80,10 +84,12 @@ function reasonMessage(reason: string): string {
 }
 
 /**
- * Project-scoped Connections workspace. Forms are durable project metadata and never become
- * executable Source until a later, explicitly-owned task introduces behavior wiring.
+ * Project-scoped Connections workspace. Intent forms remain durable project metadata while the
+ * visual behavior panel writes typed edits through the same aggregate Source authority as Design.
  */
 export function ConnectionsWorkspace({
+  behaviorPanel,
+  behaviorSubject,
   controller,
   hidden = false,
   record,
@@ -193,8 +199,9 @@ export function ConnectionsWorkspace({
           <p className={styles.eyebrow}>Separate authoring workspace</p>
           <h2 id="connections-workspace-title">Connections</h2>
           <p>
-            Prepare node-linked intent for {surfaceName}. Incomplete forms persist beside the valid
-            Source and never execute host or behavior code.
+            Wire typed state, events, actions, conditions, and navigation for {surfaceName}. The
+            controls below write the same managed Source used by Design; saved intent notes remain
+            inert metadata until a later publishing/runtime task.
           </p>
         </div>
         <span className={styles.previewBadge}>{intents.length} saved intents</span>
@@ -316,6 +323,25 @@ export function ConnectionsWorkspace({
           </aside>
         </div>
       )}
+      <section aria-labelledby="connections-behavior-title" className={styles.connectionsBehavior}>
+        <header className={styles.connectionsBehaviorHeader}>
+          <div>
+            <p className={styles.eyebrow}>Visual wiring</p>
+            <h3 id="connections-behavior-title">Behavior</h3>
+            <p>
+              {behaviorSubject === null || behaviorSubject === undefined
+                ? "Select a layer in Design before wiring its behavior."
+                : `Editing ${behaviorSubject} through typed controls.`}
+            </p>
+          </div>
+          <span className={styles.previewBadge}>Source-backed</span>
+        </header>
+        {behaviorPanel ?? (
+          <p className={styles.previewNotice} role="status">
+            No visual behavior projection is available for this selection.
+          </p>
+        )}
+      </section>
       <p aria-live="polite" className={styles.connectionsWorkspaceNotice} role="status">
         {notice}
       </p>

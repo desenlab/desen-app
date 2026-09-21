@@ -15,6 +15,7 @@ import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "./m10a-t16-legacy-input-receip
 import { M10A_T17_LEGACY_INPUT_SUCCESSORS } from "./m10a-t17-legacy-input-receipts.mjs";
 import { M10A_T18_LEGACY_INPUT_SUCCESSORS } from "./m10a-t18-legacy-input-receipts.mjs";
 import { M10A_T19_LEGACY_INPUT_SUCCESSORS } from "./m10a-t19-legacy-input-receipts.mjs";
+import { M10A_T20_LEGACY_INPUT_SUCCESSORS } from "./m10a-t20-legacy-input-receipts.mjs";
 import { M10A_T15_APP_TEST_FILES, M10A_T15_WORKLOADS } from "./m10a-t15-workloads.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
@@ -124,6 +125,7 @@ function noOverrides(value) {
 function projectM10AT15CurrentBytes(relative, bytes) {
   let projected = bytes;
   for (const [label, successors] of [
+    ["T20", M10A_T20_LEGACY_INPUT_SUCCESSORS],
     ["T19", M10A_T19_LEGACY_INPUT_SUCCESSORS],
     ["T18", M10A_T18_LEGACY_INPUT_SUCCESSORS],
     ["T17", M10A_T17_LEGACY_INPUT_SUCCESSORS],

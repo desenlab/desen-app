@@ -40,7 +40,7 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   DEPENDENCY_POLICY: 39,
   FROZEN_INPUT: 172,
   PACKAGE_OR_APPLICATION: 811,
-  SHARED_PROOF_INFRASTRUCTURE: 422,
+  SHARED_PROOF_INFRASTRUCTURE: 423,
   PROJECT_DOCUMENTATION: 178,
 });
 const M10A_T16_SUCCESSOR_PATHS = Object.freeze([
@@ -68,6 +68,7 @@ const M10A_T19_SUCCESSOR_PATHS = Object.freeze([
   "docs/proof/M10A-T19.md",
   "scripts/lib/m10a-t19-legacy-input-receipts.mjs",
 ]);
+const M10A_T20_SUCCESSOR_PATHS = Object.freeze(["scripts/lib/m10a-t20-legacy-input-receipts.mjs"]);
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
   "docs/proof/SEC-01-DEPENDENCY-SECURITY.md",
@@ -607,7 +608,10 @@ async function currentTrackedPaths() {
 }
 
 function calculateAffectedWorkloadOwnershipReview(rawPaths) {
-  const withoutT19 = rawPaths.filter((candidate) => !M10A_T19_SUCCESSOR_PATHS.includes(candidate));
+  const withoutT20 = rawPaths.filter((candidate) => !M10A_T20_SUCCESSOR_PATHS.includes(candidate));
+  const withoutT19 = withoutT20.filter(
+    (candidate) => !M10A_T19_SUCCESSOR_PATHS.includes(candidate),
+  );
   const withoutT18 = withoutT19.filter(
     (candidate) => !M10A_T18_SUCCESSOR_PATHS.includes(candidate),
   );
@@ -619,20 +623,22 @@ function calculateAffectedWorkloadOwnershipReview(rawPaths) {
   const paths =
     rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
       ? rawPaths
-      : withoutT19.length === 1923
-        ? withoutT19
-        : withoutT18.length === 1920
-          ? withoutT18
-          : current.length === 1912
-            ? current
-            : withoutT15.length === 1867 || withoutT15.length === 1865
-              ? withoutT15
-              : withoutT15.filter(
-                  (candidate) =>
-                    !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
-                    !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
-                    !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
-                );
+      : withoutT20.length === 1929
+        ? withoutT20
+        : withoutT19.length === 1923
+          ? withoutT19
+          : withoutT18.length === 1920
+            ? withoutT18
+            : current.length === 1912
+              ? current
+              : withoutT15.length === 1867 || withoutT15.length === 1865
+                ? withoutT15
+                : withoutT15.filter(
+                    (candidate) =>
+                      !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
+                      !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
+                      !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
+                  );
   return calculateAffectedWorkloadOwnershipReviewRaw(paths);
 }
 
@@ -640,6 +646,7 @@ function calculateAffectedWorkloadOwnershipReviewBase(rawPaths) {
   return calculateAffectedWorkloadOwnershipReviewRaw(
     rawPaths.filter(
       (candidate) =>
+        !M10A_T20_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T19_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T18_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T17_SUCCESSOR_PATHS.includes(candidate) &&
@@ -656,6 +663,7 @@ function calculateM10AT04AndEarlierOwnershipReview(paths) {
   return calculateAffectedWorkloadOwnershipReview(
     paths.filter(
       (candidate) =>
+        !M10A_T20_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T19_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T12_SUCCESSOR_PATHS.includes(candidate) &&
         !M10A_T11_SUCCESSOR_PATHS.includes(candidate) &&
@@ -684,7 +692,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1929 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1930 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 

@@ -16,6 +16,7 @@ import {
   M10A_T15_WORKLOADS,
 } from "./m10a-t15-workloads.mjs";
 import { M10A_T17_SUCCESSOR_TESTS } from "./m10a-t17-legacy-input-receipts.mjs";
+import { M10A_T20_SUCCESSOR_TESTS } from "./m10a-t20-legacy-input-receipts.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const MAX_REPORT_BYTES = 4 * 1024 * 1024;
@@ -244,7 +245,7 @@ export function parseM10AT15VitestReceipt(owner, input, workspaceRoot = ROOT) {
       relative.split("/").includes("..")
     )
       fail("REPORT_INVALID", `${owner} contains a foreign test file.`);
-    const successorTests = M10A_T17_SUCCESSOR_TESTS.filter(
+    const successorTests = [...M10A_T17_SUCCESSOR_TESTS, ...M10A_T20_SUCCESSOR_TESTS].filter(
       ({ path: successorPath }) => successorPath === `${packagePath}/${relative}`,
     );
     const names = [];

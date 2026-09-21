@@ -18,6 +18,7 @@ import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "./m10a-t16-legacy-input-receip
 import { M10A_T17_ADDED_APP_SOURCE_RECEIPTS } from "./m10a-t17-legacy-input-receipts.mjs";
 import { M10A_T18_ADDED_APP_SOURCE_RECEIPTS } from "./m10a-t18-legacy-input-receipts.mjs";
 import { M10A_T19_ADDED_APP_SOURCE_RECEIPTS } from "./m10a-t19-legacy-input-receipts.mjs";
+import { M10A_T20_LEGACY_INPUT_SUCCESSORS } from "./m10a-t20-legacy-input-receipts.mjs";
 import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   materializeDesenAppHistoricalReaderFileOverrides,
@@ -3987,6 +3988,14 @@ const M10A_T19_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
   graphSha256: "sha256:8371b57ad8fddffe3ad1ef96e1d9c4441be2898aabdb983336dedb005f0005ad",
 });
 
+// T20 extends the same reachable graph with visual behavior wiring. Preserve the historical
+// T19 projection while admitting the exact current successor graph for readers that re-observe
+// the live App during later proof runs.
+const M10A_T20_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
+  ...M10A_T19_CURRENT_RUNTIME_RESOLUTION,
+  graphSha256: "sha256:194c9b07fbcc1d2c56ff11176b9e247415cfc585c76c731f1ebc20dea363d9ae",
+});
+
 function projectM10AT15RuntimeToM10AT12(runtime) {
   const observed = {
     profile: runtime?.profile ?? M10A_T15_CURRENT_RUNTIME_RESOLUTION.profile,
@@ -4000,11 +4009,12 @@ function projectM10AT15RuntimeToM10AT12(runtime) {
     !isDeepStrictEqual(observed, M10A_T15_CURRENT_RUNTIME_RESOLUTION) &&
     !isDeepStrictEqual(observed, M10A_T17_CURRENT_RUNTIME_RESOLUTION) &&
     !isDeepStrictEqual(observed, M10A_T18_CURRENT_RUNTIME_RESOLUTION) &&
-    !isDeepStrictEqual(observed, M10A_T19_CURRENT_RUNTIME_RESOLUTION)
+    !isDeepStrictEqual(observed, M10A_T19_CURRENT_RUNTIME_RESOLUTION) &&
+    !isDeepStrictEqual(observed, M10A_T20_CURRENT_RUNTIME_RESOLUTION)
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
-      "The live App graph is not the exact reviewed T12/T14/T15/T17 successor.",
+      "The live App graph is not the exact reviewed T12-T20 successor.",
       { observed },
     );
   }
@@ -4110,6 +4120,9 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
     sourceAudit.sourceReceipts.map((receipt) => [receipt.path, receipt]),
   );
   for (const receipt of successor.styleReceipts) {
+    const t20Input = M10A_T20_LEGACY_INPUT_SUCCESSORS.find(
+      ({ path: sourcePath }) => sourcePath === receipt.path,
+    );
     const changedInput = M10A_T15_LEGACY_INPUT_SUCCESSORS.find(
       ({ path: sourcePath }) => sourcePath === receipt.path,
     );
@@ -4136,7 +4149,7 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
         path: receipt.path,
       });
     }
-    const expected = currentInput?.current ?? changedInput?.current ?? receipt;
+    const expected = t20Input?.current ?? currentInput?.current ?? changedInput?.current ?? receipt;
     if (
       !sourceAudit.inventory.includes(receipt.path) ||
       graphReceipts.get(receipt.path)?.bytes !== expected.bytes ||
